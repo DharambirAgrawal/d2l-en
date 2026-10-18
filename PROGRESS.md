@@ -173,6 +173,23 @@ new kind of data file.
   `[colab]`/`[sagemaker]`, which also skips generating their notebooks), the
   homepage news list, Twitter button and forum promo.
 
+### 2026-10-18: Progress sync + "My Notes" review page
+- **Sync** (sidebar progress box → *Sync*), `static/progress/sync.js`:
+  - *Sync link*: copies a link carrying completed sections + solved
+    exercises in its `#fragment` (never sent to the server); opening it on
+    another device merges them in.
+  - *Automatic sync with GitHub*: paste a fine-grained token with only
+    "Gists: Read and write" on each device; progress is kept in a secret gist
+    `d2l-progress.json` in my account, pulled on page load and pushed ~2 s
+    after changes. Merging is a union (syncing never loses a check mark;
+    unmarking only applies on that device). The token stays in that
+    browser's localStorage; *Disconnect* removes it.
+  - Not synced: exercise code drafts (stay per browser).
+- **My Notes** page (sidebar, after Notation; `chapter_my-notes/index.md`,
+  `static/progress/review.js`): all Notes boxes from completed sections in
+  book order, links back to each subsection, "Show all sections", *Copy as
+  text*, *Print / save as PDF*.
+
 ---
 
 ## Still on the site (possible next cleanups)
@@ -195,7 +212,7 @@ by `tools/build_exercises.py` (the deploy fails if something is broken).
 | Notes to remember | `notes/<chapter>/<section>.yml`: `- after: <section heading>` + `notes:` list of Markdown | automatic, at the end of that section |
 | Playground | `playgrounds/<id>.yml` (title, description, slider params, optional `python` version) + drawing code `registry['<id>']` in `static/exercises/playgrounds.js` | `<div class="d2l-playground" data-playground="<id>"></div>` |
 | Runnable book cells | nothing to add: every `pytorch`-tab / shared cell | automatic |
-| Progress | nothing to add | automatic on every TOC page |
+| Progress, sync, My Notes | nothing to add | automatic (`static/progress/`) |
 | Project data | `static/projects/` → `_static/projects/` | link from a project page |
 
 Runtime files (`static/exercises/`): `exercise.js` (all UI), `exercise.css`,

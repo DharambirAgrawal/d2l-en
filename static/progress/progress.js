@@ -4,34 +4,38 @@
  *   - a "Mark section as complete" button at the end of every book page,
  *   - a ✓ next to completed pages in the sidebar table of contents, an n/m
  *     count on each chapter, and an overall progress bar,
- *   - Export / Import of progress as a JSON file (backup, or moving to
- *     another browser).
+ *   - Export / Import of progress as a JSON file, and a Sync button
+ *     (see sync.js).
  *
  * Progress lives in this browser's localStorage. Only pages listed in the
- * table of contents can be marked.
+ * table of contents can be marked. Other scripts use window.D2LProgress.
  */
 // Leading semicolon: this file is appended to other scripts in d2l.js.
 ;(function () {
   'use strict';
 
   const STORAGE_KEY = 'd2l-progress:v1';
+  // The theme later wraps sidebar links in <span class="link-wrapper">.
+  const TOC_LINKS = 'li > a.reference.internal, li > .link-wrapper > a.reference.internal';
 
   function load() {
     try {
       const data = JSON.parse(window.localStorage.getItem(STORAGE_KEY) || '{}');
-      return data && typeof data === 'object' ? data : {};
+      return data && typeof data === 'object' && !Array.isArray(data) ? data : {};
     } catch (e) {
       return {};
     }
   }
 
-  function save(data) {
+  function save(data, {silent = false} = {}) {
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-      return true;
     } catch (e) {
       return false;
     }
+    // Let sync.js push the change, and every progress UI refresh.
+    window.dispatchEvent(new CustomEvent('d2l-progress-updated', {detail: {local: !silent}}));
+    return true;
   }
 
   function siteRoot() {
@@ -55,6 +59,28 @@
     return node;
   }
 
+  /* Book pages in table-of-contents order: [{key, title, href}]. */
+  function tocPages() {
+    const nav = document.querySelector('.globaltoc nav');
+    if (!nav) return [];
+    const root = siteRoot();
+    const here = pageKey(window.location.href, root);
+    const seen = new Set();
+    const out = [];
+    nav.querySelectorAll(TOC_LINKS).forEach((a) => {
+      const href = a.getAttribute('href');
+      const key = href === '#' ? here : pageKey(a.href.split('#')[0], root);
+      if (!key || seen.has(key)) return;
+      seen.add(key);
+      const title = Array.from(a.childNodes).filter((n) => n.nodeType === 3)
+        .map((n) => n.textContent).join('').trim();
+      out.push({key, title, href: href === '#' ? window.location.pathname : a.href.split('#')[0]});
+    });
+    return out;
+  }
+
+  window.D2LProgress = {load, save, tocPages, siteRoot, pageKey, STORAGE_KEY};
+
   function init() {
     const tocs = document.querySelectorAll('.globaltoc nav');
     if (!tocs.length) return;
@@ -65,14 +91,15 @@
     // Every TOC entry, keyed by page. The current page links to "#".
     const entries = [];
     tocs.forEach((nav) => {
-      nav.querySelectorAll('li > a.reference.internal').forEach((a) => {
+      nav.querySelectorAll(TOC_LINKS).forEach((a) => {
         const href = a.getAttribute('href');
         const key = href === '#' ? here : pageKey(a.href.split('#')[0], root);
-        if (key) entries.push({a, key, li: a.parentElement});
+        if (key) entries.push({a, key, li: a.closest('li')});
       });
     });
     const pages = Array.from(new Set(entries.map((e) => e.key)));
-    const onTocPage = pages.includes(here);
+    // The notes review page is a tool, not a lesson: nothing to complete there.
+    const onTocPage = pages.includes(here) && !document.querySelector('.d2l-review');
 
     // Overall progress box, at the top of each table of contents.
     const boxes = [];
@@ -85,12 +112,18 @@
       const tools = el('div', 'd2l-progress-tools');
       const exportBtn = el('button', 'd2l-progress-link', 'Export');
       const importBtn = el('button', 'd2l-progress-link', 'Import');
-      exportBtn.type = importBtn.type = 'button';
+      const syncBtn = el('button', 'd2l-progress-link d2l-progress-sync', 'Sync');
+      exportBtn.type = importBtn.type = syncBtn.type = 'button';
       exportBtn.title = 'Download your progress as a file (backup)';
       importBtn.title = 'Load progress from an exported file';
+      syncBtn.title = 'Keep progress in sync across your devices';
       exportBtn.addEventListener('click', exportProgress);
       importBtn.addEventListener('click', importProgress);
-      tools.append(exportBtn, el('span', null, ' · '), importBtn);
+      syncBtn.addEventListener('click', () => {
+        if (window.D2LSync) window.D2LSync.open();
+      });
+      const syncState = el('span', 'd2l-progress-syncstate');
+      tools.append(exportBtn, el('span', null, ' · '), importBtn, el('span', null, ' · '), syncBtn, syncState);
       box.append(label, bar, tools);
       nav.prepend(box);
       boxes.push({label, fill});
@@ -111,7 +144,6 @@
         if (done[here]) delete done[here];
         else done[here] = new Date().toISOString().slice(0, 10);
         save(done);
-        render();
       });
       wrap.append(button);
       if (pager) pager.before(wrap);
@@ -125,6 +157,7 @@
     }
 
     function render() {
+      done = load();
       const count = pages.filter((k) => done[k]).length;
       const pct = pages.length ? Math.round((100 * count) / pages.length) : 0;
       boxes.forEach(({label, fill}) => {
@@ -157,7 +190,7 @@
         const complete = !!done[here];
         button.textContent = complete
           ? `✓ Completed on ${done[here]} · click to undo`
-          : '☐ Mark section as complete';
+          : 'Mark section as complete';
         button.classList.toggle('d2l-progress-complete', complete);
         if (chip) chip.hidden = !complete;
       }
@@ -185,21 +218,17 @@
           const data = JSON.parse(text);
           if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('bad file');
           // Merge: keep what is already marked here, add what the file has.
-          done = Object.assign(load(), data);
-          if (!save(done)) throw new Error('storage unavailable');
-          render();
+          if (!save(Object.assign(load(), data))) throw new Error('storage unavailable');
           window.alert(`Imported. ${Object.keys(data).length} completed sections in the file.`);
         }).catch(() => window.alert('That file could not be imported.'));
       });
       input.click();
     }
 
-    // Keep several open tabs in sync.
+    // Refresh after any change: this page, sync, or another tab.
+    window.addEventListener('d2l-progress-updated', render);
     window.addEventListener('storage', (e) => {
-      if (e.key === STORAGE_KEY) {
-        done = load();
-        render();
-      }
+      if (e.key === STORAGE_KEY) render();
     });
 
     render();

@@ -451,6 +451,10 @@ def main():
             os.makedirs(os.path.dirname(path), exist_ok=True)
             with open(path, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False)
+        # Index for the "My Notes" review page: which pages have notes.
+        os.makedirs(os.path.join(static_out, 'notes'), exist_ok=True)
+        with open(os.path.join(static_out, 'notes', 'index.json'), 'w', encoding='utf-8') as f:
+            json.dump({'pages': sorted(notes)}, f)
         print(f'Wrote {len(exercises)} exercises, answers for {len(answers)} sections, '
               f'{len(playgrounds)} playgrounds, notes for {len(notes)} sections')
 

@@ -388,6 +388,7 @@
         if (all) {
           storage.set(this.data.id + ':solved', '1');
           this.setSolved(true);
+          window.dispatchEvent(new CustomEvent('d2l-exercise-solved', {detail: {id: this.data.id}}));
         }
         box.append(el('div', {class: 'd2l-ex-summary ' + (all ? 'd2l-ex-good' : 'd2l-ex-bad')},
           all ? `✓ All ${r.total} tests passed` : `${r.passed} of ${r.total} tests passed`));

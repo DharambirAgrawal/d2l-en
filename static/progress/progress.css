@@ -61,3 +61,76 @@
   vertical-align: middle;
   white-space: nowrap;
 }
+
+.d2l-progress-syncstate { color: #8c959f; }
+
+/* Sync dialog. */
+.d2l-sync-dialog {
+  width: min(520px, calc(100vw - 32px));
+  padding: 0;
+  border: 1px solid #d1d9e0;
+  border-radius: 10px;
+  color: #1f2328;
+  box-shadow: 0 12px 32px rgba(31, 35, 40, .15);
+}
+.d2l-sync-dialog::backdrop { background: rgba(31, 35, 40, .3); }
+.d2l-sync-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  border-bottom: 1px solid #e6eaee;
+}
+.d2l-sync-title { font-weight: 600; }
+.d2l-sync-section { padding: 6px 18px 14px; }
+.d2l-sync-section + .d2l-sync-section { border-top: 1px solid #e6eaee; }
+.d2l-sync-section h3 { margin: 10px 0 4px; font-size: 14px; font-weight: 600; }
+.d2l-sync-section p { margin: 4px 0 8px; font-size: 13.5px; color: #59636e; line-height: 1.5; }
+.d2l-sync-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.d2l-sync-input {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 9px;
+  border: 1px solid #d1d9e0;
+  border-radius: 6px;
+  font: inherit;
+  font-size: 13px;
+}
+.d2l-sync-input:focus { outline: 2px solid #0969da; outline-offset: 0; border-color: #0969da; }
+.d2l-sync-status { font-size: 13px; color: #59636e; }
+.d2l-sync-error { color: #cf222e; }
+.d2l-sync-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  z-index: 1000;
+  transform: translateX(-50%);
+  max-width: calc(100vw - 32px);
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: #1f2328;
+  color: #fff;
+  font-size: 14px;
+  box-shadow: 0 8px 24px rgba(31, 35, 40, .2);
+}
+
+/* "My Notes" review page. */
+.d2l-review-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 1em 0 .4em; }
+.d2l-review-toggle { display: flex; align-items: center; gap: 6px; font-size: 14px; margin: 0; }
+.d2l-review-summary { color: #59636e; font-size: 14px; }
+.d2l-review-empty { color: #59636e; padding: 1em; border: 1px dashed #d1d9e0; border-radius: 8px; }
+.d2l-review-page { margin: 1.6em 0; padding-bottom: .4em; border-bottom: 1px solid #e6eaee; }
+.d2l-review-page h2 { font-size: 1.35em; margin: 0 0 .3em; }
+.d2l-review-page h3 { font-size: 1em; font-weight: 600; margin: 1em 0 .2em; }
+.d2l-review-page h2 a, .d2l-review-page h3 a { color: inherit; }
+.d2l-review-notes ul { margin: .2em 0 .4em; padding-left: 1.2em; }
+.d2l-review-notes li { margin: .25em 0; }
+.d2l-review-notes p { margin: 0; }
+
+@media print {
+  .d2l-review-page-body .mdl-layout__drawer, .d2l-review-page-body header,
+  .d2l-review-page-body .side-doc-outline, .d2l-review-page-body .pagenation,
+  .d2l-review-page-body .d2l-review-bar { display: none !important; }
+  .d2l-review-page-body .mdl-layout__content { margin-left: 0 !important; }
+  .d2l-review-page { break-inside: avoid-page; }
+}

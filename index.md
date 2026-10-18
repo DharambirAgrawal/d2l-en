@@ -13,6 +13,7 @@ Dive into Deep Learning
 chapter_preface/index
 chapter_installation/index
 chapter_notation/index
+chapter_my-notes/index
 ```
 
 
