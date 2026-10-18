@@ -447,11 +447,3 @@ predict_snli(net, vocab, ['he', 'is', 'good', '.'], ['he', 'is', 'bad', '.'])
 1. Train the model with other combinations of hyperparameters. Can you get better accuracy on the test set?
 1. What are major drawbacks of the decomposable attention model for natural language inference?
 1. Suppose that we want to get the level of semantical similarity (e.g., a continuous value between 0 and 1) for any pair of sentences. How shall we collect and label the dataset? Can you design a model with attention mechanisms?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/395)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1530)
-:end_tab:

@@ -496,15 +496,3 @@ Warmup can be applied to any scheduler (not just cosine). For a more detailed di
 1. Apply the cosine scheduler to large computer vision problems, e.g., training ImageNet. How does it affect performance relative to other schedulers?
 1. How long should warmup last?
 1. Can you connect optimization and sampling? Start by using results from :citet:`Welling.Teh.2011` on Stochastic Gradient Langevin Dynamics.
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/359)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1080)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/1081)
-:end_tab:

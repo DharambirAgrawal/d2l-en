@@ -196,11 +196,3 @@ We conclude with an illustration of the computational graph and its dependencies
 1. Design an experiment that uses parallel computation on CPUs, GPUs, and communication between both devices.
 1. Use a debugger such as NVIDIA's [Nsight](https://developer.nvidia.com/nsight-compute-2019_5) to verify that your code is efficient.
 1. Designing computation tasks that include more complex data dependencies, and run experiments to see if you can obtain the correct results while improving performance.
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/362)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1681)
-:end_tab:

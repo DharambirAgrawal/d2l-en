@@ -593,11 +593,3 @@ is similar to that in :numref:`sec_kaggle_house`.
 
 1. Use the complete CIFAR-10 dataset for this Kaggle competition. Set hyperparameters as `batch_size = 128`, `num_epochs = 100`, `lr = 0.1`, `lr_period = 50`, and `lr_decay = 0.1`.  See what accuracy and ranking you can achieve in this competition. Can you further improve them?
 1. What accuracy can you get when not using image augmentation?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/379)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1479)
-:end_tab:

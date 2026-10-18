@@ -368,5 +368,3 @@ despite the concerted efforts of many brilliant researchers.
 1. How do researchers typically determine the stopping criterion?
 1. What important factor seems to differentiate cases when early stopping leads to big improvements in generalization?
 1. Beyond generalization, describe another benefit of early stopping.
-
-[Discussions](https://discuss.d2l.ai/t/7473)

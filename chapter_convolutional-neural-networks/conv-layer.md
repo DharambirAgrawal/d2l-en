@@ -578,19 +578,3 @@ In terms of convolutions themselves, they can be used for many purposes, for exa
     1. What is the minimum size of a kernel to obtain a derivative of order $d$?
 1. When you try to automatically find the gradient for the `Conv2D` class we created, what kind of error message do you see?
 1. How do you represent a cross-correlation operation as a matrix multiplication by changing the input and kernel tensors?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/65)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/66)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/271)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/17996)
-:end_tab:

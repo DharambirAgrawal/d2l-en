@@ -223,12 +223,3 @@ into a fixed-length text category.
 
 1. What hyperparameters in this section can we modify to accelerate training sentiment analysis models?
 1. Can you implement a function to load the dataset of [Amazon reviews](https://snap.stanford.edu/data/web-Amazon.html) into data iterators and labels for sentiment analysis?
-
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/391)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1387)
-:end_tab:

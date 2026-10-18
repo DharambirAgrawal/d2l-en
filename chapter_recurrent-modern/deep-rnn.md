@@ -362,19 +362,3 @@ to ensure proper convergence.
 1. Replace the GRU by an LSTM and compare the accuracy and training speed.
 1. Increase the training data to include multiple books. How low can you go on the perplexity scale?
 1. Would you want to combine sources of different authors when modeling text? Why is this a good idea? What could go wrong?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/340)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1058)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/3862)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/18018)
-:end_tab:

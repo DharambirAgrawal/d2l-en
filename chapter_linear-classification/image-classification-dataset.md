@@ -262,19 +262,3 @@ Lastly, data iterators are a key component for efficient performance. For instan
 1. Does reducing the `batch_size` (for instance, to 1) affect the reading performance?
 1. The data iterator performance is important. Do you think the current implementation is fast enough? Explore various options to improve it. Use a system profiler to find out where the bottlenecks are.
 1. Check out the framework's online API documentation. Which other datasets are available?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/48)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/49)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/224)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/17980)
-:end_tab:

@@ -35,6 +35,3 @@ for connecting to a GPU instance.
 
 1. Open any section of this book using Google Colab.
 1. Edit and run any section that requires a GPU using Google Colab.
-
-
-[Discussions](https://discuss.d2l.ai/t/424)

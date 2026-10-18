@@ -126,5 +126,3 @@ This will make it easier for the authors to review it and to merge it with the b
 1. Star and fork the `d2l-ai/d2l-en` repository.
 1. If you spot anything that needs improvement (e.g., missing a reference), submit a pull request. 
 1. It is usually a better practice to create a pull request using a new branch. Learn how to do it with [Git branching](https://git-scm.com/book/en/v2/Git-Branching-Branches-in-a-Nutshell).
-
-[Discussions](https://discuss.d2l.ai/t/426)

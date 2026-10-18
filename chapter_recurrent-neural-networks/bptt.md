@@ -428,5 +428,3 @@ For efficient computation, intermediate values are cached during backpropagation
 of $\mathbf{M}$. Formalize this statement.
    1. What does the above result mean for gradients in RNNs?
 1. Besides gradient clipping, can you think of any other methods to cope with gradient explosion in recurrent neural networks?
-
-[Discussions](https://discuss.d2l.ai/t/334)

@@ -166,6 +166,3 @@ git pull
 
 1. Edit and run any section that requires a GPU using Amazon SageMaker.
 1. Open a terminal to access the local directory that hosts all the notebooks of this book.
-
-
-[Discussions](https://discuss.d2l.ai/t/422)

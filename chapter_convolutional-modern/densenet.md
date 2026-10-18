@@ -500,19 +500,3 @@ applying DenseNet may require more memory-efficient implementations that may inc
     1. Can you think of an alternative means of reducing the memory consumption? How would you need to change the framework?
 1. Implement the various DenseNet versions presented in Table 1 of the DenseNet paper :cite:`Huang.Liu.Van-Der-Maaten.ea.2017`.
 1. Design an MLP-based model by applying the DenseNet idea. Apply it to the housing price prediction task in :numref:`sec_kaggle_house`.
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/87)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/88)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/331)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/18008)
-:end_tab:

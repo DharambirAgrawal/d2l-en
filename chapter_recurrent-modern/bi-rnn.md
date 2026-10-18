@@ -201,15 +201,3 @@ In bidirectional RNNs, the hidden state for each time step is simultaneously det
 1. If the different directions use a different number of hidden units, how will the shape of $\mathbf{H}_t$ change?
 1. Design a bidirectional RNN with multiple hidden layers.
 1. Polysemy is common in natural languages. For example, the word "bank" has different meanings in contexts “i went to the bank to deposit cash” and “i went to the bank to sit down”. How can we design a neural network model such that given a context sequence and a word, a vector representation of the word in the correct context will be returned? What type of neural architectures is preferred for handling polysemy?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/339)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1059)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/18019)
-:end_tab:

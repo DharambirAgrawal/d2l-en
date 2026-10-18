@@ -770,19 +770,3 @@ Sequential concatenations of layers and modules are handled by the `Sequential` 
 1. What kinds of problems will occur if you change `MySequential` to store modules in a Python list?
 1. Implement a module that takes two modules as an argument, say `net1` and `net2` and returns the concatenated output of both networks in the forward propagation. This is also called a *parallel module*.
 1. Assume that you want to concatenate multiple instances of the same network. Implement a factory function that generates multiple instances of the same module and build a larger network from it.
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/54)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/55)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/264)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/17989)
-:end_tab:

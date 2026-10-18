@@ -1,0 +1,23 @@
+title: Missing-Value Report for a New Dataset
+difficulty: easy
+timeout: 10
+description: |
+  Before modeling, a data scientist's first question about a new dataset is
+  "what's missing, and what kinds of columns do I have?". Write
+  `missing_report(df)` for a pandas `DataFrame` that returns a dict with:
+
+  - `"missing_fraction"`: a dict mapping **each column name** to the fraction
+    of its entries that are missing,
+  - `"rows_with_missing"`: the fraction of rows with **at least one** missing
+    value,
+  - `"numeric"` and `"categorical"`: sorted lists of column names whose
+    dtype is numeric vs. not.
+
+  The file `houses.csv` is available to test with (`pd.read_csv("houses.csv")`).
+explanation: |
+  `df.isna()` gives a boolean table of missing entries. Its column means are
+  the per-column missing fractions (booleans average as 0/1), and
+  `.any(axis=1)` flags rows with any missing value. This is the same
+  reduce-along-an-axis idea from the linear algebra section, applied to a
+  table. `pd.api.types.is_numeric_dtype` separates numeric from categorical
+  columns.

@@ -236,13 +236,3 @@ print(segment_BPE(tokens, symbols))
 1. How to design a subword embedding model based on the continuous bag-of-words model?
 1. To get a vocabulary of size $m$, how many merging operations are needed when the initial symbol vocabulary size is $n$?
 1. How to extend the idea of byte pair encoding to extract phrases?
-
-
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/386)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/4587)
-:end_tab:

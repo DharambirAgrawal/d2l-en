@@ -967,13 +967,3 @@ d2l.plt.legend();
     1. There are typically a vast number of negative anchor boxes. To make the class distribution more balanced, we could downsample negative anchor boxes.
     1. In the loss function, assign different weight hyperparameters to the class loss and the offset loss.
     1. Use other methods to evaluate the object detection model, such as those in the single shot multibox detection paper :cite:`Liu.Anguelov.Erhan.ea.2016`.
-
-
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/373)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1604)
-:end_tab:

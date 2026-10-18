@@ -424,20 +424,3 @@ Dimensionality and storage for networks are automatically inferred
 1. How does the solution change as you vary the amount of data generated?
     1. Plot the estimation error for $\hat{\mathbf{w}} - \mathbf{w}$ and $\hat{b} - b$ as a function of the amount of data. Hint: increase the amount of data logarithmically rather than linearly, i.e., 5, 10, 20, 50, ..., 10,000 rather than 1000, 2000, ..., 10,000.
     2. Why is the suggestion in the hint appropriate?
-
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/44)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/45)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/204)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/17977)
-:end_tab:

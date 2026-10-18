@@ -252,19 +252,3 @@ We can pass data through the model to make the framework finally initialize para
 1. What happens if you specify the input dimensions to the first layer but not to subsequent layers? Do you get immediate initialization?
 1. What happens if you specify mismatching dimensions?
 1. What would you need to do if you have input of varying dimensionality? Hint: look at the parameter tying.
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/280)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/8092)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/281)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/17992)
-:end_tab:

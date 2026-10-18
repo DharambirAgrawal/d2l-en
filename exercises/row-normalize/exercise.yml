@@ -1,0 +1,22 @@
+title: Make Every Row Sum to 1
+difficulty: easy
+timeout: 10
+description: |
+  Exercise 6 asks what `A / A.sum(axis=1)` does. For a non-square matrix it
+  fails, and for a square one it silently computes the wrong thing! Write
+  `row_normalize(A)` that divides each row of the 2-D NumPy array `A` by its
+  row sum, so that every row of the result sums to 1.
+
+  ```python
+  row_normalize(np.array([[1., 3.], [2., 2.], [0., 5.]]))
+  # array([[0.25, 0.75], [0.5, 0.5], [0., 1.]])
+  ```
+
+  This is exactly how raw counts become probabilities, which you will need
+  in the capstone project.
+explanation: |
+  `A.sum(axis=1)` has shape $(m,)$, which broadcasts against the **columns**
+  of an $(m, n)$ matrix (it lines up with the last axis), so `A / A.sum(axis=1)`
+  either fails ($m \neq n$) or divides column $j$ by row sum $j$ ($m = n$).
+  `keepdims=True` gives shape $(m, 1)$, which broadcasts across each row, the
+  same non-reduction sum trick from the section.

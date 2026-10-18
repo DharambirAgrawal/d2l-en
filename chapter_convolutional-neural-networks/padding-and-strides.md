@@ -357,19 +357,3 @@ So far all padding that we discussed simply extended images with zeros. This has
 1. What are the computational benefits of a stride larger than 1?
 1. What might be statistical benefits of a stride larger than 1?
 1. How would you implement a stride of $\frac{1}{2}$? What does it correspond to? When would this be useful?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/67)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/68)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/272)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/17997)
-:end_tab:

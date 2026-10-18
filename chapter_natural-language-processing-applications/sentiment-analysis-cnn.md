@@ -417,11 +417,3 @@ d2l.predict_sentiment(net, vocab, 'this movie is so bad')
 1. Tune hyperparameters and compare the two architectures for sentiment analysis in :numref:`sec_sentiment_rnn` and in this section, such as in classification accuracy and computational efficiency.
 1. Can you further improve the classification accuracy of the model by using the methods introduced in the exercises of :numref:`sec_sentiment_rnn`?
 1. Add positional encoding in the input representations. Does it improve the classification accuracy?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/393)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1425)
-:end_tab:

@@ -1,0 +1,31 @@
+title: How Much Should You Trust a Positive Test?
+description: |
+  For a test that detects the disease with probability $P(D=1 \mid H=1)$
+  (sensitivity) and has false positive rate $P(D=1 \mid H=0)$, Bayes'
+  theorem gives the probability of disease after a positive test:
+  $$P(H=1 \mid D=1) = \frac{P(D=1 \mid H=1) P(H=1)}{P(D=1 \mid H=1) P(H=1) + P(D=1 \mid H=0)(1 - P(H=1))}.$$
+  The curve shows this against prevalence $P(H=1)$ (log scale). Notice how
+  a rare disease makes even an accurate test mostly produce false alarms.
+  The same math explains alert fatigue in your Chapter 2 project.
+params:
+  - {name: prevalence, label: "prevalence $P(H{=}1)$", min: 0.0005, max: 0.3, step: 0.0005, value: 0.0015}
+  - {name: sensitivity, label: "sensitivity", min: 0.5, max: 1, step: 0.01, value: 1.0}
+  - {name: fpr, label: "false positive rate", min: 0.001, max: 0.2, step: 0.001, value: 0.01}
+code: |
+  import numpy as np
+  import matplotlib.pyplot as plt
+
+  def posterior(prior):
+      hit = sensitivity * prior
+      return hit / (hit + fpr * (1 - prior))
+
+  priors = np.logspace(-4, np.log10(0.5), 300)
+  fig, ax = plt.subplots(figsize=(5.5, 3.4))
+  ax.plot(priors, posterior(priors), label='P(disease | positive)')
+  ax.plot([prevalence], [posterior(prevalence)], 'o', color='tab:red')
+  ax.set_xscale('log'); ax.set_ylim(0, 1.02)
+  ax.set_xlabel('prevalence P(H=1)'); ax.grid(alpha=0.3); ax.legend(loc='lower right')
+  two = sensitivity ** 2 * prevalence
+  print(f'P(disease | 1 positive)  = {posterior(prevalence):.4f}')
+  print(f'P(disease | 2 positives) = {two / (two + fpr ** 2 * (1 - prevalence)):.4f}'
+        '   (two conditionally independent tests)')

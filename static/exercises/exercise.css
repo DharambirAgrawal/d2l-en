@@ -160,3 +160,108 @@ ul.d2l-ex-tests > li {
   .d2l-ex-spacer { display: none; }
   .d2l-ex-head, .d2l-ex-bar, .d2l-ex-desc { padding-left: .75em; padding-right: .75em; }
 }
+
+/* Hidden answers under each item of a section's "Exercises" list. */
+.d2l-answer { margin: .35em 0 1em; }
+.d2l-answer-btn {
+  padding: .2em .8em;
+  border: 1px solid #d0d7de;
+  border-radius: 999px;
+  background: #f6f8fa;
+  color: #1565c0;
+  font: inherit;
+  font-size: .85em;
+  font-weight: 500;
+  cursor: pointer;
+}
+.d2l-answer-btn:hover { background: #eaeef2; }
+.d2l-answer-btn[aria-expanded="true"] { background: #e3f2fd; border-color: #90caf9; }
+.d2l-answer-btn:focus-visible { outline: 2px solid #1565c0; outline-offset: 1px; }
+.d2l-answer-body {
+  margin-top: .5em;
+  padding: .6em 1em;
+  border-left: 3px solid #90caf9;
+  background: #f8fbff;
+  border-radius: 0 4px 4px 0;
+}
+.d2l-answer-body > :first-child { margin-top: 0; }
+.d2l-answer-body > :last-child { margin-bottom: 0; }
+#exercises .d2l-ex { margin: .75em 0; }
+
+/* Runnable book cells (notebook style). */
+.d2l-cell-note {
+  margin: 1em 0;
+  padding: .6em 1em;
+  border-left: 3px solid #1565c0;
+  background: #f8fbff;
+  font-size: .9em;
+}
+.d2l-cell-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .4em;
+  margin: -.4em 0 .6em;
+}
+.d2l-cell-btn {
+  padding: .15em .7em;
+  border: 1px solid #d0d7de;
+  border-radius: 4px;
+  background: #fff;
+  color: rgba(0, 0, 0, .87);
+  font: inherit;
+  font-size: .8em;
+  cursor: pointer;
+}
+.d2l-cell-btn:hover:not(:disabled) { background: #f6f8fa; }
+.d2l-cell-btn:focus-visible { outline: 2px solid #1565c0; outline-offset: 1px; }
+.d2l-cell-run { border-color: #1565c0; color: #1565c0; font-weight: 600; }
+.d2l-cell-status { font-size: .8em; color: #57606a; }
+.d2l-cell-editor { border: 1px solid #d0d7de; border-radius: 4px; margin-bottom: .2em; }
+.d2l-cell-out, .d2l-pg-out { margin: 0 0 1em; }
+.d2l-cell-out pre, .d2l-pg-out pre {
+  margin: 0 0 .4em;
+  max-height: 24em;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 13px;
+  border: 1px solid #d0d7de;
+  border-radius: 4px;
+}
+.d2l-cell-out pre.d2l-cell-stdout, .d2l-cell-out pre.d2l-cell-value,
+.d2l-pg-out pre.d2l-cell-stdout, .d2l-pg-out pre.d2l-cell-value { background: #f6f8fa; }
+.d2l-cell-img { display: block; max-width: 100%; height: auto; margin: .3em 0; }
+
+/* Playgrounds (sliders + live plot). */
+.d2l-pg-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: .5em 1.25em;
+  padding: .5em 1em;
+}
+.d2l-pg-param { display: flex; align-items: center; gap: .5em; font-size: .9em; }
+.d2l-pg-label { min-width: 4.5em; }
+.d2l-pg-param input[type="range"] { flex: 1; min-width: 0; }
+.d2l-pg-value { min-width: 3em; text-align: right; font-family: Menlo, Consolas, monospace; font-size: .85em; }
+.d2l-playground-box .d2l-pg-out { padding: 0 1em; }
+.d2l-playground-box .d2l-cell-img { margin: .3em auto; }
+
+/* Notes to remember. */
+.d2l-notes {
+  margin: 1.5em 0;
+  border: 1px solid #f0d58c;
+  border-left: 4px solid #e0a800;
+  border-radius: 6px;
+  background: #fffbea;
+}
+.d2l-notes-head {
+  display: flex;
+  align-items: center;
+  gap: .5em;
+  padding: .5em 1em;
+  border-bottom: 1px solid #f0d58c;
+}
+.d2l-notes-title { font-weight: 600; }
+.d2l-notes-body { padding: .25em 1em .5em; }
+.d2l-notes-body li { margin: .25em 0; }

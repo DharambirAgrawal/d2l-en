@@ -190,5 +190,3 @@ and output the span with the highest score.
 1. Let's design a search engine algorithm for news articles. When the system receives an query (e.g., "oil industry during the coronavirus outbreak"), it should return a ranked list of news articles that are most relevant to the query. Suppose that we have a huge pool of news articles and a large number of queries. To simplify the problem, suppose that the most relevant article has been labeled for each query. How can we apply negative sampling (see :numref:`subsec_negative-sampling`) and BERT in the algorithm design?
 1. How can we leverage BERT in training language models?
 1. Can we leverage BERT in machine translation?
-
-[Discussions](https://discuss.d2l.ai/t/396)

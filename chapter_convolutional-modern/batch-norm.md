@@ -915,19 +915,3 @@ On a more practical note, there are a number of aspects worth remembering about 
     1. Can you use other compact matrix variants (block-diagonal, low-displacement rank, Monarch, etc.)?
     1. Does a sparsification compression act as a regularizer?
     1. Are there other projections (e.g., convex cone, symmetry group-specific transforms) that you can use?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/83)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/84)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/330)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/18005)
-:end_tab:

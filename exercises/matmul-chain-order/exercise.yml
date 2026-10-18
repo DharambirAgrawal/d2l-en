@@ -1,0 +1,34 @@
+title: Which Way to Multiply Three Matrices?
+difficulty: medium
+timeout: 5
+description: |
+  Matrix multiplication is associative, $(\mathbf{AB})\mathbf{C} = \mathbf{A}(\mathbf{BC})$,
+  but the cost is not! Multiplying an $(n \times k)$ matrix by a
+  $(k \times m)$ matrix takes $n \cdot k \cdot m$ multiply-adds and creates
+  an $n \times m$ result.
+
+  Write `chain_cost(a, b, c)` where `a`, `b`, `c` are the **shapes** of
+  $\mathbf{A}, \mathbf{B}, \mathbf{C}$. Return a dict:
+
+  ```python
+  {"(AB)C": (multiply_adds, intermediate_size),
+   "A(BC)": (multiply_adds, intermediate_size),
+   "best": "(AB)C" or "A(BC)"}
+  ```
+
+  where `intermediate_size` is the number of elements of the temporary
+  product ($\mathbf{AB}$ or $\mathbf{BC}$), and `"best"` has fewer
+  multiply-adds (pick `"(AB)C"` on a tie). Raise `ValueError` if the inner
+  dimensions don't match.
+
+  Try it on Exercise 10's shapes: $2^{10} \times 2^{16}$, $2^{16} \times 2^{5}$, $2^{5} \times 2^{14}$.
+explanation: |
+  $(\mathbf{AB})\mathbf{C}$ costs $nkm + nmp$ for shapes $(n,k), (k,m), (m,p)$,
+  and $\mathbf{A}(\mathbf{BC})$ costs $kmp + nkp$. For Exercise 10, $\mathbf{AB}$
+  is a small $2^{10} \times 2^5$ matrix, so $(\mathbf{AB})\mathbf{C}$ needs about
+  $2^{31} + 2^{29}$ multiply-adds, while $\mathbf{BC}$ is a huge
+  $2^{16} \times 2^{14}$ matrix ($2^{30}$ elements, 4 GB in float32) and
+  $\mathbf{A}(\mathbf{BC})$ needs about $2^{35} + 2^{40}$. Same answer, roughly
+  400$\times$ the work and an enormous temporary. Choosing the multiplication
+  order this way is the classic *matrix chain ordering* problem, and
+  frameworks like `np.einsum(..., optimize=True)` do it for you.

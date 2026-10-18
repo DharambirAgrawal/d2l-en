@@ -1,0 +1,26 @@
+title: From Secant to Tangent
+description: |
+  The derivative is the limit of the slope of a secant line,
+  $\frac{f(x_0 + h) - f(x_0)}{h}$, as $h \to 0$. Here
+  $f(x) = 3x^2 - 4x$, whose exact derivative is $f'(x) = 6x - 4$. Shrink
+  $h$ and watch the orange secant turn into the green tangent.
+params:
+  - {name: x0, label: $x_0$, min: -1, max: 3, step: 0.1, value: 1.0}
+  - {name: h, label: $h$, min: 0.01, max: 2, step: 0.01, value: 1.0}
+code: |
+  import numpy as np
+  import matplotlib.pyplot as plt
+
+  f = lambda x: 3 * x ** 2 - 4 * x
+  x = np.linspace(-1.5, 3.5, 300)
+  secant_slope = (f(x0 + h) - f(x0)) / h
+  exact = 6 * x0 - 4
+
+  fig, ax = plt.subplots(figsize=(5.5, 3.6))
+  ax.plot(x, f(x), label='f(x)')
+  ax.plot(x, f(x0) + secant_slope * (x - x0), color='tab:orange', label=f'secant, slope {secant_slope:.3f}')
+  ax.plot(x, f(x0) + exact * (x - x0), 'g--', label=f'tangent, slope {exact:.3f}')
+  ax.plot([x0, x0 + h], [f(x0), f(x0 + h)], 'o', color='tab:orange')
+  ax.set_ylim(-4, 20); ax.grid(alpha=0.3); ax.legend(loc='upper left')
+  print(f'secant slope = {secant_slope:.5f}, exact derivative = {exact:.5f}, '
+        f'error = {secant_slope - exact:.5f} (exactly 3h = {3 * h:.5f})')

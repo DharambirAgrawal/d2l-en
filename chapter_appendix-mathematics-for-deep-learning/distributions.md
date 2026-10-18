@@ -827,16 +827,3 @@ powerful family of distributions encountered frequently in machine learning.
 1. What is the standard deviation of a random variable that is the difference $X-Y$ of two independent binomial random variables $X, Y \sim \textrm{Binomial}(16, 1/2)$.
 2. If we take a Poisson random variable $X \sim \textrm{Poisson}(\lambda)$ and consider $(X - \lambda)/\sqrt{\lambda}$ as $\lambda \rightarrow \infty$, we can show that this becomes approximately Gaussian.  Why does this make sense?
 3. What is the probability mass function for a sum of two discrete uniform random variables on $n$ elements?
-
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/417)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1098)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/1099)
-:end_tab:

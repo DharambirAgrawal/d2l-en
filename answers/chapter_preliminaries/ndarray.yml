@@ -1,0 +1,32 @@
+# Answers for chapter_preliminaries/ndarray.md "Exercises", in order.
+- answer: |
+    `X < Y` and `X > Y` return **boolean tensors with the same shape** as
+    `X` and `Y`, with `True` wherever the comparison holds elementwise. With
+    the section's `X = arange(12).reshape(3, 4)` and
+    `Y = [[2, 1, 4, 3], [1, 2, 3, 4], [4, 3, 2, 1]]`:
+
+    ```python
+    X < Y   # [[ True, False,  True, False],
+            #  [False, False, False, False],
+            #  [False, False, False, False]]
+    ```
+
+    Exactly one of `X < Y`, `X == Y`, `X > Y` is `True` at each position.
+    Boolean tensors are useful as masks, e.g. `X[X > 5]` selects elements,
+    and `(X > 5).sum()` counts them.
+- exercise: broadcast-shape
+  answer: |
+    Yes, broadcasting works for any number of axes, as long as the shapes
+    are compatible. Align the shapes **from the right**; each pair of
+    lengths must be equal or contain a 1, and the result takes the larger.
+
+    ```python
+    a = torch.arange(6).reshape(2, 1, 3)
+    b = torch.arange(8).reshape(1, 4, 2)   # incompatible: 3 vs 2
+    c = torch.arange(4).reshape(4, 1)
+    (a + c).shape                          # (2, 4, 3)
+    ```
+
+    `(2, 1, 3)` with `(4, 1)` becomes `(2, 1, 3)` with `(1, 4, 1)`, giving
+    `(2, 4, 3)`. Mismatched lengths that aren't 1 (like 3 vs 2) raise an
+    error. The coding exercise above has you implement this rule.

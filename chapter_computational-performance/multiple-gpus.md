@@ -412,11 +412,3 @@ train(num_gpus=2, batch_size=256, lr=0.2)
 1. Compare accuracy for different learning rates. How does it scale with the number of GPUs?
 1. Implement a more efficient `allreduce` function that aggregates different parameters on different GPUs? Why is it more efficient?
 1. Implement multi-GPU test accuracy computation.
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/364)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1669)
-:end_tab:

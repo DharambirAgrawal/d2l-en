@@ -159,7 +159,3 @@ Q-learning is one of the most fundamental reinforcement-learning algorithms. It 
 1. Try increasing the grid size to $8 \times 8$. Compared with $4 \times 4$ grid, how many iterations does it take to find the optimal value function?
 1. Run the Q-learning algorithm again with $\gamma$ (i.e. "gamma" in the above code) when it equals to $0$, $0.5$, and $1$ and analyze its results.
 1. Run the Q-learning algorithm again with $\epsilon$ (i.e. "epsilon" in the above code) when it equals to $0$, $0.5$, and $1$ and analyze its results.
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/12103)
-:end_tab:

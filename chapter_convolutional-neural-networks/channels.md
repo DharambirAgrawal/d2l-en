@@ -303,20 +303,3 @@ Note, though, that this flexibility comes at a price. Given an image of size $(h
 1. Assume that we have a $c \times c$ matrix. 
     1. How much faster is it to multiply with a block-diagonal matrix if the matrix is broken up into $b$ blocks?
     1. What is the downside of having $b$ blocks? How could you fix it, at least partly?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/69)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/70)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/273)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/17998)
-:end_tab:
-

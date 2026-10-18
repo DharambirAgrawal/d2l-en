@@ -486,19 +486,3 @@ Although it seems that there are only a few more lines in AlexNet's implementati
 1. Modify the batch size, and observe the changes in throughput (images/s), accuracy, and GPU memory.
 1. Apply dropout and ReLU to LeNet-5. Does it improve? Can you improve things further by preprocessing to take advantage of the invariances inherent in the images?
 1. Can you make AlexNet overfit? Which feature do you need to remove or change to break training?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/75)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/76)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/276)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/18001)
-:end_tab:

@@ -227,6 +227,3 @@ The summary in :numref:`table_latency_numbers` and :numref:`table_latency_number
 1. Direct memory access allows devices other than the CPU to write (and read) directly to (from) memory. Why is this a good idea?
 1. Look at the performance numbers for the Turing T4 GPU. Why does the performance "only" double as you go from FP16 to INT8 and INT4?
 1. What is the shortest time it should take for a packet on a round trip between San Francisco and Amsterdam? Hint: you can assume that the distance is 10,000 km.
-
-
-[Discussions](https://discuss.d2l.ai/t/363)

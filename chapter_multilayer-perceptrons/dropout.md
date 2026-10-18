@@ -491,19 +491,3 @@ it replaces an activation $h$ with a random variable with expected value $h$.
 1. Using the model in this section as an example, compare the effects of using dropout and weight decay. What happens when dropout and weight decay are used at the same time? Are the results additive? Are there diminished returns (or worse)? Do they cancel each other out?
 1. What happens if we apply dropout to the individual weights of the weight matrix rather than the activations?
 1. Invent another technique for injecting random noise at each layer that is different from the standard dropout technique. Can you develop a method that outperforms dropout on the Fashion-MNIST dataset (for a fixed architecture)?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/100)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/101)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/261)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/17987)
-:end_tab:

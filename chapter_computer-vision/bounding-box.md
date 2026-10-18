@@ -171,12 +171,3 @@ fig.axes.add_patch(bbox_to_rect(cat_bbox, 'red'));
 
 1. Find another image and try to label a bounding box that contains the object. Compare labeling bounding boxes and categories: which usually takes longer?
 1. Why is the innermost dimension of the input argument `boxes` of `box_corner_to_center` and `box_center_to_corner` always 4?
-
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/369)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1527)
-:end_tab:

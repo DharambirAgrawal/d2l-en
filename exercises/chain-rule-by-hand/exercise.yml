@@ -1,0 +1,24 @@
+title: Backpropagation by Hand
+difficulty: medium
+timeout: 10
+description: |
+  Autograd builds a computational graph and applies the chain rule
+  backwards. Do it yourself for Exercises 5--7:
+
+  $$f(x) = \log(x^2) \cdot \sin x + x^{-1}$$
+
+  Write `f_and_grad(x)` that returns `(f(x), f'(x))` for $x > 0$ by
+  computing the **forward pass** through intermediate values
+  ($a = x^2$, $b = \log a$, $c = \sin x$, $d = b \cdot c$, $e = 1/x$,
+  $f = d + e$) and then a **backward pass** that multiplies local
+  derivatives, like backpropagation does. Don't use a numerical
+  approximation.
+explanation: |
+  Backward from $f$: $\partial f/\partial d = 1$ and
+  $\partial f/\partial e = 1$. Then $\partial f/\partial b = c$,
+  $\partial f/\partial c = b$, $\partial f/\partial a = c \cdot \frac{1}{a}$.
+  Finally $x$ gets contributions from three paths:
+  $\frac{df}{dx} = \frac{c}{a}\cdot 2x + b\cos x - \frac{1}{x^2} = \frac{2\sin x}{x} + \log(x^2)\cos x - \frac{1}{x^2}$.
+  Summing the contributions of every path into a node is exactly what
+  autograd does, and going from $f$ back to $x$ (backward mode) needs one
+  pass for all inputs, which is why deep learning uses it.

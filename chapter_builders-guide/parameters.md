@@ -357,19 +357,3 @@ We have several ways of accessing and tying model parameters.
 1. Use the `NestMLP` model defined in :numref:`sec_model_construction` and access the parameters of the various layers.
 1. Construct an MLP containing a shared parameter layer and train it. During the training process, observe the model parameters and gradients of each layer.
 1. Why is sharing parameters a good idea?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/56)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/57)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/269)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/17990)
-:end_tab:

@@ -230,8 +230,3 @@ modifications.
     1. Create a virtual environment containing both the [d2lbook](https://github.com/d2l-ai/d2l-en/blob/master/INFO.md#installation-for-developers) and [syne-tune](https://syne-tune.readthedocs.io/en/latest/getting_started.html) sources.
     2. Implement the `LocalSearcher` from Exercise 2 in :numref:`sec_api_hpo` as a new searcher in Syne Tune. Hint: Read [this tutorial](https://syne-tune.readthedocs.io/en/latest/tutorials/developer/README.html). Alternatively, you may follow this [example](https://syne-tune.readthedocs.io/en/latest/examples.html#launch-hpo-experiment-with-home-made-scheduler).
     3. Compare your new `LocalSearcher` with `RandomSearch` on the `DropoutMLP` benchmark.
-
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/12093)
-:end_tab:

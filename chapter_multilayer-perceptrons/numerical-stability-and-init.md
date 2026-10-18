@@ -407,20 +407,3 @@ ReLU activation functions mitigate the vanishing gradient problem. This can acce
 1. Can we initialize all weight parameters in linear regression or in softmax regression to the same value?
 1. Look up analytic bounds on the eigenvalues of the product of two matrices. What does this tell you about ensuring that gradients are well conditioned?
 1. If we know that some terms diverge, can we fix this after the fact? Look at the paper on layerwise adaptive rate scaling  for inspiration :cite:`You.Gitman.Ginsburg.2017`.
-
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/103)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/104)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/235)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/17986)
-:end_tab:

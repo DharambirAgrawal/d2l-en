@@ -256,7 +256,3 @@ train_ranking(net, train_iter, test_iter, loss, trainer, None, num_users,
 * Vary the architectures (e.g., number of layers, number of neurons of each layer) of the MLP to check the its impact on the performance.
 * Try different optimizers, learning rate and weight decay rate.
 * Try to use hinge loss defined in the last section to optimize this model.
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/403)
-:end_tab:

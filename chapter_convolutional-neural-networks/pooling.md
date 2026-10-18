@@ -391,20 +391,3 @@ Note that there are many more ways of reducing resolution beyond pooling. For in
 1. Why do you expect max-pooling and average pooling to work differently?
 1. Do we need a separate minimum pooling layer? Can you replace it with another operation?
 1. We could use the softmax operation for pooling. Why might it not be so popular?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/71)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/72)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/274)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/17999)
-:end_tab:
-

@@ -156,7 +156,7 @@
 
     /* Run code ('run') or grade it ('submit'). Resolves with a result dict;
      * never rejects. */
-    run({mode, code, tests, packages, timeout, onStatus}) {
+    run({mode, code, tests, packages, files, timeout, onStatus, session, params, reset}) {
       if (this.busy) return Promise.resolve({status: 'busy'});
       this.setBusy(true);
       return new Promise((resolve) => {
@@ -165,7 +165,8 @@
         this.start(onStatus).then(() => {
           if (!this.current || this.current.id !== id) return; // stopped while loading
           onStatus('Loading packages…');
-          this.worker.postMessage({type: 'run', id, mode, code, tests, packages});
+          this.worker.postMessage({type: 'run', id, mode, code, tests, packages, files,
+            session, params, reset});
         }, (err) => this.finish({status: 'load-error', stdout: '', error: err.message}, false));
       });
     },
@@ -318,6 +319,7 @@
         code: this.editor.getValue(),
         tests: mode === 'submit' ? this.data.tests : '',
         packages: this.data.packages,
+        files: this.data.files,
         timeout: this.data.timeout,
         onStatus: (text) => this.setStatus(text),
       });
@@ -427,28 +429,371 @@
     }
   }
 
+  // ------------------------------------------------------------------ mount
+
+  let editorLib = null;
+
+  function mount(container) {
+    const id = container.getAttribute('data-exercise');
+    if (!editorLib) editorLib = loadCodeMirror().catch(() => null);
+    container.textContent = 'Loading exercise…';
+    Promise.all([
+      fetch(staticRoot() + encodeURIComponent(id) + '.json', {cache: 'no-cache'}).then((res) => {
+        if (!res.ok) throw new Error(`exercise "${id}" not found (${res.status})`);
+        return res.json();
+      }),
+      editorLib,
+    ]).then(([data, CodeMirror]) => new Exercise(container, data, CodeMirror))
+      .catch((err) => {
+        container.textContent = 'Could not load this exercise: ' + err.message;
+        container.classList.add('d2l-ex-broken');
+      });
+  }
+
+  // ---------------------------------------------------------------- answers
+
+  /* Hidden answers (and optional coding exercises) for the numbered list in a
+   * page's "Exercises" section, from _static/answers/<page>.json, generated
+   * from answers/<chapter>/<section>.yml by tools/build_exercises.py. */
+  function addAnswers() {
+    const list = document.querySelector('#exercises > ol, section#exercises > ol');
+    if (!list) return;
+    const opts = document.getElementById('documentation_options');
+    const rootUrl = new URL((opts && opts.getAttribute('data-url_root')) || './', window.location.href);
+    let page = window.location.pathname;
+    if (page.endsWith('/')) page += 'index.html';
+    if (!page.startsWith(rootUrl.pathname)) return;
+    page = decodeURIComponent(page.slice(rootUrl.pathname.length)).replace(/\.html$/, '');
+    const url = new URL('_static/answers/' + page + '.json', rootUrl).href;
+    fetch(url, {cache: 'no-cache'})
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!data) return;
+        const items = Array.from(list.children).filter((li) => li.tagName === 'LI');
+        items.forEach((li, i) => {
+          const entry = data.answers[i];
+          if (!entry) return;
+          if (entry.exercise) {
+            const box = el('div', {class: 'd2l-exercise', 'data-exercise': entry.exercise});
+            li.append(box);
+            mount(box);
+          }
+          if (entry.answer_html) {
+            const answer = el('div', {class: 'd2l-answer-body', html: entry.answer_html, hidden: true});
+            const button = el('button', {class: 'd2l-answer-btn', type: 'button', 'aria-expanded': 'false'},
+              'Show answer');
+            button.addEventListener('click', () => {
+              answer.hidden = !answer.hidden;
+              button.textContent = answer.hidden ? 'Show answer' : 'Hide answer';
+              button.setAttribute('aria-expanded', String(!answer.hidden));
+              if (!answer.hidden && !answer.dataset.typeset) {
+                answer.dataset.typeset = '1';
+                typeset(answer);
+              }
+            });
+            li.append(el('div', {class: 'd2l-answer'}, [button, answer]));
+          }
+        });
+      })
+      .catch(() => {});
+  }
+
+  // ------------------------------------------------------------ book cells
+
+  /* Make the book's own code cells editable and runnable, notebook style.
+   * Cells in the "pytorch" tab and cells shared by all frameworks run in
+   * one session per page; `torch` there is torchlite, a NumPy-based subset
+   * of PyTorch (see torchlite.py), since real PyTorch can't run in a browser.
+   */
+  const CELL_TIMEOUT_S = 30;
+
+  function showCellResult(box, r) {
+    box.replaceChildren();
+    box.hidden = false;
+    if (r.stdout) box.append(el('pre', {class: 'd2l-cell-stdout'}, r.stdout));
+    if (r.result) box.append(el('pre', {class: 'd2l-cell-value'}, r.result));
+    for (const img of r.images || []) {
+      box.append(el('img', {class: 'd2l-cell-img', alt: 'plot output', src: 'data:image/png;base64,' + img}));
+    }
+    if (r.error) box.append(el('pre', {class: 'd2l-ex-error'}, r.error));
+    if (!box.childElementCount) box.append(el('div', {class: 'd2l-ex-muted'}, 'Done (no output).'));
+  }
+
+  function setupBookCells() {
+    const blocks = Array.from(document.querySelectorAll('.highlight-python')).filter((b) => {
+      if (b.closest('.d2l-ex, .d2l-answer, .d2l-notes, .d2l-playground')) return false;
+      const panel = b.closest('.mdl-tabs__panel');
+      if (panel && !/^pytorch-/.test(panel.id)) return false;
+      return !/interact_select/.test(b.textContent);
+    });
+    if (!blocks.length) return;
+    const session = 'page:' + window.location.pathname;
+    const cells = blocks.map((block, index) => ({block, index, original: '', ran: false, editor: null}));
+
+    function codeOf(cell) {
+      return cell.editor ? cell.editor.getValue() : cell.original;
+    }
+
+    function restart() {
+      cells.forEach((c) => {
+        c.ran = false;
+        c.out.hidden = true;
+      });
+      restartNext = true;
+    }
+
+    let restartNext = false;
+
+    async function runCell(cell) {
+      if (runner.busy) return;
+      // Like running a notebook from the top: earlier cells that haven't run
+      // yet run first, so variables they define exist.
+      const queue = cells.slice(0, cell.index).filter((c) => !c.ran).concat([cell]);
+      for (const c of queue) {
+        c.status.textContent = c === cell ? 'Running…' : '';
+        if (c !== cell) cell.status.textContent = `Running earlier cell ${c.index + 1}…`;
+        const r = await runner.run({
+          mode: 'cell', code: codeOf(c), session, reset: restartNext,
+          timeout: CELL_TIMEOUT_S, onStatus: (t) => { cell.status.textContent = t; },
+        });
+        restartNext = false;
+        if (r.status === 'busy') return;
+        if (r.status !== 'ok' && r.status !== 'error') {
+          // Timed out, stopped, or Python failed to load: the session is gone.
+          cells.forEach((x) => { x.ran = false; });
+          restartNext = true;
+          showCellResult(c.out, {error: r.error});
+          cell.status.textContent = '';
+          return;
+        }
+        c.ran = true;
+        showCellResult(c.out, r);
+        c.status.textContent = '';
+        if (r.status === 'error' && c !== cell) {
+          cell.status.textContent = `Stopped: cell ${c.index + 1} above failed.`;
+          return;
+        }
+      }
+    }
+
+    cells.forEach((cell) => {
+      cell.original = cell.block.querySelector('pre').textContent.replace(/\n$/, '');
+      const runBtn = el('button', {class: 'd2l-cell-btn d2l-cell-run', type: 'button',
+        title: 'Run this cell (runs earlier cells first if needed)'}, '▶ Run');
+      const editBtn = el('button', {class: 'd2l-cell-btn', type: 'button', title: 'Edit this code'}, '✎ Edit');
+      const resetBtn = el('button', {class: 'd2l-cell-btn', type: 'button', hidden: true,
+        title: 'Restore the original code'}, '↺ Original');
+      const restartBtn = el('button', {class: 'd2l-cell-btn', type: 'button',
+        title: 'Forget all variables on this page and start fresh'}, 'Restart');
+      cell.status = el('span', {class: 'd2l-cell-status', role: 'status', 'aria-live': 'polite'});
+      cell.out = el('div', {class: 'd2l-cell-out', hidden: true});
+      const bar = el('div', {class: 'd2l-cell-bar'}, [runBtn, editBtn, resetBtn, cell.status,
+        el('span', {class: 'd2l-ex-spacer'}), restartBtn]);
+      cell.block.classList.add('d2l-cell');
+      cell.block.after(bar, cell.out);
+
+      runBtn.addEventListener('click', () => runCell(cell));
+      restartBtn.addEventListener('click', () => {
+        restart();
+        cell.status.textContent = 'Session restarted.';
+      });
+      editBtn.addEventListener('click', () => {
+        if (cell.editor) { cell.editor.focus(); return; }
+        if (!editorLib) editorLib = loadCodeMirror().catch(() => null);
+        editorLib.then((CodeMirror) => {
+          const holder = el('div', {class: 'd2l-ex-editor d2l-cell-editor'});
+          cell.block.querySelector('.highlight').replaceWith(holder);
+          cell.editor = makeEditor(CodeMirror, holder, cell.original, {
+            extraKeys: {
+              'Ctrl-Enter': () => runCell(cell),
+              'Cmd-Enter': () => runCell(cell),
+              'Shift-Enter': () => runCell(cell),
+            },
+          });
+          cell.editor.focus();
+          resetBtn.hidden = false;
+          editBtn.hidden = true;
+          runner.start().catch(() => {});
+        });
+      });
+      resetBtn.addEventListener('click', () => {
+        if (cell.editor) cell.editor.setValue(cell.original);
+      });
+    });
+
+    const note = el('div', {class: 'd2l-cell-note'}, [
+      el('strong', {}, 'Runnable examples: '),
+      'press ▶ Run or ✎ Edit on any PyTorch cell to experiment. They run in your browser on ',
+      el('em', {}, 'torchlite'),
+      ', a small NumPy-based version of PyTorch that covers the basics (tensors, math, ' +
+      'autograd, plotting). Cells share variables like a notebook.',
+    ]);
+    blocks[0].before(note);
+  }
+
+  // ------------------------------------------------------------ playgrounds
+
+  /* Interactive playgrounds: sliders feed variables into a short Python
+   * program whose plot and printed output update live. Defined in
+   * playgrounds/<id>.yml, embedded with
+   *   <div class="d2l-playground" data-playground="<id>"></div>
+   */
+  function mountPlayground(container) {
+    const id = container.getAttribute('data-playground');
+    container.textContent = 'Loading playground…';
+    const root = new URL('../playgrounds/', staticRoot()).href;
+    if (!editorLib) editorLib = loadCodeMirror().catch(() => null);
+    Promise.all([
+      fetch(root + encodeURIComponent(id) + '.json', {cache: 'no-cache'}).then((res) => {
+        if (!res.ok) throw new Error(`playground "${id}" not found (${res.status})`);
+        return res.json();
+      }),
+      editorLib,
+    ]).then(([pg, CodeMirror]) => buildPlayground(container, pg, CodeMirror))
+      .catch((err) => {
+        container.textContent = 'Could not load this playground: ' + err.message;
+        container.classList.add('d2l-ex-broken');
+      });
+  }
+
+  function buildPlayground(container, pg, CodeMirror) {
+    const values = {};
+    const out = el('div', {class: 'd2l-pg-out'});
+    const status = el('span', {class: 'd2l-ex-status', role: 'status', 'aria-live': 'polite'});
+    const controls = el('div', {class: 'd2l-pg-controls'});
+    let code = pg.code;
+    let pending = false;
+    let timer = null;
+
+    async function update() {
+      if (runner.busy) {  // another cell or exercise is running; try again soon
+        clearTimeout(timer);
+        timer = setTimeout(update, 300);
+        return;
+      }
+      status.textContent = 'Running…';
+      const r = await runner.run({
+        mode: 'cell', code, session: 'playground:' + pg.id, reset: true,
+        params: Object.assign({}, values), timeout: pg.timeout || 20,
+        onStatus: (t) => { status.textContent = t; },
+      });
+      status.textContent = r.status === 'ok' ? '' : (r.status === 'busy' ? '' : 'Error');
+      if (r.status !== 'busy') showCellResult(out, r);
+      if (pending) {
+        pending = false;
+        setTimeout(update, 50);
+      }
+    }
+
+    function schedule() {
+      // Slider moved: rerun after a short pause (or right after the current run).
+      if (runner.busy && status.textContent) { pending = true; return; }
+      clearTimeout(timer);
+      timer = setTimeout(update, 200);
+    }
+
+    for (const p of pg.params) {
+      values[p.name] = p.value;
+      const valueLabel = el('span', {class: 'd2l-pg-value'}, String(p.value));
+      const input = el('input', {type: 'range', min: p.min, max: p.max, step: p.step,
+        value: p.value, 'aria-label': p.label});
+      input.addEventListener('input', () => {
+        values[p.name] = Number(input.value);
+        valueLabel.textContent = input.value;
+        schedule();
+      });
+      controls.append(el('label', {class: 'd2l-pg-param'}, [
+        el('span', {class: 'd2l-pg-label', html: p.label_html || p.label}), input, valueLabel]));
+    }
+
+    const codeBox = el('div', {class: 'd2l-ex-editor', hidden: true});
+    const codeBtn = el('button', {class: 'd2l-ex-btn', type: 'button'}, 'Show / edit code');
+    const runBtn = el('button', {class: 'd2l-ex-btn d2l-ex-primary', type: 'button'}, '▶ Run');
+    let editor = null;
+    codeBtn.addEventListener('click', () => {
+      codeBox.hidden = !codeBox.hidden;
+      if (!editor && !codeBox.hidden) {
+        editor = makeEditor(CodeMirror, codeBox, code, {
+          extraKeys: {'Ctrl-Enter': () => runBtn.click(), 'Cmd-Enter': () => runBtn.click()},
+        });
+        editor.on('change', () => { code = editor.getValue(); });
+      }
+    });
+    runBtn.addEventListener('click', update);
+
+    const box = el('div', {class: 'd2l-ex d2l-playground-box'}, [
+      el('div', {class: 'd2l-ex-head'}, [
+        el('span', {class: 'd2l-ex-kicker'}, 'Playground'),
+        el('span', {class: 'd2l-ex-title'}, pg.title),
+      ]),
+      el('div', {class: 'd2l-ex-desc', html: pg.description_html}),
+      controls,
+      el('div', {class: 'd2l-ex-bar'}, [runBtn, status, el('span', {class: 'd2l-ex-spacer'}), codeBtn]),
+      codeBox,
+      out,
+      el('div', {class: 'd2l-ex-foot'},
+        'Move the sliders to experiment. Variables: ' + pg.params.map((p) => p.name).join(', ') +
+        ' · runs in your browser'),
+    ]);
+    container.replaceChildren(box);
+    typeset(box);
+    // Run once when the playground scrolls into view.
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) {
+        io.disconnect();
+        update();
+      }
+    });
+    io.observe(box);
+  }
+
+  // ------------------------------------------------------------------ notes
+
+  /* "Notes to remember" box before a page's Exercises (or at its end), from
+   * _static/notes/<page>.json (generated from notes/<chapter>/<section>.yml). */
+  function addNotes() {
+    const opts = document.getElementById('documentation_options');
+    const rootUrl = new URL((opts && opts.getAttribute('data-url_root')) || './', window.location.href);
+    let page = window.location.pathname;
+    if (page.endsWith('/')) page += 'index.html';
+    if (!page.startsWith(rootUrl.pathname)) return;
+    page = decodeURIComponent(page.slice(rootUrl.pathname.length)).replace(/\.html$/, '');
+    fetch(new URL('_static/notes/' + page + '.json', rootUrl).href, {cache: 'no-cache'})
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!data) return;
+        const copyBtn = el('button', {class: 'd2l-answer-btn', type: 'button'}, 'Copy notes');
+        copyBtn.addEventListener('click', () => {
+          const done = () => {
+            copyBtn.textContent = 'Copied!';
+            setTimeout(() => { copyBtn.textContent = 'Copy notes'; }, 1500);
+          };
+          if (navigator.clipboard) navigator.clipboard.writeText(data.text).then(done, () => {});
+        });
+        const box = el('div', {class: 'd2l-notes'}, [
+          el('div', {class: 'd2l-notes-head'}, [
+            el('span', {class: 'd2l-notes-title'}, '📝 Notes to remember'),
+            el('span', {class: 'd2l-ex-spacer'}), copyBtn,
+          ]),
+          el('div', {class: 'd2l-notes-body', html: data.html}),
+        ]);
+        const exercises = document.querySelector('#exercises');
+        const main = document.querySelector('.document section, .document .section');
+        if (exercises) exercises.before(box);
+        else if (main) main.append(box);
+        typeset(box);
+      })
+      .catch(() => {});
+  }
+
   // ------------------------------------------------------------------- init
 
   function init() {
-    const containers = document.querySelectorAll('.d2l-exercise[data-exercise]');
-    if (!containers.length) return;
-    const root = staticRoot();
-    const editorLib = loadCodeMirror().catch(() => null);
-    containers.forEach((container) => {
-      const id = container.getAttribute('data-exercise');
-      container.textContent = 'Loading exercise…';
-      Promise.all([
-        fetch(root + encodeURIComponent(id) + '.json', {cache: 'no-cache'}).then((res) => {
-          if (!res.ok) throw new Error(`exercise "${id}" not found (${res.status})`);
-          return res.json();
-        }),
-        editorLib,
-      ]).then(([data, CodeMirror]) => new Exercise(container, data, CodeMirror))
-        .catch((err) => {
-          container.textContent = 'Could not load this exercise: ' + err.message;
-          container.classList.add('d2l-ex-broken');
-        });
-    });
+    document.querySelectorAll('.d2l-exercise[data-exercise]').forEach(mount);
+    document.querySelectorAll('.d2l-playground[data-playground]').forEach(mountPlayground);
+    addAnswers();
+    addNotes();
+    setupBookCells();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

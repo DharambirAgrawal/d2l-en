@@ -107,7 +107,3 @@ d2l.train_ch13(net, train_iter, test_iter, loss, trainer, num_epochs, devices)
 
 * Can you test FM on other dataset such as Avazu, MovieLens, and Criteo datasets?
 * Vary the embedding size to check its impact on performance, can you observe a similar pattern as that of matrix factorization?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/406)
-:end_tab:

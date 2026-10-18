@@ -6,7 +6,9 @@
  *
  * Messages in:
  *   {type: 'init', pyodideUrl, graderUrl}
- *   {type: 'run', id, mode: 'run' | 'submit', code, tests, packages}
+ *   {type: 'run', id, mode: 'run' | 'submit', code, tests, packages, files}
+ *   {type: 'run', id, mode: 'cell', code, session, params, reset}  book cells,
+ *       playgrounds (see notebook.py)
  * Messages out:
  *   {type: 'ready'} | {type: 'init-error', message}
  *   {type: 'status', id, text}   progress while loading packages
@@ -22,6 +24,13 @@ async function init(pyodideUrl, graderUrl) {
   if (!response.ok) throw new Error(`Could not load ${graderUrl} (${response.status})`);
   pyodide.FS.mkdirTree('/d2l');
   pyodide.FS.writeFile('/d2l/grader.py', await response.text());
+  // Runtime for the book's runnable cells and playgrounds, fetched next to
+  // grader.py. Loaded lazily by the first cell run.
+  const base = graderUrl.slice(0, graderUrl.lastIndexOf('/') + 1);
+  for (const name of ['notebook.py', 'torchlite.py', 'd2llite.py']) {
+    const r = await fetch(base + name);
+    if (r.ok) pyodide.FS.writeFile('/d2l/' + name, await r.text());
+  }
   pyodide.runPython('import sys; sys.path.insert(0, "/d2l"); import grader');
   return pyodide;
 }
@@ -32,17 +41,44 @@ async function run(msg) {
   try {
     post({type: 'status', text: 'Loading packages…'});
     try {
-      await pyodide.loadPackagesFromImports(msg.code + '\n' + (msg.tests || ''));
+      const helpers = Object.entries(msg.files || {})
+        .filter(([name]) => name.endsWith('.py')).map(([, text]) => text).join('\n');
+      // Book cells run on torchlite (NumPy) and may plot with matplotlib.
+      const extra = msg.mode === 'cell'
+        ? 'import numpy\n' + (/\bd2l\b|matplotlib|plt\./.test(msg.code) ? 'import matplotlib\n' : '')
+        : '';
+      // Jupyter magics (%matplotlib inline) aren't Python; drop them so
+      // import detection can parse the code.
+      const code = msg.code.replace(/^\s*[%!].*$/gm, '');
+      await pyodide.loadPackagesFromImports(
+        extra + code + '\n' + (msg.tests || '') + '\n' + helpers);
     } catch (e) {
       // Unknown or broken imports are reported by Python when the code runs.
     }
     if (msg.packages && msg.packages.length) await pyodide.loadPackage(msg.packages);
+    // Exercise data files (CSV, text, helper modules) go in the working
+    // directory, which is also on sys.path.
+    for (const [name, text] of Object.entries(msg.files || {})) {
+      pyodide.FS.writeFile(name, text);
+    }
+    pyodide.runPython('import importlib, os, sys; importlib.invalidate_caches();'
+      + ' sys.path.insert(0, os.getcwd()) if os.getcwd() not in sys.path else None');
     post({type: 'started'});
     pyodide.globals.set('_d2l_code', msg.code);
     pyodide.globals.set('_d2l_tests', msg.tests || '');
-    const json = pyodide.runPython(msg.mode === 'submit'
-      ? 'grader.run_tests_json(_d2l_code, _d2l_tests)'
-      : 'grader.run_code_json(_d2l_code)');
+    let json;
+    if (msg.mode === 'cell') {
+      // A book cell or playground: notebook-style session, torchlite as torch.
+      pyodide.globals.set('_d2l_session', msg.session);
+      pyodide.globals.set('_d2l_params', JSON.stringify(msg.params || null));
+      if (msg.reset) pyodide.runPython('import notebook; notebook.reset(_d2l_session)');
+      json = pyodide.runPython(
+        'import notebook; notebook.run_cell_json(_d2l_session, _d2l_code, _d2l_params)');
+    } else {
+      json = pyodide.runPython(msg.mode === 'submit'
+        ? 'grader.run_tests_json(_d2l_code, _d2l_tests)'
+        : 'grader.run_code_json(_d2l_code)');
+    }
     post({type: 'result', result: JSON.parse(json)});
   } catch (e) {
     post({type: 'result', result: {status: 'error', stdout: '', error: String(e)}});

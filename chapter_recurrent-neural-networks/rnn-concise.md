@@ -243,19 +243,3 @@ framework implementations are often highly optimized,
 
 1. Can you make the RNN model overfit using the high-level APIs?
 1. Implement the autoregressive model of :numref:`sec_sequence` using an RNN.
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/335)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1053)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/2211)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/18015)
-:end_tab:

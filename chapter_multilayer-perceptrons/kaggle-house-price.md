@@ -453,19 +453,3 @@ we can use $K$-fold cross-validation .
 1. Improve the score by tuning the hyperparameters through $K$-fold cross-validation.
 1. Improve the score by improving the model (e.g., layers, weight decay, and dropout).
 1. What happens if we do not standardize the continuous numerical features as we have done in this section?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/106)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/107)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/237)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/17988)
-:end_tab:

@@ -911,11 +911,3 @@ in the final output.
 1. Modify the variable `anchors` in :numref:`subsec_labeling-anchor-boxes` and :numref:`subsec_predicting-bounding-boxes-nms`. How do the results change?
 1. Non-maximum suppression is a greedy algorithm that suppresses predicted bounding boxes by *removing* them. Is it possible that some of these removed ones are actually useful? How can this algorithm be modified to suppress *softly*? You may refer to Soft-NMS :cite:`Bodla.Singh.Chellappa.ea.2017`.
 1. Rather than being hand-crafted, can non-maximum suppression be learned?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/370)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1603)
-:end_tab:

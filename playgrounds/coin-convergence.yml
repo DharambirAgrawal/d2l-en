@@ -1,0 +1,29 @@
+title: Watching an Estimate Converge
+description: |
+  Toss a coin with $P(\textrm{heads}) = p$ a total of $n$ times and track
+  the running fraction of heads. The shaded band is
+  $p \pm 2\sqrt{p(1-p)/k}$ after $k$ tosses: the estimate's standard
+  deviation shrinks like $1/\sqrt{k}$ (law of large numbers and central limit
+  theorem). Change the seed to see a different random run.
+params:
+  - {name: p, label: $p$, min: 0.05, max: 0.95, step: 0.05, value: 0.5}
+  - {name: n, label: "tosses $n$", min: 10, max: 5000, step: 10, value: 1000}
+  - {name: seed, label: seed, min: 0, max: 20, step: 1, value: 0}
+code: |
+  import numpy as np
+  import matplotlib.pyplot as plt
+
+  rng = np.random.default_rng(int(seed))
+  tosses = rng.random(int(n)) < p                    # True = heads
+  k = np.arange(1, int(n) + 1)
+  estimate = tosses.cumsum() / k
+  band = 2 * np.sqrt(p * (1 - p) / k)
+
+  fig, ax = plt.subplots(figsize=(5.5, 3.4))
+  ax.fill_between(k, p - band, p + band, alpha=0.2, label='p ± 2 std')
+  ax.plot(k, estimate, label='running estimate')
+  ax.axhline(p, color='k', ls='--', lw=1, label='true p')
+  ax.set_xscale('log'); ax.set_ylim(0, 1); ax.set_xlabel('number of tosses k')
+  ax.grid(alpha=0.3); ax.legend(loc='upper right')
+  print(f'after {int(n)} tosses: estimate = {estimate[-1]:.4f}, true p = {p}, '
+        f'expected std = {np.sqrt(p * (1 - p) / n):.4f}')

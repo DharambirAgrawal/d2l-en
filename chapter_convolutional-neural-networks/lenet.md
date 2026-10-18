@@ -355,19 +355,3 @@ A second difference is the relative ease with which we were able to implement Le
 1. Try out the improved network on the original MNIST dataset.
 1. Display the activations of the first and second layer of LeNet for different inputs (e.g., sweaters and coats).
 1. What happens to the activations when you feed significantly different images into the network (e.g., cats, cars, or even random noise)?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/73)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/74)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/275)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/18000)
-:end_tab:

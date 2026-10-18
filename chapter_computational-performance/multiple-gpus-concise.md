@@ -283,13 +283,3 @@ train(net, num_gpus=2, batch_size=512, lr=0.2)
 1. This section uses ResNet-18. Try different epochs, batch sizes, and learning rates. Use more GPUs for computation. What happens if you try this with 16 GPUs (e.g., on an AWS p2.16xlarge instance)?
 1. Sometimes, different devices provide different computing power. We could use the GPUs and the CPU at the same time. How should we divide the work? Is it worth the effort? Why? Why not?
 :end_tab:
-
-
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/365)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1403)
-:end_tab:

@@ -619,15 +619,3 @@ train_concise_ch11(trainer, {'learning_rate': 0.05}, data_iter)
 1. Read the MXNet documentation and use the `Trainer` class `set_learning_rate` function to reduce the learning rate of the minibatch stochastic gradient descent to 1/10 of its previous value after each epoch.
 1. Compare minibatch stochastic gradient descent with a variant that actually *samples with replacement* from the training set. What happens?
 1. An evil genie replicates your dataset without telling you (i.e., each observation occurs twice and your dataset grows to twice its original size, but nobody told you). How does the behavior of stochastic gradient descent, minibatch stochastic gradient descent and that of gradient descent change?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/353)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1068)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/1069)
-:end_tab:

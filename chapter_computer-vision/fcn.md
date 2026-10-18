@@ -453,11 +453,3 @@ d2l.show_images(imgs[::3] + imgs[1::3] + imgs[2::3], 3, n, scale=2);
 1. Can you further improve the accuracy of the model by tuning the hyperparameters?
 1. Predict the classes of all pixels in test images.
 1. The original fully convolutional network paper also uses outputs of some intermediate CNN layers :cite:`Long.Shelhamer.Darrell.2015`. Try to implement this idea.
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/377)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1582)
-:end_tab:

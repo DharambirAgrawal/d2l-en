@@ -216,8 +216,3 @@ trainer = gluon.Trainer(net.collect_params(), optimizer,
 * Conduct an ablation study by removing one of the horizontal and vertical convolutional networks, which component is the more important ?
 * Vary the hyperparameter $L$. Does longer historical interactions bring higher accuracy?
 * Apart from the sequence-aware recommendation task we introduced above, there is another type of sequence-aware recommendation task called session-based recommendation :cite:`Hidasi.Karatzoglou.Baltrunas.ea.2015`. Can you explain the differences between these two tasks?
-
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/404)
-:end_tab:

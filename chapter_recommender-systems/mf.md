@@ -176,8 +176,3 @@ scores
 * Vary the size of latent factors. How does the size of latent factors influence the model performance?
 * Try different optimizers, learning rates, and weight decay rates.
 * Check the predicted rating scores of other users for a specific movie.
-
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/400)
-:end_tab:

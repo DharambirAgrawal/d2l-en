@@ -383,20 +383,3 @@ much more efficiently.
 1. Experiment with the hyperparameters of the code in this section. In particular:
     1. Plot how the validation loss changes as you change the learning rate.
     1. Do the validation and training loss change as you change the minibatch size? How large or small do you need to go before you see an effect?
-
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/50)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/51)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/225)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/17982)
-:end_tab:

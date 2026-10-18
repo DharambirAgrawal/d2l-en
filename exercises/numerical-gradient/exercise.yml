@@ -1,0 +1,25 @@
+title: Numerical Gradients (Your First Gradient Checker)
+difficulty: medium
+timeout: 10
+description: |
+  Every deep learning engineer eventually debugs a wrong gradient. The tool
+  for that is a **numerical gradient**: approximate each partial derivative
+  with the *central difference*
+
+  $$\frac{\partial f}{\partial x_i} \approx \frac{f(\mathbf{x} + h\mathbf{e}_i) - f(\mathbf{x} - h\mathbf{e}_i)}{2h},$$
+
+  where $\mathbf{e}_i$ is the $i^\textrm{th}$ unit vector.
+
+  Write `numerical_gradient(f, x, h=1e-5)` that returns a NumPy array with the
+  same shape as `x` (a 1-D float array). Don't modify `x`.
+
+  Then check Exercises 7 and 8: the gradient of
+  $f(\mathbf{x}) = 3x_1^2 + 5e^{x_2}$ and of $\|\mathbf{x}\|_2$.
+explanation: |
+  The central difference has error $O(h^2)$, much better than the one-sided
+  $(f(x+h) - f(x))/h$ with error $O(h)$, which is why gradient checkers use
+  it. Copy `x` before nudging one coordinate at a time. For
+  $f(\mathbf{x}) = 3x_1^2 + 5e^{x_2}$, the gradient is $[6x_1, 5e^{x_2}]^\top$;
+  for $\|\mathbf{x}\|_2$ it is $\mathbf{x} / \|\mathbf{x}\|_2$, which is
+  undefined at $\mathbf{x} = \mathbf{0}$ (the norm has a "cone tip" there).
+  Later in the book you'll compare autograd's gradients to exactly this.

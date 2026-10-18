@@ -394,19 +394,3 @@ They can also skip subsequences by turning on the update gate.
 1. Adjust the hyperparameters and analyze their influence on running time, perplexity, and the output sequence.
 1. Compare runtime, perplexity, and the output strings for `rnn.RNN` and `rnn.GRU` implementations with each other.
 1. What happens if you implement only parts of a GRU, e.g., with only a reset gate or only an update gate?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/342)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1056)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/3860)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/18017)
-:end_tab:

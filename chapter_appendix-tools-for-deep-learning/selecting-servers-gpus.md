@@ -65,6 +65,3 @@ We can see a number of things:
 * Use the cloud for large deployments.
 * High density servers may not be compatible with all GPUs. Check the mechanical and cooling specifications before you buy.
 * Use FP16 or lower precision for high efficiency.
-
-
-[Discussions](https://discuss.d2l.ai/t/425)

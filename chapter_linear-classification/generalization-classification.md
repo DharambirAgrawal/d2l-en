@@ -583,5 +583,3 @@ in the context of deep learning.
    regardless of your true error?
 1. What is the VC dimension of the class of fifth-order polynomials?
 1. What is the VC dimension of axis-aligned rectangles on two-dimensional data?
-
-[Discussions](https://discuss.d2l.ai/t/6829)

@@ -647,19 +647,3 @@ You can lose significant performance by moving data without care.
 1. Measure how much time it takes to perform two matrix--matrix multiplications
    on two GPUs at the same time. Compare it with computing in in sequence
    on one GPU. Hint: you should see almost linear scaling.
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/62)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/63)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/270)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/17995)
-:end_tab:

@@ -283,11 +283,3 @@ for X, Y in train_iter:
 
 1. Machine translation has long been evaluated based on superficial $n$-gram matching between an output translation and a ground-truth translation. Can you design a measure for evaluating machine translation results by using natural language inference?
 1. How can we change hyperparameters to reduce the vocabulary size?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/394)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1388)
-:end_tab:

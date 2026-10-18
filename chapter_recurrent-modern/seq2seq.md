@@ -888,20 +888,3 @@ BLEU is a popular measure that matches $n$-grams between the predicted sequence 
 1. In training, replace teacher forcing with feeding the prediction at the previous time step into the decoder. How does this influence the performance?
 1. Rerun the experiment by replacing GRU with LSTM.
 1. Are there any other ways to design the output layer of the decoder?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/345)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1062)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/3865)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/18022)
-:end_tab:
-

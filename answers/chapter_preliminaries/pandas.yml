@@ -1,0 +1,64 @@
+# Answers for chapter_preliminaries/pandas.md "Exercises", in order.
+- exercise: missing-report
+  answer: |
+    Load and inspect:
+
+    ```python
+    df = pd.read_csv(path)        # or with header=None and names=[...]
+    df.info()                     # dtypes and non-null counts
+    df.isna().mean()              # fraction missing per column
+    df.isna().any(axis=1).mean()  # fraction of rows with any missing value
+    df.dtypes.value_counts()      # numeric vs object (text/categorical)
+    ```
+
+    For **Abalone**, nothing is missing; there are 8 numeric columns and 1
+    categorical (`Sex`: M/F/I). Many other UCI datasets mark missing values
+    with `?` instead of `NA`, so pass `na_values='?'` to `read_csv`. The
+    coding exercise above builds this report as a reusable function.
+- answer: |
+    Select by name with `[]` or `.loc`, and by position with `.iloc`:
+
+    ```python
+    inputs = data[['NumRooms', 'RoofType']]   # columns by name
+    targets = data['Price']
+    data.loc[:, 'NumRooms':'RoofType']        # label-based slice (inclusive)
+    data.iloc[:, 0:2]                         # position-based slice
+    ```
+
+    Name-based selection is safer: it keeps working if the column order
+    changes.
+- answer: |
+    pandas loads everything into **memory**, so the practical limit is your
+    RAM, and a DataFrame often takes 2--10$\times$ the CSV's size (Python
+    strings are expensive). Parsing a large CSV is also slow and
+    single-threaded.
+
+    Ways around it: read in chunks (`pd.read_csv(..., chunksize=100_000)`),
+    load only needed columns (`usecols=`), use smaller dtypes (`float32`,
+    `category`), or switch to columnar formats (Parquet) and out-of-core
+    tools. A server has more RAM and faster disks, so the same code handles
+    larger files, but the limit is still memory.
+- answer: |
+    One-hot encoding creates one column per category, so thousands of
+    categories create thousands of mostly-zero columns. Options:
+
+    - group rare categories into an "other" bucket,
+    - encode by frequency, or by the target mean (carefully, to avoid leaking
+      the label),
+    - hash categories into a fixed number of buckets,
+    - learn **embeddings** (dense vectors per category), as deep learning does
+      for words.
+
+    If every label is unique (like an ID or a name), it carries no
+    generalizable information, so you should usually **drop** it: the model
+    would just memorize rows, which is overfitting.
+- answer: |
+    Alternatives depend on the data type:
+
+    - **NumPy**: `np.load`/`np.save` for arrays (`.npy`, `.npz`), fast and
+      compact.
+    - **Images**: Pillow (`Image.open(...)`), then `np.asarray(img)` gives an
+      $H \times W \times 3$ tensor.
+    - **Large tables**: Parquet/Arrow files and libraries such as Polars.
+    - **Deep learning**: framework data loaders (e.g. PyTorch `Dataset` and
+      `DataLoader`) that stream batches from disk.

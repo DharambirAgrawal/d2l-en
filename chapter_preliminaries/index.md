@@ -33,5 +33,7 @@ calculus
 autograd
 probability
 lookup-api
+project-alert-triage
+capstone-minigpt-1
 ```
 

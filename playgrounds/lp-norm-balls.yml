@@ -1,0 +1,30 @@
+title: What Do Different Norms Measure?
+description: |
+  The curve shows every 2-D point with $\|\mathbf{x}\|_p = 1$, the
+  "unit ball" of the $\ell_p$ norm. At $p = 1$ it's a diamond (Manhattan
+  distance), at $p = 2$ a circle (Euclidean), and as $p$ grows it
+  approaches a square ($\ell_\infty$: the largest coordinate). The dashed
+  curves are $\ell_1$ and $\ell_2$ for reference.
+params:
+  - {name: p, label: $p$, min: 1, max: 10, step: 0.1, value: 2}
+  - {name: x1, label: "$x_1$ of a test point", min: -3, max: 3, step: 0.5, value: 3}
+  - {name: x2, label: "$x_2$ of a test point", min: -3, max: 3, step: 0.5, value: -2}
+code: |
+  import numpy as np
+  import matplotlib.pyplot as plt
+
+  def unit_ball(p, n=400):
+      t = np.linspace(0, 2 * np.pi, n)
+      u = np.stack([np.cos(t), np.sin(t)])
+      return u / (np.abs(u) ** p).sum(axis=0) ** (1 / p)   # rescale to norm 1
+
+  fig, ax = plt.subplots(figsize=(4.5, 4.5))
+  for q, style in ((1, 'k--'), (2, 'k:')):
+      ax.plot(*unit_ball(q), style, lw=1, label=f'p = {q}')
+  ax.plot(*unit_ball(p), color='tab:orange', lw=2.5, label=f'p = {p:g}')
+  ax.set_aspect('equal'); ax.grid(alpha=0.3); ax.legend(loc='upper right')
+  ax.set_xlim(-1.4, 1.4); ax.set_ylim(-1.4, 1.4)
+
+  x = np.array([x1, x2])
+  for q in (1, 2, p, np.inf):
+      print(f'||x||_{q:<4g} = {np.linalg.norm(x, q):.3f}   for x = {x}')

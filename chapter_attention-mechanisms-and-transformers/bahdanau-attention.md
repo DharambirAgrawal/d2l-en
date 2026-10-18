@@ -471,20 +471,3 @@ In the RNN encoder--decoder, the Bahdanau attention mechanism treats the decoder
 
 1. Replace GRU with LSTM in the experiment.
 1. Modify the experiment to replace the additive attention scoring function with the scaled dot-product. How does it influence the training efficiency?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/347)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1065)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/3868)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/18028)
-:end_tab:
-

@@ -1,0 +1,19 @@
+title: Stack Matrices into a Tensor and Slice One Back Out
+difficulty: easy
+timeout: 10
+description: |
+  Exercise 12: stack three matrices of the same shape into a tensor with
+  three axes, with the matrices along the **third (last) axis**, then
+  recover the second one by slicing.
+
+  Write `stack_and_recover(A, B, C)` that returns `(T, B_again)` where
+  `T[..., 0] == A`, `T[..., 1] == B`, `T[..., 2] == C`, and `B_again` is
+  obtained **by slicing `T`**.
+
+  For $100 \times 200$ matrices, what is `T.shape`?
+explanation: |
+  `np.stack([A, B, C], axis=-1)` creates a new last axis, giving shape
+  $(100, 200, 3)$: a $3^{\textrm{rd}}$-order tensor with $60{,}000$ elements.
+  Slicing `T[:, :, 1]` (or `T[..., 1]`) takes the second coordinate of the
+  third axis, which is exactly $\mathbf{B}$. This layout, with the "which
+  matrix" index last, is how color channels are stored in images.

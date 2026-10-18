@@ -1,0 +1,25 @@
+title: Predict the Shape of a Reduction
+difficulty: easy
+timeout: 5
+description: |
+  Reductions like `sum` and `mean` remove the axes they reduce over, unless
+  `keepdims=True` keeps them with length 1. Write
+  `reduced_shape(shape, axis, keepdims=False)` that returns the output shape
+  of `X.sum(axis=axis, keepdims=keepdims)` for a tensor `X` of the given
+  shape, **without** creating any tensor.
+
+  - `axis` is an int (possibly negative, counting from the end) or a tuple of
+    ints. `axis=None` reduces everything.
+
+  ```python
+  reduced_shape((2, 3, 4), 0)                  # (3, 4)
+  reduced_shape((2, 3, 4), -1)                 # (2, 3)
+  reduced_shape((2, 3, 4), (0, 2))             # (3,)
+  reduced_shape((2, 3, 4), 1, keepdims=True)   # (2, 1, 4)
+  reduced_shape((2, 3, 4), None)               # ()
+  ```
+explanation: |
+  Normalize the axes first (`axis % ndim` turns `-1` into the last axis),
+  then walk over the input axes: drop the reduced ones, or replace them with
+  1 when `keepdims` is set. Knowing these shapes by heart is what makes
+  broadcasting with reductions, like `A / A.sum(axis=1, keepdims=True)`, safe.

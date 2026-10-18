@@ -1,0 +1,36 @@
+title: A Matrix Is a Transformation
+description: |
+  Multiplying by $\mathbf{A} = \begin{bmatrix} a & b \\ c & d \end{bmatrix}$
+  maps every point $\mathbf{x}$ to $\mathbf{A}\mathbf{x}$. The blue circle and
+  square are the inputs; orange shows where $\mathbf{A}$ sends them. The
+  arrows are $\mathbf{A}\mathbf{e}_1 = (a, c)$ and $\mathbf{A}\mathbf{e}_2 = (b, d)$,
+  the **columns** of $\mathbf{A}$. Try a rotation ($a = d = 0.7$,
+  $b = -0.7$, $c = 0.7$), a stretch ($a = 2$, $d = 1$, rest 0), or making
+  the columns parallel.
+params:
+  - {name: a, label: $a$, min: -2, max: 2, step: 0.1, value: 1.0}
+  - {name: b, label: $b$, min: -2, max: 2, step: 0.1, value: 0.5}
+  - {name: c, label: $c$, min: -2, max: 2, step: 0.1, value: 0.0}
+  - {name: d, label: $d$, min: -2, max: 2, step: 0.1, value: 1.0}
+code: |
+  import numpy as np
+  import matplotlib.pyplot as plt
+
+  A = np.array([[a, b], [c, d]])
+  t = np.linspace(0, 2 * np.pi, 200)
+  circle = np.stack([np.cos(t), np.sin(t)])          # shape (2, 200)
+  square = np.array([[0, 1, 1, 0, 0], [0, 0, 1, 1, 0]])
+
+  fig, ax = plt.subplots(figsize=(4.5, 4.5))
+  ax.plot(*circle, color='tab:blue', alpha=0.5, label='input')
+  ax.plot(*square, color='tab:blue', alpha=0.5)
+  ax.plot(*(A @ circle), color='tab:orange', label='A @ input')
+  ax.plot(*(A @ square), color='tab:orange')
+  for col, name in ((A[:, 0], 'A e1'), (A[:, 1], 'A e2')):
+      ax.annotate('', xy=col, xytext=(0, 0),
+                  arrowprops=dict(arrowstyle='->', color='tab:red', lw=2))
+      ax.text(*(col * 1.08), name, color='tab:red')
+  lim = max(2.2, np.abs(A @ circle).max() * 1.15)
+  ax.set_xlim(-lim, lim); ax.set_ylim(-lim, lim)
+  ax.set_aspect('equal'); ax.grid(alpha=0.3); ax.legend(loc='upper left')
+  print('A =\n', A)

@@ -241,11 +241,3 @@ Assume that the durations of these three stages are $t_1, t_2$ and $t_3$, respec
 :begin_tab:`pytorch`
 1. On the CPU, benchmark the same matrix multiplication operations in this section. Can you still observe asynchrony via the backend?
 :end_tab:
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/361)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/2564)
-:end_tab:

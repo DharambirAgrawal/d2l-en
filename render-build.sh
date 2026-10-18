@@ -11,12 +11,13 @@ python -m pip install --upgrade pip "setuptools<81" wheel
 python -m pip install --use-pep517 pandoc-attributes
 
 # Install the D2L book builder
-# (pybtex 0.25+ removed _FakeEntryPoint, which sphinxcontrib-bibtex 2.4 imports)
+# (pybtex 0.25+ removed _FakeEntryPoint, which sphinxcontrib-bibtex 2.4 imports;
+#  numpy/pandas/matplotlib are for checking the exercises and playgrounds)
 python -m pip install \
   "git+https://github.com/d2l-ai/d2l-book.git" \
   pypandoc_binary \
   "pybtex==0.24.0" \
-  numpy
+  numpy pandas matplotlib
 
 # Check the interactive exercises first (fails fast if one is broken)
 python tools/build_exercises.py
@@ -52,9 +53,16 @@ cp static/frontpage/frontpage.html _build/rst_all/
 # Generate the HTML website
 d2lbook build html --tab all
 
+# d2lbook always adds a Google Analytics loader; replace it with no-ops
+python tools/strip_analytics.py _build/html/_static/d2l.js
+
 # Include homepage images
 mkdir -p _build/html/_images
 cp -r static/frontpage/_images/. _build/html/_images/
+
+# Project data files offered for download on the project pages
+mkdir -p _build/html/_static/projects
+cp -r static/projects/. _build/html/_static/projects/
 
 # Add the interactive exercises (JSON + Python runner files)
 python tools/build_exercises.py --out _build/html/_static/exercises

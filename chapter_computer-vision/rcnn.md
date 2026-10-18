@@ -290,11 +290,3 @@ in subsequent sections of this chapter.
 
 1. Can we frame object detection as a single regression problem, such as predicting bounding boxes and class probabilities? You may refer to the design of the YOLO model :cite:`Redmon.Divvala.Girshick.ea.2016`.
 1. Compare single shot multibox detection with the methods introduced in this section. What are their major differences? You may refer to Figure 2 of :citet:`Zhao.Zheng.Xu.ea.2019`.
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/374)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1409)
-:end_tab:

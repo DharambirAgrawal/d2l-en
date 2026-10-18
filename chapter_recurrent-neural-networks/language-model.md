@@ -324,19 +324,3 @@ large language models form the basis of state-of-the-art systems across diverse 
     1. Does it really lead to a perfectly uniform distribution over the sequences on the document?
     1. What would you have to do to make things even more uniform? 
 1. If we want a sequence example to be a complete sentence, what kind of problem does this introduce in minibatch sampling? How can we fix it?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/117)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/118)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/1049)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/18012)
-:end_tab:

@@ -114,6 +114,3 @@ By hiding all the complexity about synchronization behind a simple push and pull
 1. Can you increase the ring synchronization even further? Hint: you can send messages in both directions.
 1. Is it possible to allow asynchronous communication (while computation is still ongoing)? How does it affect performance?
 1. What if we lost a server during a long-running computation? How can we design a *fault tolerance* mechanism to avoid restarting the computation fully?
-
-
-[Discussions](https://discuss.d2l.ai/t/366)

@@ -236,15 +236,3 @@ As we saw, optimization for deep learning is full of challenges. Fortunately the
 1. Assume that you want to balance a (real) ball on a (real) saddle.
     1. Why is this hard?
     1. Can you exploit this effect also for optimization algorithms?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/349)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/487)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/489)
-:end_tab:

@@ -286,11 +286,3 @@ get_analogy('do', 'did', 'go', glove_6b50d)
 
 1. Test the fastText results using `TokenEmbedding('wiki.en')`.
 1. When the vocabulary is extremely large, how can we find similar words or complete a word analogy faster?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/387)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1336)
-:end_tab:

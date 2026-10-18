@@ -242,20 +242,3 @@ The hidden state of an RNN can capture historical information of the sequence up
 1. Why can RNNs express the conditional probability of a token at some time step based on all the previous tokens in the text sequence?
 1. What happens to the gradient if you backpropagate through a long sequence?
 1. What are some of the problems associated with the language model described in this section?
-
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/337)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1050)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/1051)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/180013)
-:end_tab:

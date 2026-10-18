@@ -562,19 +562,3 @@ and *more efficiently* (using our GPUs to their full potential).
     1. Can you think of a cheap solution for combining the best aspects of squared loss and absolute value loss?
        Hint: how can you avoid really large gradient values?
 1. Why do we need to reshuffle the dataset? Can you design a case where a maliciously constructed dataset would break the optimization algorithm otherwise?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/42)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/43)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/201)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/17976)
-:end_tab:

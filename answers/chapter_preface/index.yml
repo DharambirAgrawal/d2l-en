@@ -1,0 +1,27 @@
+# Answers for chapter_preface/index.md "Exercises", in order.
+- answer: |
+    Install Python 3 (3.9+ works for this book). The simplest route is
+    Miniconda (see the Installation chapter):
+
+    ```bash
+    conda create --name d2l python=3.9 -y
+    conda activate d2l
+    python --version
+    ```
+
+    You don't need a local install for this site's interactive exercises:
+    they run Python in your browser. You will need one for the projects,
+    which you build in your own GitHub repositories.
+- answer: |
+    There's no single right answer. A good plan:
+
+    - **Linear algebra** shaky? Study 2.3 carefully and do every coding
+      exercise; vectors, matrices, and norms show up in every chapter.
+    - **Calculus** shaky? 2.4 and 2.5: you mainly need derivatives, the
+      chain rule, and gradients.
+    - **Probability** shaky? 2.6: conditional probability, Bayes' theorem,
+      expectation, and variance.
+    - **Python** shaky? 2.1 and 2.2 double as a NumPy and pandas crash
+      course.
+
+    Write down your weakest area and revisit it after finishing Chapter 2.

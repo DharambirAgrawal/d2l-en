@@ -1403,20 +1403,3 @@ transforms the representation at all the sequence positions using the same MLP.
 1. For language modeling, should we use the Transformer encoder, decoder, or both? How would you design this method?
 1. What challenges can Transformers face if input sequences are very long? Why?
 1. How would you improve the computational and memory efficiency of Transformers? Hint: you may refer to the survey paper by :citet:`Tay.Dehghani.Bahri.ea.2020`.
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/348)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1066)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/3871)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/18031)
-:end_tab:
-

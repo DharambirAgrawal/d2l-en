@@ -306,11 +306,3 @@ for downstream natural language processing applications.
 
 1. In the experiment, we can see that the masked language modeling loss is significantly higher than the next sentence prediction loss. Why?
 2. Set the maximum length of a BERT input sequence to be 512 (same as the original BERT model). Use the configurations of the original BERT model such as $\textrm{BERT}_{\textrm{LARGE}}$. Do you encounter any error when running this section? Why?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/390)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1497)
-:end_tab:

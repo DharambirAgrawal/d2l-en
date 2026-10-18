@@ -733,19 +733,3 @@ During training, gradient clipping can mitigate the problem of exploding gradien
 1. Run the code in this section without clipping the gradient. What happens?
 1. Replace the activation function used in this section with ReLU 
    and repeat the experiments in this section. Do we still need gradient clipping? Why?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/336)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/486)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/1052)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/18014)
-:end_tab:

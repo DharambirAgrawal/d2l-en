@@ -212,15 +212,3 @@ d2l.train_concise_ch11(trainer, {'learning_rate' : 0.1}, data_iter)
 1. What does Gerschgorin's theorem tell us about the eigenvalues of the diagonally preconditioned matrix $\textrm{diag}^{-\frac{1}{2}}(\mathbf{M}) \mathbf{M} \textrm{diag}^{-\frac{1}{2}}(\mathbf{M})$?
 1. Try out Adagrad for a proper deep network, such as :numref:`sec_lenet` when applied to Fashion-MNIST.
 1. How would you need to modify Adagrad to achieve a less aggressive decay in learning rate?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/355)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1072)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/1073)
-:end_tab:

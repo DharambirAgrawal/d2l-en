@@ -368,11 +368,3 @@ get_similar_tokens('chip', 3, net[0])
 
 1. Using the trained model, find semantically similar words for other input words. Can you improve the results by tuning hyperparameters?
 1. When a training corpus is huge, we often sample context words and noise words for the center words in the current minibatch *when updating model parameters*. In other words, the same center word may have different context words or noise words in different training epochs. What are the benefits of this method? Try to implement this training method.
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/384)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1335)
-:end_tab:

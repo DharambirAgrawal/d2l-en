@@ -641,19 +641,3 @@ in many cases.
     1. Prove that the function classes parametrized by both nonlinearities are identical. Hint: affine layers have bias terms, too.
 1. Assume that we have a nonlinearity that applies to one minibatch at a time, such as the batch normalization :cite:`Ioffe.Szegedy.2015`. What kinds of problems do you expect this to cause?
 1. Provide an example where the gradients vanish for the sigmoid activation function.
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/90)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/91)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/226)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/17984)
-:end_tab:

@@ -561,11 +561,3 @@ Some of these blocks even have the subtle texture of brush strokes.
 1. Adjust the weight hyperparameters in the loss function. Does the output retain more content or have less noise?
 1. Use different content and style images. Can you create more interesting synthesized images?
 1. Can we apply style transfer for text? Hint: you may refer to the survey paper by :citet:`10.1145/3544903.3544906`.
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/378)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1476)
-:end_tab:

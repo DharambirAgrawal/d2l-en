@@ -461,12 +461,3 @@ def load_data_voc(batch_size, crop_size):
 
 1. How can semantic segmentation be applied in autonomous vehicles and medical image diagnostics? Can you think of other applications?
 1. Recall the descriptions of data augmentation in :numref:`sec_image_augmentation`. Which of the image augmentation methods used in image classification would be infeasible to be applied in semantic segmentation?
-
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/375)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1480)
-:end_tab:

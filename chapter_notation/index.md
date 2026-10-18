@@ -1,19 +1,10 @@
 # Notation
 :label:`chap_notation`
 
-Throughout this book, we adhere 
-to the following notational conventions.
-Note that some of these symbols are placeholders,
-while others refer to specific objects.
-As a general rule of thumb, 
-the indefinite article "a" often indicates
-that the symbol is a placeholder
-and that similarly formatted symbols
-can denote other objects of the same type.
-For example, "$x$: a scalar" means 
-that lowercased letters generally
-represent scalar values,
-but "$\mathbb{Z}$: the set of integers"
+Throughout this book, we use the following notation. Some symbols are
+placeholders and others refer to specific objects. As a rule of thumb, the
+indefinite article "a" marks a placeholder: "$x$: a scalar" means lowercase
+letters generally represent scalars, while "$\mathbb{Z}$: the set of integers"
 refers specifically to the symbol $\mathbb{Z}$.
 
 
@@ -95,7 +86,3 @@ refers specifically to the symbol $\mathbb{Z}$.
 * $\rho(X, Y)$: the Pearson correlation coefficient between $X$ and $Y$, equals $\frac{\textrm{Cov}(X, Y)}{\sigma_X \sigma_Y}$
 * $H(X)$: entropy of random variable $X$
 * $D_{\textrm{KL}}(P\|Q)$: the KL-divergence (or relative entropy) from distribution $Q$ to distribution $P$
-
-
-
-[Discussions](https://discuss.d2l.ai/t/25)

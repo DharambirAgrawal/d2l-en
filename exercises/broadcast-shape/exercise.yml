@@ -1,0 +1,26 @@
+title: Broadcasting Rules by Hand
+difficulty: medium
+timeout: 5
+description: |
+  Broadcasting decides the result shape of an elementwise operation between
+  tensors of different shapes. Implement the rule yourself:
+  `broadcast_shape(a, b)` takes two shapes (tuples of ints) and returns the
+  broadcast shape, or raises `ValueError` if they are incompatible.
+
+  The rule: line the shapes up **from the right** (pad the shorter one with
+  1s on the left). Two lengths are compatible if they are equal or one of
+  them is 1, and the result takes the larger one.
+
+  ```python
+  broadcast_shape((3, 1), (1, 2))        # (3, 2)
+  broadcast_shape((2, 3, 4), (3, 1))     # (2, 3, 4)
+  broadcast_shape((5,), ())              # (5,)
+  broadcast_shape((2, 3), (3, 2))        # raises ValueError
+  ```
+explanation: |
+  Padding with 1s on the left aligns the trailing axes, which is why a
+  vector of shape $(n,)$ broadcasts against each row of an $(m, n)$ matrix.
+  For each aligned pair, a length of 1 can be stretched (copied) to match the
+  other, and anything else must agree exactly. This is the
+  `np.broadcast_shapes` / PyTorch rule, so knowing it lets you predict the
+  shape of `a + b` before running the code.

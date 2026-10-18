@@ -489,11 +489,3 @@ for batch in data_iter:
 1. How does the running time of code in this section changes if not using subsampling?
 1. The `RandomGenerator` class caches `k` random sampling results. Set `k` to other values and see how it affects the data loading speed.
 1. What other hyperparameters in the code of this section may affect the data loading speed?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/383)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1330)
-:end_tab:

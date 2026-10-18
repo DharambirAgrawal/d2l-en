@@ -40,5 +40,3 @@ A number of recommendation tasks have been investigated in the past decades.  Ba
 
 1. Can you explain how recommender systems influence your daily life?
 2. What interesting recommendation tasks do you think can be investigated?
-
-[Discussions](https://discuss.d2l.ai/t/398)

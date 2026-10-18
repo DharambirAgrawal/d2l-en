@@ -514,17 +514,3 @@ Taylor series have two primary applications:
 2. What is the derivative of $\log(\frac{1}{x})$?
 3. True or False: If $f'(x) = 0$ then $f$ has a maximum or minimum at $x$?
 4. Where is the minimum of $f(x) = x\log(x)$ for $x\ge0$ (where we assume that $f$ takes the limiting value of $0$ at $f(0)$)?
-
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/412)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1088)
-:end_tab:
-
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/1089)
-:end_tab:

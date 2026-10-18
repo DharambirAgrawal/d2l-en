@@ -9,6 +9,49 @@ This file is excluded from the book build (see `exclusions` in `config.ini`).
 
 ---
 
+## My requirements (keep following these)
+
+Collected from my requests so they are never forgotten. Every change to the
+site should respect them.
+
+1. **Distraction-free.** No GitHub, 中文版, MXNet, Discussions/forum, or
+   analytics. Only things that help me learn.
+2. **Shorter text, same understanding.** Compress the book's prose (about 40%
+   shorter, "medium") **without losing important explanations, examples, math,
+   figures or code**. Don't force it: sections that are already short stay
+   as they are. Originals remain in git history.
+3. **Hidden answers for every end-of-section exercise.** A "Show answer"
+   button, so I can solve first and then check.
+4. **Coding questions get an interactive coding exercise** (run + tests).
+5. **Progress tracking.** Check off completed sections, with ✓ marks in the
+   sidebar.
+6. **At least one project per chapter.** It must:
+   - use everything learned **up to that chapter** (this one and earlier),
+     and nothing beyond;
+   - be **small and focused on core problem solving**, not a big build that
+     eats study time;
+   - be **fresh, not the usual tutorial project**, and solve a real problem
+     that companies actually have;
+   - be **resume-worthy** for internship applications (clear impact).
+7. **One continuing capstone** that grows chapter by chapter, so that by the
+   end I have built **my own ChatGPT-like model** from what I learned.
+   - **Projects and capstone are requirement specs only** (problem, data,
+     milestones, acceptance criteria, README/resume notes). **No in-browser
+     coding environment for them**: I write the code myself in my own GitHub
+     repos, so I can show people what I built.
+8. **Keep tracking** everything I ask for here and in the change log below.
+9. **Editable, runnable examples.** The book's code examples should be
+   editable and runnable in the page (like a notebook), so I can experiment
+   while reading. Where the book's code needs PyTorch (which can't run in the
+   browser), give a NumPy/pandas version I can run.
+10. **Reusable interactive components** (build once, reuse everywhere):
+    graphs/plots, playgrounds with sliders for trying different values, so
+    adding interactivity to later chapters stays easy.
+11. **Short "notes to remember" boxes** in each section: the key ideas,
+    formulas and facts worth copying into my handwritten notes.
+
+---
+
 ## Hosting setup (Render static site)
 
 | Setting           | Value                  |
@@ -55,7 +98,7 @@ The script edits `config.ini` while it runs. Don't commit that change
 
 ### 2026-10-18: First deploy
 - Set `eval_notebook = False`: code isn't executed during the build, so pages
-  show code but **no outputs/plots**.
+  show code but no precomputed outputs (use the in-page **▶ Run** instead).
 - Added `render-build.sh` and fixed the dependency/build issues above.
 
 ### 2026-10-18: Simplified the site for distraction-free learning
@@ -69,22 +112,81 @@ The script edits `config.ini` while it runs. Don't commit that change
   button, the Chinese-version/GitHub news sentence, and "NumPy/MXNet" from the
   tagline. Unlinked the two "Recommender Systems" author credits.
 
+### 2026-10-18: Interactive exercises, Phase 1 (live)
+- Pyodide runner + two exercises in 2.3 (details below).
+
+### 2026-10-18: Preface → Chapter 2 made into a study course
+- **Removed:** "Discussions" tabs/comment boxes at the end of every section
+  (all 166 chapter files) and Google Analytics (`config.ini`).
+- **Shortened the prose** of the Preface, Installation, Notation,
+  Introduction and Chapter 2 (about 28% shorter overall; every code cell,
+  equation, figure, label, citation and example kept, checked by script).
+  The Preface's forum exercises were replaced with a study-plan exercise.
+- **Hidden answers** for all 51 end-of-section exercises (`answers/`).
+- **12 new coding exercises** for the coding questions (`exercises/`).
+- **Notes to remember** box in each section with key formulas (`notes/`).
+- **Runnable book examples:** every PyTorch and shared code cell has
+  **▶ Run / ✎ Edit / Restart**, running notebook-style in the browser on
+  *torchlite* (a NumPy-based subset of PyTorch with a small autograd).
+  All 94 Chapter 2 PyTorch cells run.
+- **Playgrounds** with sliders and live plots (`playgrounds/`): matrix as a
+  transformation, $\ell_p$ unit balls, secant to tangent, coin-toss
+  convergence, Bayes for medical tests.
+- **Progress tracking:** "Mark section as complete" button, ✓ in the sidebar,
+  per-chapter counts, overall progress bar, Export/Import backup
+  (`static/progress/`; stored in this browser's localStorage).
+- **Projects (requirement docs only; I code them in my own GitHub repos):**
+  - 2.8 *Project: On-Call Alert Triage* (data: `static/projects/metrics.csv`,
+    2,000 simulated telemetry windows).
+  - 2.9 *Capstone, Part 1: MiniGPT from Counts* (baseline: held-out
+    perplexity about 11.4 on *The Time Machine*).
+
 ---
 
 ## Still on the site (possible next cleanups)
 
 - Navbar: "Stable Version" (→ d2l.ai), "PyTorch" PDF, "Notebooks", "Courses".
 - JAX and TensorFlow code tabs.
-- "Discussions" links at the end of each section (→ discuss.d2l.ai).
-- "Open the notebook in Colab / SageMaker" buttons.
+- "Open the notebook in Colab / SageMaker" buttons (they point to the
+  original D2L notebooks).
 - Homepage news items, Twitter follow button, and author/translation sections.
-- Code outputs (plots, printed results) are missing because
-  `eval_notebook = False`.
+- An empty `<script src="">` in the theme causes a harmless
+  "Refused to execute script" console error.
+
+---
+
+## How the learning features work
+
+All of these are driven by plain files in the repo and checked at build time
+by `tools/build_exercises.py` (the deploy fails if something is broken).
+
+| Feature | Where the content lives | Embed / placement |
+|---|---|---|
+| Coding exercise | `exercises/<id>/` (exercise.yml, starter.py, solution.py, tests.py, optional `files/`) | ```` ```{=html} ```` + `<div class="d2l-exercise" data-exercise="<id>"></div>` in a chapter, or `exercise:` in an answers file |
+| Hidden answers | `answers/<chapter>/<section>.yml`: one entry per item of the section's "## Exercises" list (`answer:` Markdown, optional `exercise:` id) | automatic, under each exercise |
+| Notes to remember | `notes/<chapter>/<section>.yml`: list of Markdown strings | automatic, before "Exercises" |
+| Playground | `playgrounds/<id>.yml`: title, description, params (sliders), code | `<div class="d2l-playground" data-playground="<id>"></div>` |
+| Runnable book cells | nothing to add: every `pytorch`-tab / shared cell | automatic |
+| Progress | nothing to add | automatic on every TOC page |
+| Project data | `static/projects/` → `_static/projects/` | link from a project page |
+
+Runtime files (`static/exercises/`): `exercise.js` (all UI), `exercise.css`,
+`worker.js` (Pyodide in a Web Worker), `grader.py` (tests; shared with the
+build check), `notebook.py` (book cells + playgrounds, notebook sessions),
+`torchlite.py` (NumPy-based PyTorch subset: tensors, broadcasting,
+reductions, linear algebra, autograd, Multinomial), `d2llite.py` (the book's
+plotting helpers). `static/progress/` holds progress tracking.
+
+**Adding a chapter later:** shorten its prose (keep code/math/figures/
+examples), write `answers/` + `notes/`, add exercises for coding questions,
+add playgrounds where a slider helps, write its project spec page and the
+next capstone part, run the chapter's PyTorch cells through torchlite (and
+extend torchlite if a cell needs more of PyTorch), then do a full local
+build + browser test.
 
 ## Interactive coding exercises
 
-Write Python inside the book pages and run/grade it, LeetCode-style.
-**Phase 1 built and tested on 2026-10-18** (awaiting deploy).
+**Live since 2026-10-18.**
 
 ### Decision: Pyodide (Python in the browser) in a Web Worker
 
@@ -92,25 +194,13 @@ Write Python inside the book pages and run/grade it, LeetCode-style.
 |---|---|
 | **Pyodide + Web Worker** | ✅ Chosen. Free, no backend, works on Render static hosting. Has NumPy, SciPy, pandas, scikit-learn, matplotlib. |
 | Backend runner (Judge0 / own server on Render) | ❌ Costs money or sleeps on free tier, 512 MB RAM, sandboxing is hard. |
-| JupyterLite (full notebook in browser) | ❌ for graded exercises (heavy, no grading UI); maybe later for a "scratchpad". |
+| JupyterLite (full notebook in browser) | ❌ for graded exercises (heavy, no grading UI). |
 | Binder / Thebe (real Jupyter kernel) | ❌ 1–2 min cold starts, unreliable. |
-| PyTorch in the browser | ❌ Not possible in Pyodide. PyTorch exercises → "Open in Colab" (phase 3). |
-
-### How it fits together
-
-| File | Role |
-|---|---|
-| `exercises/<id>/` | One folder per exercise (see below). |
-| `static/exercises/exercise.js` | Page UI: editor, buttons, results, auto-save. Added to every page via `include_js` in `config.ini`; does nothing on pages without exercises. |
-| `static/exercises/exercise.css` | Styling, via `include_css`. |
-| `static/exercises/worker.js` | Web Worker that loads Pyodide and runs code. |
-| `static/exercises/grader.py` | Runs code and tests. **Shared** by the browser and the build check, so both grade identically. Includes the test helpers. |
-| `tools/build_exercises.py` | Validates every exercise, then writes `_build/html/_static/exercises/<id>.json` plus the worker and grader. Run twice by `render-build.sh` (check early, write at the end). |
+| Real PyTorch in the browser | ❌ Not possible in Pyodide → torchlite for the book's basic examples. |
 
 Pinned versions: Pyodide **314.0.7** (Python 3.14 in the browser) from
-jsDelivr, CodeMirror **5.65.18** from cdnjs. Both are set at the top of
-`exercise.js`. Pyodide 314+ must be loaded as a module worker (`import()`);
-the old `importScripts()` method fails.
+jsDelivr, CodeMirror **5.65.18** from cdnjs (top of `exercise.js`).
+Pyodide 314+ must be loaded as a module worker (`import()`).
 
 ### How to add an exercise
 
@@ -126,10 +216,8 @@ the old `importScripts()` method fails.
      explanation: |              # shown with the solution
        ...
      ```
-   - `starter.py`: what you start from (must NOT pass all tests).
-   - `solution.py`: reference solution (must pass all tests).
-   - `tests.py`: plain Python. Every `test_*` function is a test, and its
-     docstring is the description shown:
+   - `starter.py` (must NOT pass all tests), `solution.py` (must pass all),
+     `tests.py` (every `test_*` function is a test; its docstring is shown):
      ```python
      from submission import vector_add        # the code being graded
      from grader import expect_equal, expect_close, expect_raises
@@ -138,9 +226,11 @@ the old `importScripts()` method fails.
          """[1, 2] + [3, 4] = [4, 6]"""
          expect_equal(vector_add([1, 2], [3, 4]), [4, 6])
      ```
-     Helpers in `grader.py`: `expect_equal`, `expect_close` (tolerance; lists,
-     numbers, NumPy arrays), `expect_raises`, `expect_type`, `expect_shape`,
-     `expect_true`, and `uses_any(...)` (for "don't use `np.dot`" rules).
+     Helpers: `expect_equal`, `expect_close` (tolerance; lists, numbers,
+     NumPy arrays), `expect_raises`, `expect_type`, `expect_shape`,
+     `expect_true`, `uses_any(...)` (for "don't use `np.dot`" rules).
+   - Optional `files/`: data files (CSV, text, helper `.py`) put in the
+     working directory. Give helper modules unique names.
 2. Embed it in a chapter's `.md` (must be this raw-HTML fence; a plain `<div>`
    loses its `data-exercise` attribute during the book build):
    ````
@@ -148,52 +238,46 @@ the old `importScripts()` method fails.
    <div class="d2l-exercise" data-exercise="<id>"></div>
    ```
    ````
-3. Check it: `python tools/build_exercises.py` (needs `numpy`, `pyyaml`,
-   `mistune`). The deploy fails if a solution fails its tests, a starter
-   already passes, or a chapter embeds an unknown id.
+   or attach it to an end-of-section exercise via `exercise: <id>` in the
+   section's answers file.
+3. Check: `python tools/build_exercises.py` (needs `numpy`, `pandas`,
+   `matplotlib`, `pyyaml`, `mistune`).
 
-### Exercises so far
+### Exercises so far (14)
 
-| Id | Chapter | Tests |
-|---|---|---|
-| `vector-add` | 2.3 Linear Algebra (after "Basic Properties of Tensor Arithmetic") | 8 |
-| `matvec-numpy` | 2.3 Linear Algebra (after "Matrix–Vector Products") | 6 |
+| Section | Exercises |
+|---|---|
+| 2.1 Data Manipulation | `broadcast-shape` |
+| 2.2 Data Preprocessing | `missing-report` |
+| 2.3 Linear Algebra | `vector-add`, `matvec-numpy` (in text); `row-normalize`, `sum-shapes`, `matmul-chain-order`, `stack-and-slice` (Exercises) |
+| 2.4 Calculus | `tangent-line`, `numerical-gradient` |
+| 2.5 Automatic Differentiation | `chain-rule-by-hand` |
+| 2.6 Probability and Statistics | `coin-estimator-variance`, `coupled-tests-bayes`, `portfolio-stats` |
 
-### Phases
-- [x] **Phase 1: Runner + first exercises.** Lazy Pyodide load in a worker,
-      stdout/traceback capture, fresh module per run, timeout + Stop button
-      (kills and restarts the worker), one run at a time per page, Run /
-      Submit / Reset / Show solution, auto-save + "Solved" badge in
-      `localStorage`, plain-textarea fallback if CodeMirror's CDN fails.
-- [x] **Phase 1 test (2026-10-18):** clean full build (exit 0, no new Sphinx
-      warnings) + 27/27 headless-Chromium checks on the generated page: run,
-      print, syntax error, traceback, unsupported import, failing and passing
-      submissions, NumPy, banned-`@` rule, infinite-loop timeout + recovery,
-      Stop, Reset, show solution, reload persistence, two independent
-      exercises, math/tabs intact, phone width, no new JS errors. Build check
-      verified to fail on a broken solution and on an unknown embedded id.
-- [ ] **Deploy** and try it on the live site.
-- [ ] **Phase 2: Content.** Add exercises chapter by chapter as I study.
-      Ideas: hints, per-page progress.
-- [ ] **Phase 3: PyTorch exercises.** Generate a Colab notebook per exercise
-      (starter + tests) from the same exercise folder.
+### Testing record
+- 2026-10-18 Phase 1: clean full build + 27/27 browser checks (exercises).
+- 2026-10-18 Study-course update: clean full build (exit 0, 61 warnings,
+  same as before), all 94 Chapter 2 PyTorch cells pass through torchlite,
+  exercise suite 27/27, plus browser checks for runnable cells (auto-running
+  earlier cells, shared session, editing, errors, restart, autograd, plots),
+  playgrounds (render, slider updates), notes, hidden answers, progress
+  (mark, persist, sidebar), project page + CSV download, no Discussions or
+  analytics requests, no new JS errors.
 
 ### Known limits (by design)
-- Tests/solutions ship to the browser, so "Show solution" is honor-system.
-- First run downloads Pyodide (~10 MB; NumPy another ~8 MB), cached after.
-- Not a security sandbox; it only runs my own code in my own browser.
-- Browser Python is 3.14 while the build check uses Render's 3.10, so keep
-  exercise code to features both support.
-
-## Pre-existing site issues (found while testing, not fixed yet)
-- **Discussions** box at the end of each section is broken: discuss.d2l.ai
-  refuses to be embedded on other domains.
-- **Google Analytics** with the original D2L tracking IDs is still on every
-  page, so visits are reported to D2L's analytics.
-- An empty `<script src="">` in the theme causes a harmless
-  "Refused to execute script" console error.
+- Tests/solutions ship to the browser, so "Show solution"/answers are
+  honor-system.
+- First run downloads Pyodide (~10 MB; NumPy ~8 MB; matplotlib more for
+  plots), cached after.
+- torchlite is a teaching subset: no `nn`, `optim`, GPU, or data loaders.
+  Later chapters that use them need torchlite extended or Colab.
+- Progress and saved code live in this browser's localStorage (use Export /
+  Import in the sidebar to back up or move progress).
+- Browser Python is 3.14 while the build check uses Render's 3.10.
 
 ## To-do
 
-- [ ] Deploy Phase 1 and try both exercises on the live site.
-- [ ] Decide on the pre-existing issues above (likely remove Discussions + analytics).
+- [ ] Deploy the study-course update and try it on the live site.
+- [ ] Chapter 3 onward: same treatment (shorten, answers, notes, exercises,
+      playgrounds, project spec, Capstone Part 2), extending torchlite for
+      `nn`/training basics.

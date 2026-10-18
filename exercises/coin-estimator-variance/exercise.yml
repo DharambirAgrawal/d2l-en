@@ -1,0 +1,22 @@
+title: How Fast Does the Coin Estimate Converge?
+difficulty: medium
+timeout: 15
+description: |
+  Exercise 3: the estimate of $P(\textrm{heads})$ after $n$ tosses is the
+  fraction of heads, $\hat{p} = n_\textrm{h} / n$. Write two functions:
+
+  - `theoretical_variance(p, n)`: the exact variance of $\hat{p}$ for a
+    coin with $P(\textrm{heads}) = p$.
+  - `simulated_variance(p, n, trials, seed=0)`: run `trials` experiments of
+    `n` tosses each with `np.random.default_rng(seed)`, compute $\hat{p}$
+    for each, and return the variance of those estimates.
+
+  Then compare them for growing `n`. How does the variance scale?
+explanation: |
+  Each toss is a Bernoulli variable with variance $p(1-p)$. For independent
+  tosses, variances add, and dividing by $n$ scales variance by $1/n^2$, so
+  $\textrm{Var}[\hat{p}] = \frac{p(1-p)}{n}$: the standard deviation shrinks
+  like $1/\sqrt{n}$, the rate the central limit theorem predicts.
+  Chebyshev then gives
+  $P(|\hat{p} - p| \geq \epsilon) \leq \frac{p(1-p)}{n\epsilon^2}$, a
+  guaranteed (if loose) bound for any $n$.

@@ -150,19 +150,3 @@ We also encourage you to study the source code of the libraries
 to see examples of high-quality implementations of production code. 
 By doing this you will become a better engineer 
 in addition to becoming a better scientist.
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/38)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/39)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/199)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/17972)
-:end_tab:

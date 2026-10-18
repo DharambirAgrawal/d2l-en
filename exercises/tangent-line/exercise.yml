@@ -1,0 +1,16 @@
+title: Find the Tangent Line
+difficulty: easy
+timeout: 10
+description: |
+  Exercise 6 asks for the tangent line of $f(x) = x^3 - \frac{1}{x}$ at
+  $x = 1$. Write `tangent_line(f, x0, h=1e-6)` that returns
+  `(slope, intercept)` of the tangent line $y = \textrm{slope} \cdot x + \textrm{intercept}$
+  at `x0`, estimating the derivative with a central difference.
+
+  The starter plots $f$ and your line with matplotlib (you'll see the
+  printed values; plots aren't displayed here).
+explanation: |
+  The tangent at $x_0$ has slope $f'(x_0)$ and passes through
+  $(x_0, f(x_0))$, so its intercept is $f(x_0) - f'(x_0)\,x_0$. For
+  $f(x) = x^3 - 1/x$, $f'(x) = 3x^2 + 1/x^2$, so $f'(1) = 4$, $f(1) = 0$,
+  and the tangent is $y = 4x - 4$.

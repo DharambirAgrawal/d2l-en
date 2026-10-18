@@ -1,0 +1,22 @@
+title: Portfolio Return and Risk
+difficulty: medium
+timeout: 10
+description: |
+  Exercise 8: a portfolio puts weight $\alpha_i$ on stock $i$ (weights sum
+  to 1). With mean returns $\boldsymbol{\mu}$ and covariance
+  $\boldsymbol{\Sigma}$, write `portfolio_stats(alpha, mu, Sigma)` that
+  returns `(expected_return, variance)` of the portfolio.
+
+  Raise `ValueError` if the weights don't sum to 1 (within `1e-8`).
+
+  Then try: which single stock maximizes return? Does spreading money
+  across stocks lower the variance?
+explanation: |
+  The portfolio return is the linear function $\boldsymbol{\alpha}^\top \mathbf{s}$,
+  so by linearity of expectation its mean is $\boldsymbol{\alpha}^\top \boldsymbol{\mu}$,
+  and by the covariance identity from the section its variance is
+  $\boldsymbol{\alpha}^\top \boldsymbol{\Sigma} \boldsymbol{\alpha}$.
+  Maximizing return alone puts all weight on the stock with the largest
+  $\mu_i$. Spreading weight lowers variance when stocks aren't perfectly
+  correlated, which is the trade-off Markowitz's portfolio optimization
+  formalizes.

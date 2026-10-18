@@ -330,11 +330,3 @@ $\mathbf{W}^\top$ and $\mathbf{W}$, respectively.
 
 1. In :numref:`subsec-connection-to-mat-transposition`, the convolution input `X` and the transposed convolution output `Z` have the same shape. Do they have the same value? Why?
 1. Is it efficient to use matrix multiplications to implement convolutions? Why?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/376)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1450)
-:end_tab:

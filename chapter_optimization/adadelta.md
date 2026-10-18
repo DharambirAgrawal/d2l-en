@@ -148,16 +148,3 @@ d2l.train_concise_ch11(trainer, {'learning_rate':5.0, 'rho': 0.9}, data_iter)
 1. Show how to implement the algorithm without the use of $\mathbf{g}_t'$. Why might this be a good idea?
 1. Is Adadelta really learning rate free? Could you find optimization problems that break Adadelta?
 1. Compare Adadelta to Adagrad and RMS prop to discuss their convergence behavior.
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/357)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/1076)
-:end_tab:
-
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/1077)
-:end_tab:

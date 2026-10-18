@@ -1,0 +1,92 @@
+# Answers for chapter_preliminaries/autograd.md "Exercises", in order.
+- answer: |
+    The second derivative is a derivative **of the derivative computation**.
+    The framework must record the backward pass itself as a new
+    computational graph (in PyTorch, `create_graph=True`) and then
+    backpropagate through it. That roughly doubles the graph and the stored
+    intermediate values.
+
+    For a function of $n$ inputs, the gradient has $n$ entries but the
+    second derivative (the Hessian) has $n^2$: with millions of parameters,
+    computing it fully is out of the question. That's why deep learning
+    mostly uses first-order methods (gradient descent).
+- answer: |
+    In PyTorch, calling `y.backward()` twice raises an error like
+    *"Trying to backward through the graph a second time"*: to save memory,
+    the intermediate values in the graph are freed after the first backward
+    pass. Use `y.backward(retain_graph=True)` the first time to keep them.
+
+    If you do keep the graph, the second call **adds** to `x.grad`
+    (gradients accumulate), so you'd see $2 \times$ the gradient unless you
+    call `x.grad.zero_()` in between.
+- answer: |
+    Then `d = f(a)` is a vector or matrix, not a scalar, and PyTorch's
+    `d.backward()` complains: "grad can be implicitly created only for scalar
+    outputs". You must reduce it, e.g. `d.sum().backward()`.
+
+    Analysis: `f` multiplies `a` by a scale chosen through the control flow
+    (based on norms and sums of the whole tensor), so `d = c * a` for some
+    scalar `c` that depends on `a`. Locally, `d.sum()` has gradient `c` in
+    every entry, and checking `a.grad == d / a` still works elementwise.
+- answer: |
+    ```python
+    x = torch.linspace(-2 * torch.pi, 2 * torch.pi, 200, requires_grad=True)
+    y = torch.sin(x)
+    y.sum().backward()      # each y_i depends only on x_i
+    d2l.plot(x.detach(), [y.detach(), x.grad], 'x', 'f(x)',
+             legend=['f(x) = sin(x)', "f'(x) via autograd"])
+    ```
+
+    Summing is fine because $\partial (\sum_j y_j) / \partial x_i = dy_i/dx_i$.
+    The derivative curve is exactly $\cos x$.
+- exercise: chain-rule-by-hand
+  answer: |
+    Introduce intermediate variables, each a simple operation:
+
+    ```text
+    x ──> a = x²  ──> b = log a ──┐
+    │                             ├─> d = b · c ──┐
+    ├──> c = sin x ───────────────┘               ├─> f = d + e
+    └──> e = 1/x ─────────────────────────────────┘
+    ```
+
+    $x$ feeds into three branches ($a$, $c$, $e$), and the paths merge at
+    $d$ and $f$.
+- answer: |
+    Local derivatives on each edge:
+    $\frac{da}{dx} = 2x$, $\frac{db}{da} = \frac{1}{a}$, $\frac{dc}{dx} = \cos x$,
+    $\frac{\partial d}{\partial b} = c$, $\frac{\partial d}{\partial c} = b$,
+    $\frac{de}{dx} = -\frac{1}{x^2}$, and $\frac{\partial f}{\partial d} = \frac{\partial f}{\partial e} = 1$.
+
+    Sum over all paths from $x$ to $f$:
+
+    $$\frac{df}{dx} = c \cdot \frac{1}{a} \cdot 2x + b \cos x - \frac{1}{x^2} = \frac{2\sin x}{x} + \log(x^2)\cos x - \frac{1}{x^2}.$$
+- answer: |
+    **Forward (from $x$ to $f$):** carry $\frac{d\,\cdot}{dx}$ along with
+    each value: $\dot a = 2x$, $\dot b = \dot a / a = 2/x$, $\dot c = \cos x$,
+    $\dot d = \dot b\, c + b\, \dot c$, $\dot e = -1/x^2$, $\dot f = \dot d + \dot e$.
+
+    **Backward (from $f$ to $x$):** carry $\frac{df}{d\,\cdot}$ backwards:
+    $\bar f = 1$, $\bar d = \bar e = 1$, $\bar b = c$, $\bar c = b$,
+    $\bar a = \bar b / a$, and finally
+    $\bar x = \bar a \cdot 2x + \bar c \cos x + \bar e \cdot (-1/x^2)$.
+
+    Both give the same number. The coding exercise has you implement the
+    backward version, which is exactly what autograd does.
+- answer: |
+    It depends on the **number of inputs vs. outputs**:
+
+    - **Forward mode** costs one pass **per input**, and needs no stored
+      intermediate values (derivatives move along with the computation).
+      Good when there are few inputs and many outputs.
+    - **Backward (reverse) mode** costs one pass **per output**, but must
+      store intermediate values from the forward pass (more memory). Good
+      when there are many inputs and few outputs.
+
+    Training a network maps millions of parameters (inputs) to one scalar
+    loss (output), so backward mode (backpropagation) wins by a factor of
+    millions. Forward mode is useful for things like Jacobian-vector
+    products with few inputs. In matrix terms, the chain rule is a product
+    of Jacobians, and the two modes multiply it from opposite ends:
+    whichever end produces small (vector-shaped) intermediate results is
+    cheaper, which is also easier to parallelize.

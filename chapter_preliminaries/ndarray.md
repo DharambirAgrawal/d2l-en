@@ -6,60 +6,26 @@ tab.interact_select(['mxnet', 'pytorch', 'tensorflow', 'jax'])
 # Data Manipulation
 :label:`sec_ndarray`
 
-In order to get anything done, 
-we need some way to store and manipulate data.
-Generally, there are two important things 
-we need to do with data: 
-(i) acquire them; 
-and (ii) process them once they are inside the computer. 
-There is no point in acquiring data 
-without some way to store it, 
-so to start, let's get our hands dirty
-with $n$-dimensional arrays, 
-which we also call *tensors*.
-If you already know the NumPy 
-scientific computing package, 
-this will be a breeze.
-For all modern deep learning frameworks,
-the *tensor class* (`ndarray` in MXNet, 
-`Tensor` in PyTorch and TensorFlow) 
-resembles NumPy's `ndarray`,
-with a few killer features added.
-First, the tensor class
-supports automatic differentiation.
-Second, it leverages GPUs
-to accelerate numerical computation,
-whereas NumPy only runs on CPUs.
-These properties make neural networks
-both easy to code and fast to run.
+To get anything done, we need to (i) acquire data and (ii) process it once
+it's in the computer, and there's no point acquiring data without a way to
+store it. So let's get our hands dirty with $n$-dimensional arrays, also
+called *tensors*. If you know NumPy, this will be a breeze. In every modern
+deep learning framework, the *tensor class* (`ndarray` in MXNet, `Tensor` in
+PyTorch and TensorFlow) resembles NumPy's `ndarray`, plus two killer
+features: it supports automatic differentiation, and it uses GPUs to
+accelerate numerical computation (NumPy runs only on CPUs). These make neural
+networks easy to code and fast to run.
 
 
 
 ## Getting Started
 
-:begin_tab:`mxnet`
-To start, we import the `np` (`numpy`) and
-`npx` (`numpy_extension`) modules from MXNet.
-Here, the `np` module includes 
-functions supported by NumPy,
-while the `npx` module contains a set of extensions
-developed to empower deep learning 
-within a NumPy-like environment.
-When using tensors, we almost always 
-invoke the `set_np` function:
-this is for compatibility of tensor processing 
-by other components of MXNet.
-:end_tab:
-
 :begin_tab:`pytorch`
-(**To start, we import the PyTorch library.
-Note that the package name is `torch`.**)
+To start, we import the PyTorch library. Note that the package name is `torch`.
 :end_tab:
 
 :begin_tab:`tensorflow`
-To start, we import `tensorflow`. 
-For brevity, practitioners 
-often assign the alias `tf`.
+To start, we import `tensorflow`, usually with the alias `tf`.
 :end_tab:
 
 ```{.python .input}
@@ -84,53 +50,22 @@ import jax
 from jax import numpy as jnp
 ```
 
-[**A tensor represents a (possibly multidimensional) array of numerical values.**]
-In the one-dimensional case, i.e., when only one axis is needed for the data,
-a tensor is called a *vector*.
-With two axes, a tensor is called a *matrix*.
-With $k > 2$ axes, we drop the specialized names
-and just refer to the object as a $k^\textrm{th}$-*order tensor*.
-
-:begin_tab:`mxnet`
-MXNet provides a variety of functions 
-for creating new tensors 
-prepopulated with values. 
-For example, by invoking `arange(n)`,
-we can create a vector of evenly spaced values,
-starting at 0 (included) 
-and ending at `n` (not included).
-By default, the interval size is $1$.
-Unless otherwise specified, 
-new tensors are stored in main memory 
-and designated for CPU-based computation.
-:end_tab:
+A tensor represents a (possibly multidimensional) array of numerical values.
+With one axis, it's a *vector*; with two, a *matrix*; with $k > 2$ axes, we
+just call it a $k^\textrm{th}$-*order tensor*.
 
 :begin_tab:`pytorch`
-PyTorch provides a variety of functions 
-for creating new tensors 
-prepopulated with values. 
-For example, by invoking `arange(n)`,
-we can create a vector of evenly spaced values,
-starting at 0 (included) 
-and ending at `n` (not included).
-By default, the interval size is $1$.
-Unless otherwise specified, 
-new tensors are stored in main memory 
-and designated for CPU-based computation.
+PyTorch has many functions for creating tensors prepopulated with values.
+`arange(n)` creates a vector of evenly spaced values from 0 (included) to `n`
+(not included), with step $1$ by default. Unless specified otherwise, new
+tensors are stored in main memory and computed on the CPU.
 :end_tab:
 
 :begin_tab:`tensorflow`
-TensorFlow provides a variety of functions 
-for creating new tensors 
-prepopulated with values. 
-For example, by invoking `range(n)`,
-we can create a vector of evenly spaced values,
-starting at 0 (included) 
-and ending at `n` (not included).
-By default, the interval size is $1$.
-Unless otherwise specified, 
-new tensors are stored in main memory 
-and designated for CPU-based computation.
+TensorFlow has many functions for creating tensors prepopulated with values.
+`range(n)` creates a vector of evenly spaced values from 0 (included) to `n`
+(not included), with step $1$ by default. Unless specified otherwise, new
+tensors are stored in main memory and computed on the CPU.
 :end_tab:
 
 ```{.python .input}
@@ -157,28 +92,14 @@ x = jnp.arange(12)
 x
 ```
 
-:begin_tab:`mxnet`
-Each of these values is called
-an *element* of the tensor.
-The tensor `x` contains 12 elements.
-We can inspect the total number of elements 
-in a tensor via its `size` attribute.
-:end_tab:
-
 :begin_tab:`pytorch`
-Each of these values is called
-an *element* of the tensor.
-The tensor `x` contains 12 elements.
-We can inspect the total number of elements 
-in a tensor via its `numel` method.
+Each value is an *element* of the tensor; `x` has 12. The `numel` method gives
+the total number of elements.
 :end_tab:
 
 :begin_tab:`tensorflow`
-Each of these values is called
-an *element* of the tensor.
-The tensor `x` contains 12 elements.
-We can inspect the total number of elements 
-in a tensor via the `size` function.
+Each value is an *element* of the tensor; `x` has 12. The `size` function gives
+the total number of elements.
 :end_tab:
 
 ```{.python .input}
@@ -196,29 +117,17 @@ x.numel()
 tf.size(x)
 ```
 
-(**We can access a tensor's *shape***) 
-(the length along each axis)
-by inspecting its `shape` attribute.
-Because we are dealing with a vector here,
-the `shape` contains just a single element
-and is identical to the size.
+The `shape` attribute gives a tensor's *shape*, its length along each axis.
+For a vector, the shape has a single element, equal to the size.
 
 ```{.python .input}
 %%tab all
 x.shape
 ```
 
-We can [**change the shape of a tensor
-without altering its size or values**],
-by invoking `reshape`.
-For example, we can transform 
-our vector `x` whose shape is (12,) 
-to a matrix `X`  with shape (3, 4).
-This new tensor retains all elements
-but reconfigures them into a matrix.
-Notice that the elements of our vector
-are laid out one row at a time and thus
-`x[3] == X[0, 3]`.
+`reshape` changes a tensor's shape without changing its size or values. Here
+we turn the vector `x` of shape (12,) into a matrix `X` of shape (3, 4). The
+elements are laid out one row at a time, so `x[3] == X[0, 3]`.
 
 ```{.python .input}
 %%tab mxnet, pytorch, jax
@@ -232,23 +141,13 @@ X = tf.reshape(x, (3, 4))
 X
 ```
 
-Note that specifying every shape component
-to `reshape` is redundant.
-Because we already know our tensor's size,
-we can work out one component of the shape given the rest.
-For example, given a tensor of size $n$
-and target shape ($h$, $w$),
-we know that $w = n/h$.
-To automatically infer one component of the shape,
-we can place a `-1` for the shape component
-that should be inferred automatically.
-In our case, instead of calling `x.reshape(3, 4)`,
-we could have equivalently called `x.reshape(-1, 4)` or `x.reshape(3, -1)`.
+Specifying every shape component is redundant: given the size $n$ and target
+shape ($h$, $w$), we know $w = n/h$. Put `-1` for the component that should be
+inferred: instead of `x.reshape(3, 4)`, we could write `x.reshape(-1, 4)` or
+`x.reshape(3, -1)`.
 
-Practitioners often need to work with tensors
-initialized to contain all 0s or 1s.
-[**We can construct a tensor with all elements set to 0**] (~~or one~~)
-and a shape of (2, 3, 4) via the `zeros` function.
+We often need tensors of all 0s or 1s. `zeros` creates a tensor of shape
+(2, 3, 4) with every element set to 0.
 
 ```{.python .input}
 %%tab mxnet
@@ -270,8 +169,7 @@ tf.zeros((2, 3, 4))
 jnp.zeros((2, 3, 4))
 ```
 
-Similarly, we can create a tensor 
-with all 1s by invoking `ones`.
+Similarly, `ones` creates a tensor of all 1s.
 
 ```{.python .input}
 %%tab mxnet
@@ -293,15 +191,10 @@ tf.ones((2, 3, 4))
 jnp.ones((2, 3, 4))
 ```
 
-We often wish to 
-[**sample each element randomly (and independently)**] 
-from a given probability distribution.
-For example, the parameters of neural networks
-are often initialized randomly.
-The following snippet creates a tensor 
-with elements drawn from 
-a standard Gaussian (normal) distribution
-with mean 0 and standard deviation 1.
+We often want to sample each element randomly (and independently) from a
+given distribution, e.g., to initialize neural network parameters. This
+creates a tensor with elements drawn from a standard Gaussian (normal)
+distribution with mean 0 and standard deviation 1.
 
 ```{.python .input}
 %%tab mxnet
@@ -326,13 +219,9 @@ tf.random.normal(shape=[3, 4])
 jax.random.normal(jax.random.PRNGKey(0), (3, 4))
 ```
 
-Finally, we can construct tensors by
-[**supplying the exact values for each element**] 
-by supplying (possibly nested) Python list(s) 
-containing numerical literals.
-Here, we construct a matrix with a list of lists,
-where the outermost list corresponds to axis 0,
-and the inner list corresponds to axis 1.
+Finally, we can give the exact value of each element with (possibly nested)
+Python lists of numbers. Here, the outer list corresponds to axis 0 and the
+inner lists to axis 1.
 
 ```{.python .input}
 %%tab mxnet
@@ -356,40 +245,26 @@ jnp.array([[2, 1, 4, 3], [1, 2, 3, 4], [4, 3, 2, 1]])
 
 ## Indexing and Slicing
 
-As with  Python lists,
-we can access tensor elements 
-by indexing (starting with 0).
-To access an element based on its position
-relative to the end of the list,
-we can use negative indexing.
-Finally, we can access whole ranges of indices 
-via slicing (e.g., `X[start:stop]`), 
-where the returned value includes 
-the first index (`start`) *but not the last* (`stop`).
-Finally, when only one index (or slice)
-is specified for a $k^\textrm{th}$-order tensor,
-it is applied along axis 0.
-Thus, in the following code,
-[**`[-1]` selects the last row and `[1:3]`
-selects the second and third rows**].
+As with Python lists, we can access elements by index (starting at 0), use
+negative indices to count from the end, and select ranges with slices
+(`X[start:stop]`), which include `start` *but not* `stop`. When only one index
+(or slice) is given for a $k^\textrm{th}$-order tensor, it applies along axis
+0. So `[-1]` selects the last row and `[1:3]` the second and third rows.
 
 ```{.python .input}
 %%tab all
 X[-1], X[1:3]
 ```
 
-:begin_tab:`mxnet, pytorch`
-Beyond reading them, (**we can also *write* elements of a matrix by specifying indices.**)
+:begin_tab:`pytorch`
+We can also *write* elements of a matrix by specifying indices.
 :end_tab:
 
 :begin_tab:`tensorflow`
-`Tensors` in TensorFlow are immutable, and cannot be assigned to.
-`Variables` in TensorFlow are mutable containers of state that support
-assignments. Keep in mind that gradients in TensorFlow do not flow backwards
-through `Variable` assignments.
-
-Beyond assigning a value to the entire `Variable`, we can write elements of a
-`Variable` by specifying indices.
+TensorFlow `Tensors` are immutable and can't be assigned to. `Variables` are
+mutable containers of state that support assignment (note that gradients don't
+flow backwards through `Variable` assignments). Beyond assigning the whole
+`Variable`, we can write elements by specifying indices.
 :end_tab:
 
 ```{.python .input}
@@ -414,15 +289,10 @@ X_new_1 = X.at[1, 2].set(17)
 X_new_1
 ```
 
-If we want [**to assign multiple elements the same value,
-we apply the indexing on the left-hand side 
-of the assignment operation.**]
-For instance, `[:2, :]`  accesses 
-the first and second rows,
-where `:` takes all the elements along axis 1 (column).
-While we discussed indexing for matrices,
-this also works for vectors
-and for tensors of more than two dimensions.
+To assign the same value to multiple elements, index on the left-hand side of
+the assignment. For instance, `[:2, :]` selects the first and second rows,
+where `:` takes all elements along axis 1 (columns). This works for vectors
+and higher-order tensors too.
 
 ```{.python .input}
 %%tab mxnet, pytorch
@@ -445,28 +315,16 @@ X_new_2
 
 ## Operations
 
-Now that we know how to construct tensors
-and how to read from and write to their elements,
-we can begin to manipulate them
-with various mathematical operations.
-Among the most useful of these 
-are the *elementwise* operations.
-These apply a standard scalar operation
-to each element of a tensor.
-For functions that take two tensors as inputs,
-elementwise operations apply some standard binary operator
-on each pair of corresponding elements.
-We can create an elementwise function 
-from any function that maps 
-from a scalar to a scalar.
+Now we can manipulate tensors with mathematical operations. Among the most
+useful are *elementwise* operations, which apply a scalar operation to each
+element, or, for two tensors, a binary operation to each pair of
+corresponding elements. Any function from a scalar to a scalar can be made
+elementwise.
 
-In mathematical notation, we denote such
-*unary* scalar operators (taking one input)
-by the signature 
-$f: \mathbb{R} \rightarrow \mathbb{R}$.
-This just means that the function maps
-from any real number onto some other real number.
-Most standard operators, including unary ones like $e^x$, can be applied elementwise.
+We write such *unary* scalar operators (one input) as
+$f: \mathbb{R} \rightarrow \mathbb{R}$: they map any real number to another.
+Most standard operators, including unary ones like $e^x$, can be applied
+elementwise.
 
 ```{.python .input}
 %%tab mxnet
@@ -488,28 +346,17 @@ tf.exp(x)
 jnp.exp(x)
 ```
 
-Likewise, we denote *binary* scalar operators,
-which map pairs of real numbers
-to a (single) real number
-via the signature 
-$f: \mathbb{R}, \mathbb{R} \rightarrow \mathbb{R}$.
-Given any two vectors $\mathbf{u}$ 
-and $\mathbf{v}$ *of the same shape*,
-and a binary operator $f$, we can produce a vector
-$\mathbf{c} = F(\mathbf{u},\mathbf{v})$
-by setting $c_i \gets f(u_i, v_i)$ for all $i$,
-where $c_i, u_i$, and $v_i$ are the $i^\textrm{th}$ elements
-of vectors $\mathbf{c}, \mathbf{u}$, and $\mathbf{v}$.
-Here, we produced the vector-valued
-$F: \mathbb{R}^d, \mathbb{R}^d \rightarrow \mathbb{R}^d$
-by *lifting* the scalar function
-to an elementwise vector operation.
-The common standard arithmetic operators
-for addition (`+`), subtraction (`-`), 
-multiplication (`*`), division (`/`), 
-and exponentiation (`**`)
-have all been *lifted* to elementwise operations
-for identically-shaped tensors of arbitrary shape.
+Likewise, *binary* scalar operators map pairs of real numbers to one real
+number: $f: \mathbb{R}, \mathbb{R} \rightarrow \mathbb{R}$. Given vectors
+$\mathbf{u}$ and $\mathbf{v}$ *of the same shape* and a binary operator $f$,
+we produce $\mathbf{c} = F(\mathbf{u},\mathbf{v})$ by setting
+$c_i \gets f(u_i, v_i)$ for all $i$, where $c_i, u_i$, and $v_i$ are the
+$i^\textrm{th}$ elements of $\mathbf{c}, \mathbf{u}$, and $\mathbf{v}$. We
+have *lifted* the scalar function to an elementwise vector operation
+$F: \mathbb{R}^d, \mathbb{R}^d \rightarrow \mathbb{R}^d$. The standard
+arithmetic operators, addition (`+`), subtraction (`-`), multiplication
+(`*`), division (`/`), and exponentiation (`**`), are all lifted to
+elementwise operations on identically-shaped tensors of any shape.
 
 ```{.python .input}
 %%tab mxnet
@@ -539,23 +386,13 @@ y = jnp.array([2, 2, 2, 2])
 x + y, x - y, x * y, x / y, x ** y
 ```
 
-In addition to elementwise computations,
-we can also perform linear algebraic operations,
-such as dot products and matrix multiplications.
-We will elaborate on these
-in :numref:`sec_linear-algebra`.
+Besides elementwise computations, we can do linear algebra operations such as
+dot products and matrix multiplications, covered in
+:numref:`sec_linear-algebra`.
 
-We can also [***concatenate* multiple tensors,**]
-stacking them end-to-end to form a larger one.
-We just need to provide a list of tensors
-and tell the system along which axis to concatenate.
-The example below shows what happens when we concatenate
-two matrices along rows (axis 0)
-instead of columns (axis 1).
-We can see that the first output's axis-0 length ($6$)
-is the sum of the two input tensors' axis-0 lengths ($3 + 3$);
-while the second output's axis-1 length ($8$)
-is the sum of the two input tensors' axis-1 lengths ($4 + 4$).
+We can also *concatenate* tensors, stacking them end-to-end along a chosen
+axis. Concatenating two matrices along rows (axis 0) gives an axis-0 length
+of $6$ ($3 + 3$); along columns (axis 1), an axis-1 length of $8$ ($4 + 4$).
 
 ```{.python .input}
 %%tab mxnet
@@ -585,19 +422,15 @@ Y = jnp.array([[2.0, 1, 4, 3], [1, 2, 3, 4], [4, 3, 2, 1]])
 jnp.concatenate((X, Y), axis=0), jnp.concatenate((X, Y), axis=1)
 ```
 
-Sometimes, we want to 
-[**construct a binary tensor via *logical statements*.**]
-Take `X == Y` as an example.
-For each position `i, j`, if `X[i, j]` and `Y[i, j]` are equal, 
-then the corresponding entry in the result takes value `1`,
-otherwise it takes value `0`.
+We can build a binary tensor from a *logical statement*. For `X == Y`, each
+entry `i, j` is `1` if `X[i, j]` equals `Y[i, j]` and `0` otherwise.
 
 ```{.python .input}
 %%tab all
 X == Y
 ```
 
-[**Summing all the elements in the tensor**] yields a tensor with only one element.
+Summing all elements gives a tensor with just one element.
 
 ```{.python .input}
 %%tab mxnet, pytorch, jax
@@ -612,21 +445,10 @@ tf.reduce_sum(X)
 ## Broadcasting
 :label:`subsec_broadcasting`
 
-By now, you know how to perform 
-elementwise binary operations
-on two tensors of the same shape. 
-Under certain conditions,
-even when shapes differ, 
-we can still [**perform elementwise binary operations
-by invoking the *broadcasting mechanism*.**]
-Broadcasting works according to 
-the following two-step procedure:
-(i) expand one or both arrays
-by copying elements along axes with length 1
-so that after this transformation,
-the two tensors have the same shape;
-(ii) perform an elementwise operation
-on the resulting arrays.
+Elementwise binary operations need tensors of the same shape, but under
+certain conditions the *broadcasting mechanism* lets shapes differ. It works
+in two steps: (i) expand one or both arrays by copying elements along axes of
+length 1 until the shapes match; (ii) apply the elementwise operation.
 
 ```{.python .input}
 %%tab mxnet
@@ -656,13 +478,9 @@ b = jnp.arange(2).reshape((1, 2))
 a, b
 ```
 
-Since `a` and `b` are $3\times1$ 
-and $1\times2$ matrices, respectively,
-their shapes do not match up.
-Broadcasting produces a larger $3\times2$ matrix 
-by replicating matrix `a` along the columns
-and matrix `b` along the rows
-before adding them elementwise.
+`a` is $3\times1$ and `b` is $1\times2$, so their shapes don't match.
+Broadcasting produces a $3\times2$ matrix by replicating `a` along the columns
+and `b` along the rows before adding elementwise.
 
 ```{.python .input}
 %%tab all
@@ -671,19 +489,10 @@ a + b
 
 ## Saving Memory
 
-[**Running operations can cause new memory to be
-allocated to host results.**]
-For example, if we write `Y = X + Y`,
-we dereference the tensor that `Y` used to point to
-and instead point `Y` at the newly allocated memory.
-We can demonstrate this issue with Python's `id()` function,
-which gives us the exact address 
-of the referenced object in memory.
-Note that after we run `Y = Y + X`,
-`id(Y)` points to a different location.
-That is because Python first evaluates `Y + X`,
-allocating new memory for the result 
-and then points `Y` to this new location in memory.
+Operations can allocate new memory for their results. `Y = Y + X` makes `Y`
+point to newly allocated memory instead of its old tensor. Python's `id()`,
+which gives an object's memory address, shows this: Python first evaluates
+`Y + X` into new memory, then points `Y` there.
 
 ```{.python .input}
 %%tab all
@@ -692,40 +501,23 @@ Y = Y + X
 id(Y) == before
 ```
 
-This might be undesirable for two reasons.
-First, we do not want to run around
-allocating memory unnecessarily all the time.
-In machine learning, we often have
-hundreds of megabytes of parameters
-and update all of them multiple times per second.
-Whenever possible, we want to perform these updates *in place*.
-Second, we might point at the 
-same parameters from multiple variables.
-If we do not update in place, 
-we must be careful to update all of these references,
-lest we spring a memory leak 
-or inadvertently refer to stale parameters.
+This is undesirable for two reasons. First, we don't want to allocate memory
+unnecessarily: models can have hundreds of megabytes of parameters updated
+many times per second, so we want to update them *in place*. Second, several
+variables may point to the same parameters; without in-place updates we must
+update every reference, or risk memory leaks and stale parameters.
 
-:begin_tab:`mxnet, pytorch`
-Fortunately, (**performing in-place operations**) is easy.
-We can assign the result of an operation
-to a previously allocated array `Y`
-by using slice notation: `Y[:] = <expression>`.
-To illustrate this concept, 
-we overwrite the values of tensor `Z`,
-after initializing it, using `zeros_like`,
-to have the same shape as `Y`.
+:begin_tab:`pytorch`
+In-place operations are easy: assign the result to a previously allocated
+array with slice notation, `Y[:] = <expression>`. Here we create `Z` with
+`zeros_like` (same shape as `Y`) and then overwrite its values.
 :end_tab:
 
 :begin_tab:`tensorflow`
-`Variables` are mutable containers of state in TensorFlow. They provide
-a way to store your model parameters.
-We can assign the result of an operation
-to a `Variable` with `assign`.
-To illustrate this concept, 
-we overwrite the values of `Variable` `Z`
-after initializing it, using `zeros_like`,
-to have the same shape as `Y`.
+`Variables` are TensorFlow's mutable containers of state, used to store model
+parameters. We assign the result of an operation to a `Variable` with
+`assign`. Here we create `Z` with `zeros_like` (same shape as `Y`) and then
+overwrite its values.
 :end_tab:
 
 ```{.python .input}
@@ -757,27 +549,19 @@ print('id(Z):', id(Z))
 # JAX arrays do not allow in-place operations
 ```
 
-:begin_tab:`mxnet, pytorch`
-[**If the value of `X` is not reused in subsequent computations,
-we can also use `X[:] = X + Y` or `X += Y`
-to reduce the memory overhead of the operation.**]
+:begin_tab:`pytorch`
+If `X` isn't needed afterwards, `X[:] = X + Y` or `X += Y` also reduces the
+memory overhead.
 :end_tab:
 
 :begin_tab:`tensorflow`
-Even once you store state persistently in a `Variable`, 
-you may want to reduce your memory usage further by avoiding excess
-allocations for tensors that are not your model parameters.
-Because TensorFlow `Tensors` are immutable 
-and gradients do not flow through `Variable` assignments, 
-TensorFlow does not provide an explicit way to run
-an individual operation in-place.
-
-However, TensorFlow provides the `tf.function` decorator 
-to wrap computation inside of a TensorFlow graph 
-that gets compiled and optimized before running.
-This allows TensorFlow to prune unused values, 
-and to reuse prior allocations that are no longer needed. 
-This minimizes the memory overhead of TensorFlow computations.
+Even with state stored in `Variables`, you may want to avoid excess
+allocations for tensors that aren't model parameters. Since `Tensors` are
+immutable and gradients don't flow through `Variable` assignments, TensorFlow
+has no explicit way to run a single operation in place. Instead, the
+`tf.function` decorator compiles the computation into an optimized TensorFlow
+graph that prunes unused values and reuses allocations no longer needed,
+minimizing memory overhead.
 :end_tab:
 
 ```{.python .input}
@@ -802,23 +586,16 @@ computation(X, Y)
 
 ## Conversion to Other Python Objects
 
-:begin_tab:`mxnet, tensorflow`
-[**Converting to a NumPy tensor (`ndarray`)**], or vice versa, is easy.
-The converted result does not share memory.
-This minor inconvenience is actually quite important:
-when you perform operations on the CPU or on GPUs,
-you do not want to halt computation, waiting to see
-whether the NumPy package of Python 
-might want to be doing something else
-with the same chunk of memory.
+:begin_tab:`tensorflow`
+Converting to a NumPy tensor (`ndarray`), or back, is easy. The result doesn't
+share memory, which matters: computation on the CPU or GPU shouldn't have to
+wait for NumPy, which might be using the same memory for something else.
 :end_tab:
 
 :begin_tab:`pytorch`
-[**Converting to a NumPy tensor (`ndarray`)**], or vice versa, is easy.
-The torch tensor and NumPy array 
-will share their underlying memory, 
-and changing one through an in-place operation 
-will also change the other.
+Converting to a NumPy tensor (`ndarray`), or back, is easy. The torch tensor
+and NumPy array share their underlying memory, so changing one in place
+changes the other.
 :end_tab:
 
 ```{.python .input}
@@ -849,8 +626,8 @@ B = jax.device_put(A)
 type(A), type(B)
 ```
 
-To (**convert a size-1 tensor to a Python scalar**),
-we can invoke the `item` function or Python's built-in functions.
+To convert a size-1 tensor to a Python scalar, use `item` or Python's built-in
+functions.
 
 ```{.python .input}
 %%tab mxnet
@@ -878,27 +655,13 @@ a, a.item(), float(a), int(a)
 
 ## Summary
 
-The tensor class is the main interface for storing and manipulating data in deep learning libraries.
-Tensors provide a variety of functionalities including construction routines; indexing and slicing; basic mathematics operations; broadcasting; memory-efficient assignment; and conversion to and from other Python objects.
+The tensor class is the main interface for storing and manipulating data in
+deep learning libraries. It provides construction routines, indexing and
+slicing, basic math operations, broadcasting, memory-efficient assignment,
+and conversion to and from other Python objects.
 
 
 ## Exercises
 
 1. Run the code in this section. Change the conditional statement `X == Y` to `X < Y` or `X > Y`, and then see what kind of tensor you can get.
 1. Replace the two tensors that operate by element in the broadcasting mechanism with other shapes, e.g., 3-dimensional tensors. Is the result the same as expected?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/26)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/27)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/187)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/17966)
-:end_tab:

@@ -1,4 +1,4 @@
-"""Validate the interactive exercises and bundle them for the website.
+"""Validate the interactive exercises and answers, and bundle them for the website.
 
 Each exercise is a folder under exercises/:
 
@@ -7,16 +7,29 @@ Each exercise is a folder under exercises/:
         starter.py     code the student starts from
         solution.py    reference solution
         tests.py       test_* functions (see static/exercises/grader.py)
+        files/         optional data files (CSV, text, helper .py modules),
+                       placed in the working directory before code runs
+
+Answers to the numbered "## Exercises" list at the end of a section live in
+answers/<chapter>/<section>.yml, one entry per exercise, in order:
+
+    - answer: |              # Markdown, shown behind a "Show answer" button
+        ...
+    - exercise: tensor-len   # optional: an interactive exercise shown under
+      answer: |              # the question
+        ...
 
 Checks, with the same grader the browser uses:
   * the reference solution passes every test,
   * the starter code does not pass every test,
-  * every exercise embedded in a chapter exists.
+  * every exercise embedded in a chapter or answers file exists,
+  * every answers file has exactly one entry per exercise in its section.
 
 Usage:
     python tools/build_exercises.py                   # validate only
     python tools/build_exercises.py --out DIR         # validate, then write
-                                                      # DIR/<id>.json + runtime files
+                                                      # DIR/<id>.json + runtime files,
+                                                      # and DIR/../answers/<page>.json
 """
 import argparse
 import configparser
@@ -35,8 +48,11 @@ import yaml
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 EXERCISES_DIR = os.path.join(ROOT, 'exercises')
+ANSWERS_DIR = os.path.join(ROOT, 'answers')
+PLAYGROUNDS_DIR = os.path.join(ROOT, 'playgrounds')
+NOTES_DIR = os.path.join(ROOT, 'notes')
 RUNTIME_DIR = os.path.join(ROOT, 'static', 'exercises')
-RUNTIME_FILES = ['grader.py', 'worker.js']  # served next to the JSON files
+RUNTIME_FILES = ['grader.py', 'worker.js', 'notebook.py', 'torchlite.py', 'd2llite.py']
 
 ID_PATTERN = re.compile(r'^[a-z0-9]+(-[a-z0-9]+)*$')
 DIFFICULTIES = ('easy', 'medium', 'hard')
@@ -44,14 +60,34 @@ REQUIRED_FILES = ('exercise.yml', 'starter.py', 'solution.py', 'tests.py')
 ALLOWED_KEYS = {'title', 'difficulty', 'description', 'explanation',
                 'packages', 'timeout'}
 EMBED_PATTERN = re.compile(r'data-exercise="([^"]+)"')
+PLAYGROUND_EMBED = re.compile(r'data-playground="([^"]+)"')
+PLAYGROUND_KEYS = {'title', 'description', 'params', 'code', 'timeout'}
+
+# Runs a playground's code once with its default parameters.
+_PLAYGROUND_SCRIPT = """
+import json, os, sys, tempfile
+sys.path.insert(0, sys.argv[1])
+os.chdir(tempfile.mkdtemp())
+import notebook
+code, params = json.load(sys.stdin)
+r = notebook.run_cell('check', code, params)
+print(json.dumps({'status': r['status'], 'error': r['error'],
+                  'outputs': len(r['images']) + bool(r['stdout']) + bool(r['result'])}))
+"""
 
 # Runs one exercise's tests in a separate process, so a hanging starter or
 # solution can be timed out.
 _CHECK_SCRIPT = """
-import json, sys
+import json, os, sys, tempfile
 sys.path.insert(0, sys.argv[1])
 import grader
-code, tests = json.load(sys.stdin)
+code, tests, files = json.load(sys.stdin)
+workdir = tempfile.mkdtemp()
+for name, text in files.items():
+    with open(os.path.join(workdir, name), 'w', encoding='utf-8') as f:
+        f.write(text)
+os.chdir(workdir)
+sys.path.insert(0, workdir)
 print(grader.run_tests_json(code, tests))
 """
 
@@ -82,11 +118,11 @@ def render_markdown(text):
     return re.sub(r'@@MATH(\d+)@@', lambda m: math[int(m.group(1))], rendered)
 
 
-def run_tests(code, tests, timeout):
+def run_tests(code, tests, timeout, files=None):
     try:
         proc = subprocess.run(
             [sys.executable, '-I', '-c', _CHECK_SCRIPT, RUNTIME_DIR],
-            input=json.dumps([code, tests]), capture_output=True, text=True,
+            input=json.dumps([code, tests, files or {}]), capture_output=True, text=True,
             timeout=timeout)
     except subprocess.TimeoutExpired:
         return None
@@ -108,6 +144,26 @@ def describe_failures(result):
             if t.get('error'):
                 lines.append('      ' + t['error'].replace('\n', '\n      '))
     return '\n'.join(lines)
+
+
+MAX_FILES_BYTES = 2_000_000
+
+
+def read_files(folder):
+    """Text files in <folder>/files/, keyed by file name."""
+    files, total = {}, 0
+    for path in sorted(glob.glob(os.path.join(folder, 'files', '*'))):
+        if not os.path.isfile(path):
+            continue
+        name = os.path.basename(path)
+        if not re.match(r'^[A-Za-z0-9_.-]+$', name):
+            raise ExerciseError(f'files/{name}: use letters, digits, "_", "-" and "." only')
+        with open(path, encoding='utf-8') as f:
+            files[name] = f.read()
+        total += len(files[name])
+    if total > MAX_FILES_BYTES:
+        raise ExerciseError(f'files/ is {total} bytes; keep it under {MAX_FILES_BYTES}')
+    return files
 
 
 def load_exercise(folder):
@@ -150,6 +206,7 @@ def load_exercise(folder):
         'starter': read('starter.py'),
         'solution': read('solution.py'),
         'tests': read('tests.py'),
+        'files': read_files(folder),
     }
 
 
@@ -157,14 +214,14 @@ def validate(ex):
     # The browser's timeout covers running only; allow extra time here for
     # importing packages such as NumPy.
     timeout = ex['timeout'] + 30
-    result = run_tests(ex['solution'], ex['tests'], timeout)
+    result = run_tests(ex['solution'], ex['tests'], timeout, ex['files'])
     if result is None:
         raise ExerciseError(f'solution.py timed out after {timeout}s')
     if result['status'] != 'ok' or result['total'] == 0 or result['passed'] != result['total']:
         if result['status'] == 'ok' and result['total'] == 0:
             raise ExerciseError('tests.py defines no test_* functions')
         raise ExerciseError('solution.py fails its tests:\n' + describe_failures(result))
-    starter = run_tests(ex['starter'], ex['tests'], timeout)
+    starter = run_tests(ex['starter'], ex['tests'], timeout, ex['files'])
     if starter is not None and starter['status'] == 'ok' and starter['passed'] == starter['total']:
         raise ExerciseError('starter.py already passes every test')
     return result['total']
@@ -177,8 +234,8 @@ def book_exclusions():
     return config.get('build', 'exclusions', fallback='').split()
 
 
-def embedded_ids():
-    """Exercise ids referenced from the book's Markdown files."""
+def embedded_ids(pattern=EMBED_PATTERN):
+    """Exercise (or playground) ids referenced from the book's Markdown files."""
     excluded = book_exclusions()
     found = {}
     for path in glob.glob(os.path.join(ROOT, '**', '*.md'), recursive=True):
@@ -187,9 +244,123 @@ def embedded_ids():
                 fnmatch.fnmatch(rel, pattern) for pattern in excluded):
             continue
         with open(path, encoding='utf-8') as f:
-            for ex_id in EMBED_PATTERN.findall(f.read()):
+            for ex_id in pattern.findall(f.read()):
                 found.setdefault(ex_id, []).append(rel)
     return found
+
+
+def count_section_exercises(md_path):
+    """Number of top-level items in the numbered list under "## Exercises"."""
+    count, inside = 0, False
+    with open(md_path, encoding='utf-8') as f:
+        for line in f:
+            if line.startswith('## '):
+                inside = line.strip() == '## Exercises'
+            elif inside and re.match(r'\d+\. ', line):
+                count += 1
+    return count
+
+
+def load_answers(known_ids):
+    """Load answers/**/*.yml. Returns ({page: [entry, ...]}, errors)."""
+    pages, errors = {}, []
+    for path in sorted(glob.glob(os.path.join(ANSWERS_DIR, '**', '*.yml'), recursive=True)):
+        rel = os.path.relpath(path, ANSWERS_DIR)
+        page = rel[:-len('.yml')].replace(os.sep, '/')
+        md = os.path.join(ROOT, page + '.md')
+        if not os.path.isfile(md):
+            errors.append(f'answers/{rel}: no matching {page}.md')
+            continue
+        with open(path, encoding='utf-8') as f:
+            entries = yaml.safe_load(f) or []
+        if not isinstance(entries, list):
+            errors.append(f'answers/{rel}: must be a list with one entry per exercise')
+            continue
+        expected = count_section_exercises(md)
+        if len(entries) != expected:
+            errors.append(f'answers/{rel}: has {len(entries)} entries, but {page}.md '
+                          f'has {expected} exercises')
+            continue
+        out = []
+        for i, entry in enumerate(entries, 1):
+            if not isinstance(entry, dict) or not set(entry) <= {'answer', 'exercise'}:
+                errors.append(f'answers/{rel}: entry {i} may only have "answer" and "exercise"')
+                continue
+            ex_id = entry.get('exercise')
+            if ex_id and ex_id not in known_ids:
+                errors.append(f'answers/{rel}: entry {i} uses unknown exercise "{ex_id}"')
+            out.append({'exercise': ex_id,
+                        'answer_html': render_markdown(entry.get('answer', ''))})
+        pages[page] = out
+    return pages, errors
+
+
+def load_playgrounds():
+    """Load and run-check playgrounds/*.yml. Returns ({id: data}, errors)."""
+    found, errors = {}, []
+    for path in sorted(glob.glob(os.path.join(PLAYGROUNDS_DIR, '*.yml'))):
+        pg_id = os.path.basename(path)[:-len('.yml')]
+        where = f'playgrounds/{pg_id}.yml'
+        with open(path, encoding='utf-8') as f:
+            meta = yaml.safe_load(f) or {}
+        if not ID_PATTERN.match(pg_id):
+            errors.append(f'{where}: name must be lowercase words joined by "-"')
+            continue
+        if set(meta) - PLAYGROUND_KEYS or not {'title', 'code', 'params'} <= set(meta):
+            errors.append(f'{where}: needs title, params and code (allowed: '
+                          f'{", ".join(sorted(PLAYGROUND_KEYS))})')
+            continue
+        params, defaults = [], {}
+        for p in meta['params']:
+            if not {'name', 'min', 'max', 'step', 'value'} <= set(p):
+                errors.append(f'{where}: each param needs name, min, max, step, value')
+                break
+            if not p['min'] <= p['value'] <= p['max']:
+                errors.append(f'{where}: param {p["name"]} default is outside [min, max]')
+            label = p.get('label', p['name'])
+            params.append({'name': p['name'], 'label': label,
+                           'label_html': render_markdown(label).strip()[3:-4],
+                           'min': p['min'], 'max': p['max'], 'step': p['step'],
+                           'value': p['value']})
+            defaults[p['name']] = p['value']
+        try:
+            proc = subprocess.run(
+                [sys.executable, '-I', '-c', _PLAYGROUND_SCRIPT, RUNTIME_DIR],
+                input=json.dumps([meta['code'], defaults]), capture_output=True,
+                text=True, timeout=120)
+            result = json.loads(proc.stdout.strip().splitlines()[-1])
+        except Exception as e:
+            errors.append(f'{where}: could not run: {e}')
+            continue
+        if result['status'] != 'ok':
+            errors.append(f'{where}: code fails with default values:\n{result["error"]}')
+        elif not result['outputs']:
+            errors.append(f'{where}: code produces no output (plot, print, or value)')
+        found[pg_id] = {'id': pg_id, 'title': str(meta['title']),
+                        'description_html': render_markdown(meta.get('description', '')),
+                        'params': params, 'code': meta['code'],
+                        'timeout': meta.get('timeout', 20)}
+    return found, errors
+
+
+def load_notes():
+    """notes/<chapter>/<section>.yml: a list of Markdown items."""
+    pages, errors = {}, []
+    for path in sorted(glob.glob(os.path.join(NOTES_DIR, '**', '*.yml'), recursive=True)):
+        rel = os.path.relpath(path, NOTES_DIR)
+        page = rel[:-len('.yml')].replace(os.sep, '/')
+        if not os.path.isfile(os.path.join(ROOT, page + '.md')):
+            errors.append(f'notes/{rel}: no matching {page}.md')
+            continue
+        with open(path, encoding='utf-8') as f:
+            items = yaml.safe_load(f) or []
+        if not isinstance(items, list) or not all(isinstance(i, str) for i in items):
+            errors.append(f'notes/{rel}: must be a list of Markdown strings')
+            continue
+        html_items = ''.join(f'<li>{render_markdown(i).strip()}</li>' for i in items)
+        pages[page] = {'html': f'<ul>{html_items}</ul>',
+                       'text': '\n'.join('- ' + ' '.join(i.split()) for i in items)}
+    return pages, errors
 
 
 def main():
@@ -215,10 +386,21 @@ def main():
         if ex_id not in known:
             errors.append(f'{", ".join(files)}: embeds unknown exercise "{ex_id}"')
 
+    answers, answer_errors = load_answers(known)
+    errors += answer_errors
+    playgrounds, pg_errors = load_playgrounds()
+    errors += pg_errors
+    for pg_id, files in embedded_ids(PLAYGROUND_EMBED).items():
+        if pg_id not in playgrounds:
+            errors.append(f'{", ".join(files)}: embeds unknown playground "{pg_id}"')
+    notes, note_errors = load_notes()
+    errors += note_errors
+
     if errors:
         print('\nExercise check failed:\n\n' + '\n\n'.join(errors), file=sys.stderr)
         sys.exit(1)
-    print(f'{len(exercises)} exercises OK')
+    print(f'{len(exercises)} exercises, answers for {len(answers)} sections, '
+          f'{len(playgrounds)} playgrounds, notes for {len(notes)} sections: OK')
 
     if args.out:
         os.makedirs(args.out, exist_ok=True)
@@ -227,7 +409,24 @@ def main():
                 json.dump(ex, f, ensure_ascii=False)
         for name in RUNTIME_FILES:
             shutil.copy(os.path.join(RUNTIME_DIR, name), args.out)
-        print(f'Wrote {len(exercises)} exercises to {args.out}')
+        answers_out = os.path.join(os.path.dirname(os.path.abspath(args.out)), 'answers')
+        for page, entries in answers.items():
+            path = os.path.join(answers_out, page + '.json')
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump({'answers': entries}, f, ensure_ascii=False)
+        static_out = os.path.dirname(os.path.abspath(args.out))
+        for pg_id, data in playgrounds.items():
+            os.makedirs(os.path.join(static_out, 'playgrounds'), exist_ok=True)
+            with open(os.path.join(static_out, 'playgrounds', pg_id + '.json'), 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False)
+        for page, data in notes.items():
+            path = os.path.join(static_out, 'notes', page + '.json')
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False)
+        print(f'Wrote {len(exercises)} exercises, answers for {len(answers)} sections, '
+              f'{len(playgrounds)} playgrounds, notes for {len(notes)} sections')
 
 
 if __name__ == '__main__':

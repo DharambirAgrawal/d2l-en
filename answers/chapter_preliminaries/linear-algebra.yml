@@ -1,0 +1,113 @@
+# Answers for chapter_preliminaries/linear-algebra.md "Exercises", in order.
+- answer: |
+    By definition, $[\mathbf{A}^\top]_{ij} = a_{ji}$. Apply it twice:
+    $[(\mathbf{A}^\top)^\top]_{ij} = [\mathbf{A}^\top]_{ji} = a_{ij}$.
+    Every entry equals the corresponding entry of $\mathbf{A}$, so
+    $(\mathbf{A}^\top)^\top = \mathbf{A}$. (Shapes also check out:
+    $m \times n \to n \times m \to m \times n$.)
+- answer: |
+    Compare entry $(i, j)$ of both sides:
+    $[(\mathbf{A} + \mathbf{B})^\top]_{ij} = [\mathbf{A} + \mathbf{B}]_{ji} = a_{ji} + b_{ji} = [\mathbf{A}^\top]_{ij} + [\mathbf{B}^\top]_{ij}$.
+    All entries agree, so $\mathbf{A}^\top + \mathbf{B}^\top = (\mathbf{A} + \mathbf{B})^\top$.
+- answer: |
+    Yes. Using the previous two exercises:
+    $(\mathbf{A} + \mathbf{A}^\top)^\top = \mathbf{A}^\top + (\mathbf{A}^\top)^\top = \mathbf{A}^\top + \mathbf{A} = \mathbf{A} + \mathbf{A}^\top$.
+    It equals its own transpose, so it is symmetric. (Squareness is needed
+    so that $\mathbf{A} + \mathbf{A}^\top$ is defined.)
+- answer: |
+    `len(X)` is **2**: `len` returns the length of the first axis (axis 0),
+    and `X` has shape (2, 3, 4).
+
+    ```python
+    X = torch.arange(24).reshape(2, 3, 4)
+    len(X)   # 2
+    ```
+- answer: |
+    Yes, always **axis 0**: `len(X) == X.shape[0]`. It treats the tensor as a
+    sequence of sub-tensors along the first axis (that's also what
+    `for x in X:` iterates over). A 0-dimensional (scalar) tensor has no
+    axis 0, so `len` raises an error.
+- exercise: row-normalize
+  answer: |
+    With the section's `A` of shape (2, 3), `A.sum(axis=1)` has shape (2,).
+    Broadcasting aligns shapes **from the right**, so (2, 3) with (2,)
+    compares 3 with 2 and **fails** with a shape error.
+
+    For a square matrix it runs but silently computes the **wrong** thing:
+    the (n,) vector broadcasts as a row, so column $j$ is divided by row sum
+    $j$. The fix is to keep the reduced axis:
+
+    ```python
+    A / A.sum(axis=1, keepdims=True)   # shape (m, 1): each row sums to 1
+    ```
+
+    Lesson: always check shapes when combining reductions with broadcasting.
+- answer: |
+    In a grid of avenues and streets you can only move along them, so the
+    distance is $|\Delta \textrm{avenues}| + |\Delta \textrm{streets}|$: the
+    $\ell_1$ norm of the difference, also called the **Manhattan distance**.
+    You can't travel diagonally through buildings (unless you cut across
+    a park or plaza). The straight-line ("as the crow flies") distance would
+    be the $\ell_2$ norm, which is always $\leq$ the $\ell_1$ distance.
+- exercise: sum-shapes
+  answer: |
+    Summing removes the chosen axis:
+
+    - `axis=0`: (3, 4)
+    - `axis=1`: (2, 4)
+    - `axis=2`: (2, 3)
+
+    With `keepdims=True`, the reduced axis stays with length 1: (1, 3, 4),
+    (2, 1, 4), (2, 3, 1).
+- answer: |
+    It computes the square root of the sum of the squares of **all**
+    elements, i.e. the $\ell_2$ norm of the tensor flattened into one long
+    vector (the Frobenius norm generalized to any order):
+
+    ```python
+    X = torch.arange(24, dtype=torch.float32).reshape(2, 3, 4)
+    torch.linalg.norm(X), torch.sqrt((X ** 2).sum())   # equal
+    ```
+
+    (`numpy.linalg.norm` behaves the same with no `axis` argument; with
+    `axis=` it computes vector or matrix norms along those axes.)
+- exercise: matmul-chain-order
+  answer: |
+    Yes, a huge difference. Multiplying $(n \times k)$ by $(k \times m)$
+    costs about $nkm$ multiply-adds and creates an $n \times m$ result.
+
+    - $(\mathbf{AB})\mathbf{C}$: $\mathbf{AB}$ is $2^{10} \times 2^5$ (tiny, $2^{15}$
+      entries), costing $2^{10} \cdot 2^{16} \cdot 2^5 = 2^{31}$, then
+      $2^{10} \cdot 2^5 \cdot 2^{14} = 2^{29}$. Total about $2.7 \times 10^9$.
+    - $\mathbf{A}(\mathbf{BC})$: $\mathbf{BC}$ is $2^{16} \times 2^{14}$ ($2^{30}$
+      entries, 4 GB in float32!), costing $2^{35}$, then
+      $2^{10} \cdot 2^{16} \cdot 2^{14} = 2^{40}$. Total about $1.1 \times 10^{12}$.
+
+    So $(\mathbf{AB})\mathbf{C}$ is about 400$\times$ faster and needs far less
+    memory, because its intermediate product is small. Same mathematical
+    result, very different cost.
+- answer: |
+    $\mathbf{AB}$ and $\mathbf{AC}^\top$ have the same shapes and the same
+    number of operations, but speed can differ because of **memory layout**.
+    Tensors are stored row-major: `C.T` doesn't move data, it's a *view*
+    with swapped strides, so reading its "columns" jumps around memory and
+    is less cache-friendly. Matrix multiplication libraries often handle
+    transposed inputs well, so measure: in practice the gap is usually
+    small to moderate.
+
+    If you set `C = B.T` without cloning, `C` is just a strided view of
+    `B`'s memory, so $\mathbf{AC}^\top = \mathbf{A}(\mathbf{B}^\top)^\top$
+    reads exactly the same memory as $\mathbf{AB}$, in the same order, and
+    the speed is the same as $\mathbf{AB}$. (And changing `B` in place would
+    change `C` too.)
+- exercise: stack-and-slice
+  answer: |
+    ```python
+    A, B, C = (torch.randn(100, 200) for _ in range(3))
+    T = torch.stack([A, B, C], dim=2)   # stack along a new third axis
+    T.shape                              # (100, 200, 3)
+    (T[:, :, 1] == B).all()             # True: second coordinate of axis 2
+    ```
+
+    The tensor has shape $100 \times 200 \times 3$ (three axes, 60,000
+    elements). Index 1 along the third axis is the second matrix, $\mathbf{B}$.

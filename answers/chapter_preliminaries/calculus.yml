@@ -1,0 +1,80 @@
+# Answers for chapter_preliminaries/calculus.md "Exercises", in order.
+- answer: |
+    Use $f'(x) = \lim_{h \to 0} \frac{f(x+h) - f(x)}{h}$.
+
+    - **(i)** $f(x) = c$: $\frac{c - c}{h} = 0$, so $f'(x) = 0$.
+    - **(ii)** $f(x) = x^n$ (integer $n$): by the binomial theorem,
+      $(x+h)^n = x^n + n x^{n-1} h + O(h^2)$, so the quotient is
+      $n x^{n-1} + O(h) \to n x^{n-1}$.
+    - **(iii)** $f(x) = e^x$: $\frac{e^{x+h} - e^x}{h} = e^x \frac{e^h - 1}{h}$
+      and $\lim_{h\to 0}\frac{e^h - 1}{h} = 1$ (the defining property of $e$),
+      so $f'(x) = e^x$.
+    - **(iv)** $f(x) = \log x$: $\frac{\log(x+h) - \log x}{h} = \frac{1}{h}\log\left(1 + \frac{h}{x}\right)$.
+      Substituting $u = h/x$, this is $\frac{1}{x}\cdot\frac{\log(1+u)}{u} \to \frac{1}{x}$,
+      since $\frac{\log(1+u)}{u} \to 1$.
+- answer: |
+    **Sum:** $\frac{[f(x+h)+g(x+h)] - [f(x)+g(x)]}{h} = \frac{f(x+h)-f(x)}{h} + \frac{g(x+h)-g(x)}{h} \to f' + g'$.
+
+    **Product:** add and subtract $f(x+h)g(x)$:
+    $\frac{f(x+h)g(x+h) - f(x)g(x)}{h} = f(x+h)\frac{g(x+h)-g(x)}{h} + g(x)\frac{f(x+h)-f(x)}{h} \to f g' + g f'$
+    (using that differentiable $f$ is continuous, so $f(x+h) \to f(x)$).
+
+    **Quotient:** write $f/g = f \cdot (1/g)$. From the definition,
+    $\frac{1/g(x+h) - 1/g(x)}{h} = -\frac{g(x+h) - g(x)}{h} \cdot \frac{1}{g(x+h)g(x)} \to -\frac{g'}{g^2}$.
+    Then the product rule gives $\frac{f'}{g} - \frac{f g'}{g^2} = \frac{g f' - f g'}{g^2}$.
+- answer: |
+    Take $g(x) = C$ in the product rule: $\frac{d}{dx}[C f(x)] = C f'(x) + f(x) \cdot \frac{d}{dx}C = C f'(x) + 0 = C f'(x)$.
+- answer: |
+    Write $x^x = e^{x \log x}$ (for $x > 0$). By the chain rule,
+    $\frac{d}{dx} x^x = e^{x \log x} \cdot \frac{d}{dx}(x \log x) = x^x (\log x + 1)$.
+- answer: |
+    $f'(x) = 0$ means the tangent is **horizontal**: to first order, the
+    function doesn't change near $x$. These are *stationary points*: a local
+    minimum, a local maximum, or a saddle/inflection point.
+
+    Examples: $f(x) = x^2$ at $x = 0$ (minimum), $f(x) = -x^2$ at $0$
+    (maximum), $f(x) = x^3$ at $0$ (neither). In optimization, gradient
+    descent stops moving where the gradient is zero, which is why we look for
+    minima there, and why saddle points can slow training down.
+- exercise: tangent-line
+  answer: |
+    $f'(x) = 3x^2 + \frac{1}{x^2}$, so $f'(1) = 4$, and $f(1) = 1 - 1 = 0$.
+    The tangent at $x = 1$ is $y = 4(x - 1) = 4x - 4$.
+
+    ```python
+    x = np.arange(0.2, 3, 0.01)
+    d2l.plot(x, [x ** 3 - 1 / x, 4 * x - 4], 'x', 'f(x)',
+             legend=['f(x)', 'Tangent line (x=1)'])
+    ```
+- exercise: numerical-gradient
+  answer: |
+    $\nabla f(\mathbf{x}) = \left[\frac{\partial f}{\partial x_1}, \frac{\partial f}{\partial x_2}\right]^\top = [6x_1,\; 5e^{x_2}]^\top$.
+- answer: |
+    $f(\mathbf{x}) = \|\mathbf{x}\|_2 = \sqrt{\sum_i x_i^2}$. By the chain
+    rule, $\frac{\partial f}{\partial x_i} = \frac{1}{2\sqrt{\sum_j x_j^2}} \cdot 2x_i = \frac{x_i}{\|\mathbf{x}\|_2}$,
+    so $\nabla f(\mathbf{x}) = \frac{\mathbf{x}}{\|\mathbf{x}\|_2}$, a unit
+    vector pointing away from the origin.
+
+    At $\mathbf{x} = \mathbf{0}$ this divides by zero: the norm is **not
+    differentiable** there. Its graph is a cone with a sharp tip at the
+    origin, where no single tangent plane exists. (Frameworks typically
+    return 0 or `nan` there; using $\|\mathbf{x}\|^2$ instead avoids the
+    problem.)
+- answer: |
+    $u$ depends on $a$ through all three paths ($x$, $y$, $z$), so we add
+    the contributions:
+
+    $$\frac{\partial u}{\partial a} = \frac{\partial u}{\partial x}\frac{\partial x}{\partial a} + \frac{\partial u}{\partial y}\frac{\partial y}{\partial a} + \frac{\partial u}{\partial z}\frac{\partial z}{\partial a},$$
+    $$\frac{\partial u}{\partial b} = \frac{\partial u}{\partial x}\frac{\partial x}{\partial b} + \frac{\partial u}{\partial y}\frac{\partial y}{\partial b} + \frac{\partial u}{\partial z}\frac{\partial z}{\partial b}.$$
+
+    In matrix form, $\nabla_{(a,b)} u$ is the $2 \times 3$ matrix of
+    derivatives of $(x, y, z)$ with respect to $(a, b)$ times
+    $\nabla_{(x,y,z)} u$, matching the section's $\nabla_{\mathbf{x}} y = \mathbf{A} \nabla_{\mathbf{u}} y$.
+- answer: |
+    Differentiate both sides of $f(f^{-1}(x)) = x$ with the chain rule:
+    $f'(f^{-1}(x)) \cdot (f^{-1})'(x) = 1$, so
+
+    $$(f^{-1})'(x) = \frac{1}{f'(f^{-1}(x))},$$
+
+    valid wherever $f'(f^{-1}(x)) \neq 0$. Example: $f(x) = e^x$,
+    $f^{-1}(x) = \log x$, so $(\log x)' = \frac{1}{e^{\log x}} = \frac{1}{x}$.

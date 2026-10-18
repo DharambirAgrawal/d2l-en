@@ -345,19 +345,3 @@ Saving the architecture has to be done in code rather than in parameters.
 1. Even if there is no need to deploy trained models to a different device, what are the practical benefits of storing model parameters?
 1. Assume that we want to reuse only parts of a network to be incorporated into a network having a different architecture. How would you go about using, say the first two layers from a previous network in a new network?
 1. How would you go about saving the network architecture and parameters? What restrictions would you impose on the architecture?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/60)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/61)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/327)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/17994)
-:end_tab:

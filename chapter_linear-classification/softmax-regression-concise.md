@@ -248,19 +248,3 @@ FP32 single precision, BFLOAT16 (good for compressed representations), FP16 (ver
 1. INT8 is a very limited format consisting of nonzero numbers from $1$ to $255$. How could you extend its dynamic range without using more bits? Do standard multiplication and addition still work?
 1. Increase the number of epochs for training. Why might the validation accuracy decrease after a while? How could we fix this?
 1. What happens as you increase the learning rate? Compare the loss curves for several learning rates. Which one works better? When?
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/52)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/53)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/260)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/17983)
-:end_tab:

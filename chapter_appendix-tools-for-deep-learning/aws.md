@@ -262,6 +262,3 @@ environments.
 1. The cloud offers convenience, but it does not come cheap. Find out how to launch [spot instances](https://aws.amazon.com/ec2/spot/) to see how to reduce costs.
 1. Experiment with different GPU servers. How fast are they?
 1. Experiment with multi-GPU servers. How well can you scale things up?
-
-
-[Discussions](https://discuss.d2l.ai/t/423)

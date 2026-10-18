@@ -648,19 +648,3 @@ often dramatically.
 1. Does causality also apply to text? To which extent?
 1. Give an example for when a latent autoregressive model
    might be needed to capture the dynamic of the data.
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/113)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/114)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/1048)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/18010)
-:end_tab:

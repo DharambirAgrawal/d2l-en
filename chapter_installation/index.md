@@ -1,30 +1,20 @@
 # Installation
 :label:`chap_installation`
 
-In order to get up and running,
-we will need an environment for running Python,
-the Jupyter Notebook, the relevant libraries,
-and the code needed to run the book itself.
+To run the book's code, you need Python, Jupyter Notebook, the relevant
+libraries, and the book's notebooks.
+
+The interactive exercises on this site run Python directly in your browser,
+so you don't need any of this to do them. Set up a local environment when you
+want to run the book's PyTorch code yourself.
 
 ## Installing Miniconda
 
-Your simplest option is to install
-[Miniconda](https://conda.io/en/latest/miniconda.html).
-Note that the Python 3.x version is required.
-You can skip the following steps
-if your machine already has conda installed.
-
-Visit the Miniconda website and determine
-the appropriate version for your system
-based on your Python 3.x version and machine architecture.
-Suppose that your Python version is 3.9
-(our tested version).
-If you are using macOS,
-you would download the bash script
-whose name contains the strings "MacOSX",
-navigate to the download location,
-and execute the installation as follows
-(taking Intel Macs as an example):
+The simplest option is [Miniconda](https://conda.io/en/latest/miniconda.html)
+(Python 3.x is required; skip this if you already have conda). Download the
+version for your system and architecture. For Python 3.9 (our tested
+version) on an Intel Mac, download the script whose name contains "MacOSX"
+and run it from the download location:
 
 ```bash
 # The file name is subject to changes
@@ -32,10 +22,7 @@ sh Miniconda3-py39_4.12.0-MacOSX-x86_64.sh -b
 ```
 
 
-A Linux user
-would download the file
-whose name contains the strings "Linux"
-and execute the following at the download location:
+On Linux, download the file whose name contains "Linux" and run:
 
 ```bash
 # The file name is subject to changes
@@ -43,26 +30,24 @@ sh Miniconda3-py39_4.12.0-Linux-x86_64.sh -b
 ```
 
 
-A Windows user would download and install Miniconda by following its [online instructions](https://conda.io/en/latest/miniconda.html).
-On Windows, you may search for `cmd` to open the Command Prompt (command-line interpreter) for running commands.
+On Windows, follow the [online instructions](https://conda.io/en/latest/miniconda.html),
+and use the Command Prompt (search for `cmd`) to run commands.
 
-Next, initialize the shell so we can run `conda` directly.
+Next, initialize the shell so you can run `conda` directly:
 
 ```bash
 ~/miniconda3/bin/conda init
 ```
 
 
-Then close and reopen your current shell.
-You should be able to create
-a new environment as follows:
+Close and reopen your shell, then create a new environment:
 
 ```bash
 conda create --name d2l python=3.9 -y
 ```
 
 
-Now we can activate the `d2l` environment:
+and activate it:
 
 ```bash
 conda activate d2l
@@ -71,60 +56,16 @@ conda activate d2l
 
 ## Installing the Deep Learning Framework and the `d2l` Package
 
-Before installing any deep learning framework,
-please first check whether or not
-you have proper GPUs on your machine
-(the GPUs that power the display
-on a standard laptop are not relevant for our purposes).
-For example,
-if your computer has NVIDIA GPUs and has installed [CUDA](https://developer.nvidia.com/cuda-downloads),
-then you are all set.
-If your machine does not house any GPU,
-there is no need to worry just yet.
-Your CPU provides more than enough horsepower
-to get you through the first few chapters.
-Just remember that you will want to access GPUs
-before running larger models.
-
-
-:begin_tab:`mxnet`
-
-To install a GPU-enabled version of MXNet,
-we need to find out what version of CUDA you have installed.
-You can check this by running `nvcc --version`
-or `cat /usr/local/cuda/version.txt`.
-Assume that you have installed CUDA 11.2,
-then execute the following command:
-
-```bash
-# For macOS and Linux users
-pip install mxnet-cu112==1.9.1
-
-# For Windows users
-pip install mxnet-cu112==1.9.1 -f https://dist.mxnet.io/python
-```
-
-
-You may change the last digits according to your CUDA version, e.g., `cu101` for
-CUDA 10.1 and `cu90` for CUDA 9.0.
-
-
-If your machine has no NVIDIA GPUs
-or CUDA,
-you can install the CPU version
-as follows:
-
-```bash
-pip install mxnet==1.9.1
-```
-
-
-:end_tab:
+First check whether your machine has a suitable GPU (the display GPU of a
+standard laptop doesn't count). If you have NVIDIA GPUs with
+[CUDA](https://developer.nvidia.com/cuda-downloads) installed, you're all set.
+If not, don't worry: a CPU is plenty for the first few chapters. You'll want
+GPU access before training larger models.
 
 
 :begin_tab:`pytorch`
 
-You can install PyTorch (the specified versions are tested at the time of writing) with either CPU or GPU support as follows:
+Install PyTorch (these versions were tested at the time of writing) with CPU or GPU support:
 
 ```bash
 pip install torch==2.0.0 torchvision==0.15.1
@@ -152,10 +93,7 @@ pip install "jax[cuda11_pip]==0.4.13" -f https://storage.googleapis.com/jax-rele
 ```
 
 
-If your machine has no NVIDIA GPUs
-or CUDA,
-you can install the CPU version
-as follows:
+Without NVIDIA GPUs or CUDA, install the CPU version:
 
 ```bash
 # CPU
@@ -166,11 +104,8 @@ pip install "jax[cpu]==0.4.13" flax==0.7.0
 :end_tab:
 
 
-Our next step is to install
-the `d2l` package that we developed
-in order to encapsulate
-frequently used functions and classes
-found throughout this book:
+Then install the `d2l` package, which bundles the functions and classes used
+throughout the book:
 
 ```bash
 pip install d2l==1.0.3
@@ -179,26 +114,9 @@ pip install d2l==1.0.3
 
 ## Downloading and Running the Code
 
-Next, you will want to download the notebooks
-so that you can run each of the book's code blocks.
-Simply click on the "Notebooks" tab at the top
-of any HTML page on [the D2L.ai website](https://d2l.ai/)
-to download the code and then unzip it.
-Alternatively, you can fetch the notebooks
-from the command line as follows:
-
-:begin_tab:`mxnet`
-
-```bash
-mkdir d2l-en && cd d2l-en
-curl https://d2l.ai/d2l-en-1.0.3.zip -o d2l-en.zip
-unzip d2l-en.zip && rm d2l-en.zip
-cd mxnet
-```
-
-
-:end_tab:
-
+Download the notebooks so you can run each code block: click "Notebooks" at
+the top of any page on [the D2L.ai website](https://d2l.ai/) and unzip the
+file, or fetch them from the command line:
 
 :begin_tab:`pytorch`
 
@@ -236,40 +154,15 @@ cd jax
 
 :end_tab:
 
-If you do not already have `unzip` installed, first run `sudo apt-get install unzip`.
-Now we can start the Jupyter Notebook server by running:
+(If `unzip` is missing, run `sudo apt-get install unzip` first.) Start the
+Jupyter Notebook server:
 
 ```bash
 jupyter notebook
 ```
 
 
-At this point, you can open http://localhost:8888
-(it may have already opened automatically) in your web browser.
-Then we can run the code for each section of the book.
-Whenever you open a new command line window,
-you will need to execute `conda activate d2l`
-to activate the runtime environment
-before running the D2L notebooks,
-or updating your packages
-(either the deep learning framework
-or the `d2l` package).
-To exit the environment,
-run `conda deactivate`.
-
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/23)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/24)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/436)
-:end_tab:
-
-:begin_tab:`jax`
-[Discussions](https://discuss.d2l.ai/t/17964)
-:end_tab:
+Open http://localhost:8888 in your browser (it may open automatically) and run
+the code for each section. In every new terminal window, run
+`conda activate d2l` before running the notebooks or updating packages, and
+`conda deactivate` to leave the environment.

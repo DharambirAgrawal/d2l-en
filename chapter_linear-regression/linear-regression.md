@@ -746,15 +746,3 @@ and ultimately, evaluation on previously unseen data.
     1. The [Poisson distribution](https://en.wikipedia.org/wiki/Poisson_distribution) captures distributions over counts. It is given by $p(k \mid \lambda) = \lambda^k e^{-\lambda}/k!$. Here $\lambda$ is the rate function and $k$ is the number of events you see. Prove that $\lambda$ is the expected value of counts $k$.
     1. Design a loss function associated with the Poisson distribution.
     1. Design a loss function for estimating $\log \lambda$ instead.
-
-:begin_tab:`mxnet`
-[Discussions](https://discuss.d2l.ai/t/40)
-:end_tab:
-
-:begin_tab:`pytorch`
-[Discussions](https://discuss.d2l.ai/t/258)
-:end_tab:
-
-:begin_tab:`tensorflow`
-[Discussions](https://discuss.d2l.ai/t/259)
-:end_tab:

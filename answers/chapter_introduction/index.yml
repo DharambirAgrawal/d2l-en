@@ -1,0 +1,50 @@
+# Answers for chapter_introduction/index.md "Exercises", in order.
+- answer: |
+    Look for **hand-tuned rules and magic numbers**: thresholds ("flag if
+    more than 5 failed logins"), priority weights, retry timeouts, ranking
+    formulas, spam keyword lists, autocomplete suggestions. These are
+    heuristic design choices that could be *learned*.
+
+    To learn them you need **examples of the desired behavior**: logs of
+    inputs together with outcomes (which logins were actually attacks, which
+    search results users clicked, how long requests actually took). A useful
+    test: if you keep adjusting a rule by hand after looking at data, that
+    rule is a learning problem in disguise.
+- answer: |
+    Good candidates have **many examples but no explicit recipe**:
+
+    - recognizing objects, faces, or handwriting in photos,
+    - transcribing speech or translating text,
+    - judging whether an email is spam or a review is fake,
+    - predicting delivery times or which product a customer will want next.
+
+    You can produce correct answers (or have historical ones), but you
+    can't write down the rules that produce them. That's exactly the
+    "programming with data" setting from the motivating example.
+- answer: |
+    **Algorithms** are only useful if **data** and **computation** can feed
+    them:
+
+    - With little data, simple models with strong assumptions (linear models,
+      kernels) work better; flexible models overfit.
+    - With lots of data but little compute, you need cheap algorithms.
+    - With lots of data *and* compute (GPUs), large deep networks become the
+      best choice. This is why neural networks "came back" around 2010
+      (see the table in the Road to Deep Learning section).
+
+    Memory also matters: data has grown faster than memory, so algorithms
+    must stream data in minibatches instead of loading everything at once.
+- answer: |
+    Places where pipelines are still built from separately tuned parts:
+
+    - **Self-driving cars**: perception, prediction, and planning are often
+      separate modules with hand-written rules in between.
+    - **Search and recommendation**: candidate retrieval, ranking, and
+      business rules are tuned separately.
+    - **Robotics**: state estimation and control are designed separately.
+    - **Speech assistants**: speech recognition, language understanding, and
+      dialogue management.
+
+    End-to-end training could optimize the final goal directly instead of
+    each proxy, though it needs much more data and is harder to debug and
+    certify, which is why it isn't the default in safety-critical systems.

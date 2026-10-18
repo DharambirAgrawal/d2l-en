@@ -375,5 +375,3 @@ This algorithm converges rapidly (for an analysis and proof see e.g., :citet:`Bo
     1. Use the absolute values of that rather than the actual (possibly signed) values.
     1. Apply this to the problem above.
 1. Apply the algorithm above to a number of objective functions (convex or not). What happens if you rotate coordinates by $45$ degrees?
-
-[Discussions](https://discuss.d2l.ai/t/351)
