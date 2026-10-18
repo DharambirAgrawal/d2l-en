@@ -19,6 +19,8 @@ Usage:
                                                       # DIR/<id>.json + runtime files
 """
 import argparse
+import configparser
+import fnmatch
 import glob
 import html
 import json
@@ -168,12 +170,21 @@ def validate(ex):
     return result['total']
 
 
+def book_exclusions():
+    """The `exclusions` patterns from config.ini (files not in the book)."""
+    config = configparser.ConfigParser(interpolation=None)
+    config.read(os.path.join(ROOT, 'config.ini'), encoding='utf-8')
+    return config.get('build', 'exclusions', fallback='').split()
+
+
 def embedded_ids():
-    """Exercise ids referenced from chapter Markdown files."""
+    """Exercise ids referenced from the book's Markdown files."""
+    excluded = book_exclusions()
     found = {}
     for path in glob.glob(os.path.join(ROOT, '**', '*.md'), recursive=True):
         rel = os.path.relpath(path, ROOT)
-        if rel.startswith(('_build', '.')):
+        if rel.startswith(('_build', '.')) or any(
+                fnmatch.fnmatch(rel, pattern) for pattern in excluded):
             continue
         with open(path, encoding='utf-8') as f:
             for ex_id in EMBED_PATTERN.findall(f.read()):
