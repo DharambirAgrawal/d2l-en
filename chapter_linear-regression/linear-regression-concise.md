@@ -233,6 +233,12 @@ def loss(self, params, X, y, state):
     return d2l.reduce_mean(optax.l2_loss(y_hat, y))
 ```
 
+Squared loss is not the only choice. Compare it with two robust alternatives:
+
+```{=html}
+<div class="d2l-playground" data-playground="loss-shapes"></div>
+```
+
 ## Defining the Optimization Algorithm
 
 :begin_tab:`mxnet`

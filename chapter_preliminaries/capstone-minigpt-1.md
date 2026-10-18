@@ -1,17 +1,19 @@
-# Capstone, Part 1: MiniGPT from Counts
+# Capstone: Quill, Part 1
 :label:`sec_capstone_minigpt_1`
 
-**The capstone:** across the whole book, you'll build your own ChatGPT-like
-model, one part per chapter, in a single GitHub repository (say,
-`minigpt`). Each part uses only what you have learned so far and must beat
+*Letters from counts: the first page of your own GPT.*
+
+**The capstone:** across the whole book, you'll build **Quill**, your own
+ChatGPT-like model, one part per chapter, in a single GitHub repository
+(`quill`). Each part uses only what you have learned so far and must beat
 the previous part's results. By the end, you'll have a small Transformer
 language model that you understand line by line.
 
 | Part | After chapter | You add |
 |:--|:--|:--|
 | **1** | **2. Preliminaries** | **Tokenizer, bigram model from counts, sampling, perplexity, softmax gradient** |
-| 2 | 3--4. Linear networks | Train the bigram model as a neural network with gradient descent |
-| 3 | 5. Multilayer perceptrons | Longer context: an MLP over the previous few characters |
+| 2 | 3. Linear regression | Train the bigram model as a neural network with minibatch SGD |
+| 3 | 4--5. Classification, MLPs | Longer context: an MLP over the previous few characters |
 | ... | 9--10. RNNs | A recurrent language model |
 | ... | 11. Attention and Transformers | Self-attention, then a full GPT-style Transformer |
 
@@ -78,15 +80,15 @@ held-out text.
 
 ## For Your README and Resume
 
-Structure the repo so it can grow: `minigpt/tokenizer.py`, `minigpt/bigram.py`,
-`minigpt/train.py` (later parts), `notebooks/`, `tests/`, and a README with
+Structure the repo so it can grow: `quill/tokenizer.py`, `quill/bigram.py`,
+`quill/train.py` (later parts), `notebooks/`, `tests/`, and a README with
 a results table that gains one row per part:
 
 | Part | Model | Held-out perplexity |
 |:--|:--|:--|
 | 1 | Character bigram (counts) | about 11.4 |
 
-> *Building a GPT-style language model from scratch in NumPy/PyTorch,
+> *Building **Quill**, a GPT-style language model from scratch in NumPy/PyTorch,
 > part by part: character tokenizer, n-gram baseline, neural training with
 > hand-derived gradients, and (in progress) self-attention and Transformer
 > layers; tracking held-out perplexity at each stage.*

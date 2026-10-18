@@ -1,0 +1,19 @@
+title: "Huber Loss: Robust to Outliers"
+difficulty: medium
+timeout: 10
+description: |
+  Squared loss punishes big errors so hard that one bad label can dominate
+  training; absolute loss is robust but has a kink at zero. **Huber loss**
+  combines them (Exercise 2, with $\sigma$ as the threshold):
+
+  $$l(y, y') = \begin{cases}|y-y'| -\frac{\sigma}{2} & \textrm{ if } |y-y'| > \sigma \\ \frac{1}{2 \sigma} (y-y')^2 & \textrm{ otherwise}\end{cases}$$
+
+  Write `huber(y_hat, y, sigma=1.0)` (mean over examples) and
+  `huber_grad(y_hat, y, sigma=1.0)` (its gradient with respect to `y_hat`).
+explanation: |
+  Inside $[-\sigma, \sigma]$ the loss is quadratic, so the gradient
+  $(\hat{y} - y)/\sigma$ shrinks smoothly to zero; outside, it is linear, so
+  the gradient is capped at $\pm 1$. Large errors (outliers) therefore pull
+  on the model with bounded force. That's the "cheap combination" Exercise 8
+  of the previous section asks for. PyTorch's `nn.HuberLoss` /
+  `nn.SmoothL1Loss` implement this.

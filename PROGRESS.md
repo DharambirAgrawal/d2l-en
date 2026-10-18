@@ -54,6 +54,10 @@ site should respect them.
     a slider (not only after I let go).
 13. **Clean, calm UI:** neutral, readable design; no colorful side borders
     or flashy "AI-looking" decoration.
+14. **Project names are brand names, not robotic labels.** Name projects the
+    way Apple names products: one short, evocative, human word (like
+    "Pulse" or "Lumen"), plus a plain subtitle that says what it does.
+    Never "XYZ-Analyzer-v2"-style names.
 
 ---
 
@@ -190,6 +194,35 @@ new kind of data file.
   book order, links back to each subsection, "Show all sections", *Copy as
   text*, *Print / save as PDF*.
 
+### 2026-10-18: Chapter 3 (Linear Neural Networks for Regression)
+- Original text kept. **Answers** for all 41 exercises, **inline notes** for
+  every section, **6 coding exercises** (`mean-vs-median`, `poisson-loss`,
+  `reproducible-batches`, `linreg-sgd-numpy`, `huber-loss`,
+  `weight-decay-updates`), **4 playgrounds** (learning rate & batch size,
+  loss shapes, polynomial over/underfitting, weight decay strength).
+- **All Chapter 3 PyTorch examples run in the browser**, including the
+  `d2l.Module`/`Trainer` training loops with live loss plots:
+  - `tools/build_d2l_book.py` generates the browser's `d2l` library
+    (`_static/exercises/d2l_book.py`) from the book's own `#@save` cells,
+    exactly like the real `d2l` package (plus `save_hyperparameters`,
+    `ProgressBoard.draw` and device helpers from later sections). Add a
+    chapter to `CHAPTERS` there when preparing it.
+  - torchlite now has `nn.Module`, `nn.Parameter`, `nn.Linear`,
+    `nn.LazyLinear` (materialized in place, like PyTorch), `nn.MSELoss`,
+    `nn.Sequential`, `nn.init`, `optim.SGD` (weight decay, param groups),
+    `utils.data.TensorDataset`/`DataLoader`, `.data`, `normal_`/`fill_`.
+  - Verified: the scratch and concise models recover w = [2, -3.4],
+    b = 4.2 like the book; weight-decay norms match the book's output.
+- **Projects renamed to brand names** (requirement 14): 2.8 *Hush* (was
+  On-Call Alert Triage), capstone *Quill* (was MiniGPT).
+- **3.8 Project: Tempo**, honest delivery-time (ETA) estimates; data
+  `static/projects/deliveries.csv` (4,000 orders, 90 days). Reference test
+  MAE: average 9.4 → numeric 6.3 → +time 5.4 → +restaurants 4.2 → +Huber
+  4.0 min.
+- **3.9 Capstone: Quill, Part 2**, the bigram model trained by minibatch SGD;
+  reference: validation perplexity 11.7 after 3 epochs (lr 10, batch 256),
+  approaching the count baseline 11.4.
+
 ---
 
 ## Still on the site (possible next cleanups)
@@ -323,6 +356,7 @@ Pyodide 314+ must be loaded as a module worker (`import()`).
 ## To-do
 
 - [ ] Deploy the study-course update and try it on the live site.
-- [ ] Chapter 3 onward: same treatment (shorten, answers, notes, exercises,
-      playgrounds, project spec, Capstone Part 2), extending torchlite for
-      `nn`/training basics.
+- [x] Chapter 3: answers, notes, exercises, playgrounds, runnable training
+      loops, Tempo project, Quill Part 2.
+- [ ] Chapter 4 (classification): same treatment, Quill Part 3; torchlite
+      needs cross-entropy, softmax, `nn.Flatten`, image data (Fashion-MNIST).

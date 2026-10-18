@@ -1,0 +1,11 @@
+# Notes for chapter_linear-regression/synthetic-regression-data.md: each entry is shown at the end of the
+# section whose heading matches "after".
+- after: Generating the Dataset
+  notes:
+  - Synthetic data with known parameters ($\mathbf{w} = [2, -3.4]$, $b = 4.2$, noise $\sigma = 0.01$) lets you check whether training recovers the truth.
+- after: Reading the Dataset
+  notes:
+  - A data loader **shuffles** training examples each epoch and yields minibatches; validation data is read in order.
+- after: Concise Implementation of the Data Loader
+  notes:
+  - '`TensorDataset(X, y)` + `DataLoader(dataset, batch_size, shuffle=True)`; `len(loader)` = number of batches.'

@@ -1,0 +1,87 @@
+# Answers for chapter_linear-regression/linear-regression.md "Exercises", in order.
+- exercise: mean-vs-median
+  answer: |
+    1. Differentiate: $\frac{d}{db}\sum_i (x_i - b)^2 = -2\sum_i (x_i - b) = 0$
+       gives $b = \frac{1}{n}\sum_i x_i$, the **mean**.
+    2. Minimizing squared error is maximum likelihood for
+       $x_i \sim \mathcal{N}(b, \sigma^2)$: the negative log-likelihood is
+       $\frac{1}{2\sigma^2}\sum_i (x_i - b)^2 + \textrm{const}$. So the mean
+       is the MLE of a Gaussian's mean.
+    3. The (sub)derivative of $\sum_i |x_i - b|$ is $-\sum_i \textrm{sign}(x_i - b)$,
+       zero when as many points lie above $b$ as below: the **median** (any
+       point between the two middle values when $n$ is even). It corresponds
+       to Laplace noise and is robust to outliers.
+- answer: |
+    Append a constant 1 to the input and $b$ to the weights:
+    $\mathbf{x}^\top \mathbf{w} + b = [\mathbf{x}^\top, 1] \begin{bmatrix}\mathbf{w}\\ b\end{bmatrix}$.
+    Every affine function of $\mathbf{x}$ is a linear function of
+    $(\mathbf{x}, 1)$, and every linear function of $(\mathbf{x}, 1)$,
+    $[\mathbf{w}'^\top, c](\mathbf{x}, 1) = \mathbf{w}'^\top\mathbf{x} + c$,
+    is affine in $\mathbf{x}$. That's why the bias can be folded into the
+    weight matrix by adding a column of ones to $\mathbf{X}$.
+- answer: |
+    It's still *linear in the parameters*, so add features: build the input
+    vector $[x_i] \cup [x_i x_j]_{j \leq i}$ (all pairwise products) and feed
+    it to a single linear layer, whose weights are the $w_i$ and $w_{ij}$.
+    In a network, a "feature layer" that computes the products (or an
+    elementwise-multiplication layer) followed by `nn.Linear`. This is
+    polynomial feature expansion; deep networks instead *learn* nonlinear
+    features with hidden layers and activations.
+- answer: |
+    1. $\mathbf{X}^\top\mathbf{X}$ is singular, so it has no inverse and the
+       normal equations have **infinitely many** solutions (any direction in
+       the null space can be added). This happens with duplicated or linearly
+       dependent features, or more features than examples.
+    2. Add a little noise or, more principled, add $\lambda\mathbf{I}$
+       (ridge regression / weight decay): $(\mathbf{X}^\top\mathbf{X} + \lambda\mathbf{I})$
+       is invertible for any $\lambda > 0$. Adding independent Gaussian noise
+       of variance $\sigma^2$ to every entry of $\mathbf{X}$ does exactly
+       that on average.
+    3. With $\mathbf{X}' = \mathbf{X} + \mathbf{E}$, $E_{ij} \sim \mathcal{N}(0, \sigma^2)$:
+       $E[\mathbf{X}'^\top\mathbf{X}'] = \mathbf{X}^\top\mathbf{X} + E[\mathbf{E}^\top\mathbf{E}] = \mathbf{X}^\top\mathbf{X} + n\sigma^2\mathbf{I}$
+       (cross terms vanish because $E[\mathbf{E}] = 0$).
+    4. SGD still converges to *a* minimizer (the loss is still convex), but
+       which one depends on the initialization: starting from zero, it finds
+       the minimum-norm solution, since gradients always lie in the row space
+       of $\mathbf{X}$. It won't blow up; the flat directions simply never
+       move.
+- answer: |
+    1. $-\log P(\mathbf{y} \mid \mathbf{X}) = \sum_i |y_i - \mathbf{x}_i^\top\mathbf{w} - b| + n\log 2$.
+    2. No closed form: it's the **absolute** (L1) loss, whose minimizer is a
+       median-type solution found by linear programming, not a formula.
+    3. Minibatch SGD with the subgradient $-\textrm{sign}(y_i - \hat{y}_i)\,\mathbf{x}_i$.
+       Problem: the gradient has constant magnitude even near the optimum,
+       so with a fixed learning rate the parameters keep jumping back and
+       forth around the minimum instead of settling. Fixes: decay the
+       learning rate over time, or smooth the kink with the Huber loss
+       (quadratic near 0).
+- answer: |
+    Two linear layers compose into one linear layer:
+    $\mathbf{W}_2(\mathbf{W}_1\mathbf{x} + \mathbf{b}_1) + \mathbf{b}_2 = (\mathbf{W}_2\mathbf{W}_1)\mathbf{x} + (\mathbf{W}_2\mathbf{b}_1 + \mathbf{b}_2)$.
+    The stack can represent nothing more than a single affine map, so depth
+    adds parameters but no expressive power. You need a **nonlinear
+    activation** between the layers (Chapter 5) for depth to help.
+- answer: |
+    1. Prices are positive and their fluctuations scale with the price (a
+       \$1M house varies by much more than a \$100k house). Additive
+       Gaussian noise with fixed variance would allow negative prices and
+       assumes the same spread everywhere, both wrong.
+    2. With $y = \log\textrm{price}$, multiplicative noise becomes additive,
+       errors are relative (10% off is equally bad for cheap and expensive
+       items), and predictions $e^{\hat{y}}$ are always positive.
+    3. Prices move in discrete ticks (e.g. one cent). For a \$0.05 stock one
+       tick is 20% of the price, so the continuous-noise model breaks down
+       and quantization dominates; trading costs and illiquidity matter too.
+       Black–Scholes models log-returns for exactly this multiplicative
+       reason.
+- exercise: poisson-loss
+  answer: |
+    1. Sales are nonnegative **integers**, often small, and their variance
+       grows with the mean. Gaussian noise allows fractional and negative
+       values and assumes a constant variance.
+    2. $E[k] = \sum_{k\geq 0} k \frac{\lambda^k e^{-\lambda}}{k!} = \lambda e^{-\lambda}\sum_{k\geq 1} \frac{\lambda^{k-1}}{(k-1)!} = \lambda e^{-\lambda} e^{\lambda} = \lambda$.
+    3. Negative log-likelihood: $l(\lambda, k) = \lambda - k\log\lambda + \log k!$
+       (the last term doesn't depend on $\lambda$ and can be dropped).
+    4. With $\eta = \log\lambda$: $l(\eta, k) = e^{\eta} - k\eta$, which is
+       convex and needs no positivity constraint; its gradient is
+       $e^{\eta} - k = \lambda - k$.

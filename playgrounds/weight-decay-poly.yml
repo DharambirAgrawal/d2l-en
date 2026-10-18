@@ -1,0 +1,8 @@
+title: Weight Decay Tames an Overfitting Model
+description: |
+  A degree-12 polynomial fit to only 15 noisy points overfits badly. Weight
+  decay adds $\lambda \|\mathbf{w}\|^2$ to the loss. Slide $\lambda$ (log scale)
+  from nearly zero (wild curve, huge weights) to large (flat curve, too
+  simple): somewhere in between, the validation error is lowest.
+params:
+  - {name: log_lambda, label: "$\\log_{10} \\lambda$", min: -9, max: 2, step: 0.1, value: -9}

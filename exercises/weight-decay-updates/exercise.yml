@@ -1,0 +1,21 @@
+title: L2 vs. L1 Weight Decay Updates
+difficulty: medium
+timeout: 10
+description: |
+  Exercise 3: one SGD step on loss $L(\mathbf{w})$ plus a penalty. Given the
+  data gradient `grad` $= \nabla L(\mathbf{w})$, write:
+
+  - `l2_step(w, grad, lr, lambd)`: the step for $L + \frac{\lambda}{2}\|\mathbf{w}\|^2$,
+    i.e. $\mathbf{w} \leftarrow \mathbf{w} - \eta(\nabla L + \lambda \mathbf{w})$.
+  - `l1_step(w, grad, lr, lambd)`: the step for $L + \lambda \sum_i |w_i|$, using
+    the (sub)gradient $\lambda\,\textrm{sign}(w_i)$ (with $\textrm{sign}(0) = 0$).
+
+  Then compare: starting from `w = [1.0, 0.01]` with zero data gradient,
+  which penalty drives the small weight to (near) zero faster?
+explanation: |
+  L2 multiplies weights by $(1 - \eta\lambda)$ each step: it shrinks them
+  *proportionally*, so small weights shrink slowly and never hit exactly zero
+  ("weight decay"). L1 subtracts a *constant* $\eta\lambda$ toward zero, so
+  small weights reach zero quickly, giving **sparse** models (feature
+  selection). Real L1 implementations use soft-thresholding to land exactly
+  on zero instead of oscillating around it.

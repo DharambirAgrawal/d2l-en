@@ -1,0 +1,13 @@
+# Notes for chapter_linear-regression/weight-decay.md: each entry is shown at the end of the
+# section whose heading matches "after".
+- after: Norms and Weight Decay
+  notes:
+  - '**Weight decay** ($\ell_2$ regularization): minimize $L(\mathbf{w}, b) + \frac{\lambda}{2}\|\mathbf{w}\|^2$; larger $\lambda$ = simpler model.'
+  - 'SGD update: $\mathbf{w} \leftarrow (1 - \eta\lambda)\mathbf{w} - \frac{\eta}{|\mathcal{B}|}\sum_{i} \mathbf{x}^{(i)}(\hat{y}^{(i)} - y^{(i)})$: weights shrink each step.'
+  - $\ell_2$ spreads weight over many features; $\ell_1$ drives many weights to exactly zero (sparse, feature selection). Usually don't penalize the bias.
+- after: High-Dimensional Linear Regression
+  notes:
+  - 'Setup that overfits on purpose: 200 features, only 20 training examples.'
+- after: Implementation from Scratch
+  notes:
+  - Add `lambd * l2_penalty(w)` to the loss; with $\lambda = 0$ training loss falls but validation loss stays high (overfitting); $\lambda = 3$ closes the gap.

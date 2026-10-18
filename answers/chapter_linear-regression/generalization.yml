@@ -1,0 +1,58 @@
+# Answers for chapter_linear-regression/generalization.md "Exercises", in order.
+- answer: |
+    When the polynomial has at least as many coefficients as there are
+    training points with distinct $x$ values: with $n$ points and degree
+    $d \geq n - 1$, the Vandermonde system has an exact solution
+    (interpolation), so training error is zero. That's exactly when it
+    overfits most (unless the data really is a noiseless polynomial of that
+    degree).
+- answer: |
+    1. **Time series** (stock prices, sensor readings): today depends on
+       yesterday.
+    2. **Patients in a hospital**: multiple visits by the same patient, or
+       outbreaks spreading between patients.
+    3. **Users and sessions**: many clicks from the same user are correlated.
+    4. **Spatial data**: neighboring houses, pixels, or weather stations.
+    5. **Text**: consecutive words and sentences in a document.
+    6. **Data collected by an adaptive system** (recommendations shown
+       depend on earlier recommendations).
+
+    Splitting such data randomly leaks information between training and
+    test sets; split by time, user, or location instead.
+- answer: |
+    **Zero training error**: yes, whenever the model can memorize the
+    training set (enough capacity) and no two identical inputs have
+    different labels. **Zero generalization error** requires that the labels
+    are a deterministic function of the inputs (no label noise, no inherent
+    ambiguity) and that the model learned exactly that function for the whole
+    distribution, e.g. a noiseless problem whose true function lies in the
+    model class, with enough data. Any irreducible noise (the Bayes error)
+    makes zero generalization error impossible.
+- answer: |
+    You train the model $K$ times, each time on $(K-1)/K$ of the data, so
+    the cost is about $K$ full trainings, and that's for **one**
+    hyperparameter setting. Searching over $m$ settings costs $mK$
+    trainings, prohibitive for deep networks that take hours or days each.
+- answer: |
+    Each fold's model is trained on only $(K-1)/K$ of the data, so it is
+    slightly *worse* than the final model trained on all data: the estimate
+    is **pessimistically biased** (more so for small $K$). In addition, the
+    folds overlap in training data, so their errors are correlated, and if
+    you use the CV error to pick hyperparameters, the minimum over many
+    settings is **optimistically** biased for that chosen setting.
+- answer: |
+    The VC dimension only counts whether a class *can* realize every
+    labeling, ignoring **how large** the functions must be to do it. For
+    example, $\textrm{sign}(\sin(a x))$ has infinite VC dimension with a
+    single parameter, and linear models have VC dimension $d+1$ regardless of
+    the size of their weights. Generalization actually depends on things
+    like the margin and the norm of the weights (which is why weight decay
+    helps), which VC dimension doesn't capture; it also ignores the data
+    distribution.
+- answer: |
+    Plot a **learning curve**: train on 10%, 25%, 50%, 75%, and 100% of the
+    current data and measure validation error each time. If the error is
+    still dropping steeply as you add data (and the gap between training and
+    validation error is large), more data will very likely help further;
+    extrapolate the trend to estimate how much. If the curve has flattened,
+    more data won't help and you need a better model or features instead.

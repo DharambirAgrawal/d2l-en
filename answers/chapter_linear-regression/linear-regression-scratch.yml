@@ -1,0 +1,69 @@
+# Answers for chapter_linear-regression/linear-regression-scratch.md "Exercises", in order.
+- answer: |
+    **Zeros work here.** Linear regression is convex with a single layer, and
+    the gradient $\mathbf{X}^\top(\hat{\mathbf{y}} - \mathbf{y})$ is nonzero at
+    $\mathbf{w} = 0$, so SGD moves off zero immediately. (In networks with
+    hidden layers, zero initialization is a problem: all hidden units get the
+    same gradient and stay identical, the *symmetry* problem.)
+
+    **Variance 1000** (std about 31) also converges for this convex problem,
+    but starts with a huge loss, so it needs more steps; with large inputs or
+    a large learning rate, the first updates can overshoot and diverge.
+- answer: |
+    Yes. Ohm's law is linear: $V = R\,I$ (plus an offset $b$ for measurement
+    bias). Measure pairs $(I_i, V_i)$, define `R = torch.zeros(1, requires_grad=True)`,
+    loss $\frac{1}{n}\sum_i (R I_i + b - V_i)^2$, and run gradient descent
+    with autograd; $R$ converges to the resistance. Autograd works for any
+    differentiable model, linear or not.
+- answer: |
+    Yes, by fitting $T$ (the only unknown) by least squares between measured
+    $B_i$ and $B(\lambda_i, T)$, minimizing over $T$ with autograd. Practical
+    issues: the values span many orders of magnitude, so fit $\log B$ (or
+    rescale), and parametrize $\log T$ to keep it positive. Physicists also
+    use Wien's law $\lambda_{\max} T \approx 2.898 \times 10^{-3}\,\textrm{m·K}$
+    as an initial guess.
+- answer: |
+    Second derivatives need differentiating the backward pass itself
+    (`create_graph=True`), which stores a bigger graph and costs more memory
+    and time; the full Hessian has $d^2$ entries, impossible for large models.
+    Fixes: use Hessian-vector products (one extra backward pass, no $d^2$
+    matrix), diagonal or low-rank approximations, or finite differences of
+    gradients.
+- answer: |
+    `y_hat` has shape `(batch_size, 1)` and `y` may come as `(batch_size,)`.
+    Subtracting them would **broadcast** to a `(batch_size, batch_size)`
+    matrix and silently compute the wrong loss. Reshaping `y` to `y_hat`'s
+    shape keeps the subtraction elementwise.
+- exercise: linreg-sgd-numpy
+  answer: |
+    Larger learning rates (up to a point) make the loss drop much faster;
+    beyond a threshold the updates overshoot and the loss **diverges**. Small
+    learning rates converge reliably but slowly. More epochs reduce the
+    error until the loss reaches the **noise floor** ($\sigma^2/2 = 5 \times 10^{-5}$
+    here); after that, extra epochs don't help. Try it in the playground
+    above and in the coding exercise.
+- answer: |
+    The last minibatch is smaller (whatever is left over). Training still
+    works because the loss is averaged over however many examples the batch
+    has; that last update just has a noisier gradient.
+- exercise: huber-loss
+  answer: |
+    1. On clean data, absolute loss converges too, but the gradient has
+       constant magnitude ($\pm 1$), so near the optimum the parameters
+       jitter unless the learning rate decays; squared loss slows down
+       naturally as residuals shrink.
+    2. With $y_5 = 10000$, squared loss is dominated by that one example (its
+       gradient is about 10000 times larger), dragging the fit far off.
+       Absolute loss limits each example's pull to $\pm 1$, so the fit
+       barely moves.
+    3. **Huber loss** (or smooth L1): quadratic for small residuals, linear
+       for large ones, so gradients are bounded but smooth near zero.
+       Gradient clipping is another cheap fix.
+- answer: |
+    Without reshuffling, every epoch sees the batches in the same order, and
+    consecutive updates can be biased. Malicious case: sort the data by
+    label (or by a feature), e.g. all examples with $y < 0$ first, then all
+    with $y > 0$. Each half of the epoch pulls the parameters in opposite
+    directions, so they swing back and forth and end biased toward whatever
+    came last. Shuffling makes every minibatch an unbiased sample, so each
+    step's gradient is an unbiased estimate of the full gradient.

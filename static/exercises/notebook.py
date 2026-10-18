@@ -65,9 +65,22 @@ def _execute(code, ns):
     return None
 
 
+class _Tab:
+    """d2lbook's `tab` helper: cells shared by several frameworks branch on
+    tab.selected(...). The browser runs the PyTorch version."""
+
+    @staticmethod
+    def selected(*names):
+        return 'pytorch' in names
+
+    @staticmethod
+    def interact_select(*args, **kwargs):
+        pass
+
+
 def run_cell(session_id, code, params=None):
     """Run a cell in a session. Returns a result dict."""
-    ns = SESSIONS.setdefault(session_id, {'__name__': '__main__'})
+    ns = SESSIONS.setdefault(session_id, {'__name__': '__main__', 'tab': _Tab()})
     if params:
         ns.update(params)
     clean = _MAGIC.sub('', code)

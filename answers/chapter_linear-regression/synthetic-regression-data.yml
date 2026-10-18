@@ -1,0 +1,37 @@
+# Answers for chapter_linear-regression/synthetic-regression-data.md "Exercises", in order.
+- answer: |
+    The last minibatch is simply smaller (e.g. 1000 examples with batch size
+    32 gives 31 full batches and one of 8). Most code handles this because
+    losses are averaged over the batch. To drop the partial batch instead,
+    pass `drop_last=True` to `torch.utils.data.DataLoader`.
+- answer: |
+    1. You stream it: read chunks from disk (or generate them) as needed,
+       e.g. with an iterable dataset, memory-mapped arrays, or sharded files,
+       so only one minibatch (or chunk) is in memory at a time.
+    2. Random reads from disk are slow, so avoid one random read per example.
+       Practical options: shuffle the order of **shards/chunks** and then
+       shuffle examples within a large in-memory **buffer** (what
+       `tf.data`/WebDataset do); or use a **pseudorandom permutation** (a
+       keyed bijection on $\{0, \ldots, n-1\}$, e.g. a small block cipher /
+       Feistel network) to map index $i$ to position $\pi(i)$ on the fly,
+       so you never store the permutation table and can reshuffle each epoch
+       by changing the key.
+- exercise: reproducible-batches
+  answer: |
+    Write a generator that creates each batch when asked:
+
+    ```python
+    def stream(w, b, num_batches, batch_size, seed):
+        rng = np.random.default_rng(seed)
+        for _ in range(num_batches):
+            X = rng.standard_normal((batch_size, len(w)))
+            yield X, X @ w + b + 0.01 * rng.standard_normal(batch_size)
+    ```
+
+    Nothing is stored; the data is effectively infinite.
+- answer: |
+    Seed the random generator **inside** the iterator, so every call starts
+    from the same state: `rng = np.random.default_rng(seed)` at the start of
+    `__iter__`/the generator (or `torch.Generator().manual_seed(seed)`). The
+    same seed then reproduces the same sequence of batches, while different
+    seeds give different data. (The coding exercise above does exactly this.)

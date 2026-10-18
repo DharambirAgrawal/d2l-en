@@ -1,0 +1,15 @@
+# Notes for chapter_linear-regression/linear-regression-scratch.md: each entry is shown at the end of the
+# section whose heading matches "after".
+- after: Defining the Model
+  notes:
+  - Initialize $\mathbf{w} \sim \mathcal{N}(0, 0.01^2)$ and $b = 0$ with `requires_grad=True`; forward pass $\mathbf{X}\mathbf{w} + b$ (broadcast $b$).
+- after: Defining the Loss Function
+  notes:
+  - Reshape `y` to `y_hat`'s shape before subtracting, or broadcasting silently builds an $n \times n$ matrix.
+- after: Defining the Optimization Algorithm
+  notes:
+  - 'SGD step: `param -= lr * param.grad` inside `torch.no_grad()`, then reset gradients with `param.grad.zero_()`.'
+- after: Training
+  notes:
+  - 'Training loop: for each epoch, for each minibatch: forward → loss → backward → update. Then check the validation loss.'
+  - Learning rate too small = slow; too large = **diverges**. The loss bottoms out at the noise level.

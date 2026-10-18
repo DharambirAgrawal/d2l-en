@@ -3,7 +3,9 @@ examples in the browser (Pyodide can't run real PyTorch).
 
 It covers what the early chapters use: tensor creation, shapes, indexing,
 elementwise math, reductions, linear algebra, a small reverse-mode autograd,
-and `torch.distributions.multinomial.Multinomial`. It is for learning and
+`torch.distributions.multinomial.Multinomial`, and (Chapter 3) `nn.Module`,
+`nn.Linear`/`LazyLinear`, `nn.MSELoss`, `nn.init`, `optim.SGD` and
+`utils.data.TensorDataset`/`DataLoader`. It is for learning and
 experimenting, not a full PyTorch: anything missing raises a clear error.
 
 Loaded as the module `torch` only for the runnable book cells
@@ -334,6 +336,40 @@ class Tensor:
         self._data[...] = 0
         return self
 
+    # In-place initializers (used through `param.data.normal_(...)` etc.).
+    def normal_(self, mean=0.0, std=1.0):
+        self._data[...] = _rng.normal(mean, std, self._data.shape)
+        return self
+
+    def uniform_(self, a=0.0, b=1.0):
+        self._data[...] = _rng.uniform(a, b, self._data.shape)
+        return self
+
+    def fill_(self, value):
+        self._data[...] = _unwrap(value)
+        return self
+
+    def copy_(self, other):
+        self._data[...] = _unwrap(other)
+        return self
+
+    @property
+    def data(self):
+        """The same values without gradient tracking (shares memory)."""
+        return Tensor._wrap(self._data)
+
+    @data.setter
+    def data(self, value):
+        self._data = np.array(_unwrap(value), dtype=self._data.dtype)
+
+    @property
+    def device(self):
+        return device('cpu')
+
+    @property
+    def is_leaf(self):
+        return self._node is None
+
     # ---- shape
     def reshape(self, *shape):
         shape = shape[0] if len(shape) == 1 and isinstance(shape[0], (tuple, list, Size)) else shape
@@ -366,6 +402,13 @@ class Tensor:
 
     # ---- arithmetic
     def _binary(self, other, op, back, reverse=False):
+        if isinstance(other, (builtins.int, builtins.float, builtins.bool)) and not isinstance(other, Tensor):
+            # Python numbers adopt the tensor's type, as in PyTorch:
+            # float32 * 0.01 stays float32; int64 * 0.5 becomes float32.
+            dt = self._data.dtype
+            if dt.kind != 'f':
+                dt = np.float32 if isinstance(other, builtins.float) else dt
+            other = np.asarray(other, dtype=dt)
         o = _as_tensor(other)
         a, b = (o, self) if reverse else (self, o)
         out = _promote(op(a._data, b._data), a._data, b._data)
@@ -716,8 +759,17 @@ def rand(*size, dtype=None):
     return Tensor._wrap(_rng.random(_size_args(size)).astype(_np_dtype(dtype) or np.float32))
 
 
-def normal(mean, std, size):
-    return Tensor._wrap(_rng.normal(mean, std, size=tuple(size)).astype(np.float32))
+def normal(mean, std, size, requires_grad=False):
+    t = Tensor._wrap(_rng.normal(mean, std, size=tuple(size)).astype(np.float32))
+    return t.requires_grad_(True) if requires_grad else t
+
+
+def randperm(n, dtype=None):
+    return Tensor._wrap(_rng.permutation(n).astype(np.int64))
+
+
+def eye(n, m=None, dtype=None):
+    return Tensor._wrap(np.eye(n, m, dtype=_np_dtype(dtype) or np.float32))
 
 
 def randint(low, high=None, size=(), dtype=None):
@@ -754,8 +806,17 @@ def manual_device(*a, **k):
 
 
 class device(str):
+    """torch.device('cpu'); only the CPU exists in the browser."""
+
     def __new__(cls, name='cpu'):
         return str.__new__(cls, name)
+
+    @property
+    def type(self):
+        return str(self).split(':')[0]
+
+    def __repr__(self):
+        return f"device(type='{self.type}')"
 
 
 class _Cuda:
@@ -806,9 +867,351 @@ class _Unsupported(types.ModuleType):
             'for full PyTorch.')
 
 
-nn = _Unsupported('torch.nn')
-optim = _Unsupported('torch.optim')
-utils = _Unsupported('torch.utils')
+# ---------------------------------------------------------------- torch.nn
+
+class Parameter(Tensor):
+    """A tensor that is a model parameter (requires grad, registered by Module)."""
+    __module__ = 'torch.nn'
+
+    def __new__(cls, data=None, requires_grad=True):
+        t = Tensor._wrap(np.array(_unwrap(data), dtype=np.float32) if data is not None
+                         else np.zeros(0, np.float32))
+        t.__class__ = cls
+        t.requires_grad = requires_grad
+        return t
+
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def __repr__(self):
+        return 'Parameter containing:\n' + Tensor.__repr__(self)
+
+
+class Module:
+    """torch.nn.Module: parameters and submodules are registered when assigned
+    as attributes; calling the module runs forward()."""
+    __module__ = 'torch.nn'
+
+    def __init__(self, *args, **kwargs):
+        object.__setattr__(self, '_parameters', {})
+        object.__setattr__(self, '_modules', {})
+        object.__setattr__(self, 'training', True)
+
+    def _ensure(self):
+        if '_parameters' not in self.__dict__:
+            Module.__init__(self)
+
+    def __setattr__(self, name, value):
+        self._ensure()
+        if isinstance(value, Parameter):
+            self._parameters[name] = value
+        elif isinstance(value, Module):
+            self._modules[name] = value
+        object.__setattr__(self, name, value)
+
+    def __call__(self, *args, **kwargs):
+        return self.forward(*args, **kwargs)
+
+    def forward(self, *args, **kwargs):
+        raise NotImplementedError
+
+    def named_parameters(self, prefix=''):
+        self._ensure()
+        seen = set()
+        for name, p in self._parameters.items():
+            if id(p) not in seen:
+                seen.add(id(p))
+                yield prefix + name, p
+        for mname, m in self._modules.items():
+            for name, p in m.named_parameters(prefix + mname + '.'):
+                if id(p) not in seen:
+                    seen.add(id(p))
+                    yield name, p
+
+    def parameters(self):
+        for _, p in self.named_parameters():
+            yield p
+
+    def children(self):
+        self._ensure()
+        return iter(self._modules.values())
+
+    def named_children(self):
+        self._ensure()
+        return iter(self._modules.items())
+
+    def modules(self):
+        yield self
+        for m in self.children():
+            yield from m.modules()
+
+    def apply(self, fn):
+        for m in self.children():
+            m.apply(fn)
+        fn(self)
+        return self
+
+    def train(self, mode=True):
+        self._ensure()
+        object.__setattr__(self, 'training', mode)
+        for m in self.children():
+            m.train(mode)
+        return self
+
+    def eval(self):
+        return self.train(False)
+
+    def zero_grad(self):
+        for p in self.parameters():
+            p.grad = None
+
+    def to(self, *args, **kwargs):
+        return self
+
+    def state_dict(self):
+        return {name: Tensor._wrap(p._data.copy()) for name, p in self.named_parameters()}
+
+    def load_state_dict(self, state):
+        for name, p in self.named_parameters():
+            p._data[...] = _unwrap(state[name])
+
+    def extra_repr(self):
+        return ''
+
+    def __repr__(self):
+        self._ensure()
+        lines = [f'{type(self).__name__}({self.extra_repr()}']
+        for name, m in self._modules.items():
+            lines.append(f'  ({name}): ' + repr(m).replace('\n', '\n  '))
+        return lines[0] + (')' if len(lines) == 1 else '\n' + '\n'.join(lines[1:]) + '\n)')
+
+
+class Linear(Module):
+    """y = x W^T + b, with PyTorch's default uniform initialization."""
+
+    def __init__(self, in_features, out_features, bias=True):
+        super().__init__()
+        self.in_features, self.out_features = in_features, out_features
+        k = 1 / math.sqrt(in_features)
+        self.weight = Parameter(_rng.uniform(-k, k, (out_features, in_features)))
+        self.bias = Parameter(_rng.uniform(-k, k, out_features)) if bias else None
+
+    def forward(self, X):
+        out = matmul(X, self.weight.T)
+        return out + self.bias if self.bias is not None else out
+
+    def extra_repr(self):
+        return f'in_features={self.in_features}, out_features={self.out_features}, bias={self.bias is not None}'
+
+
+class LazyLinear(Linear):
+    """Linear layer whose input size is inferred on the first call. Like
+    PyTorch, the weight is an uninitialized parameter until then; in-place
+    initializers called earlier are replayed once the shape is known."""
+
+    def __init__(self, out_features, bias=True):
+        Module.__init__(self)
+        self.in_features, self.out_features = None, out_features
+        self.weight = _LazyParameter()
+        self.bias = Parameter(np.zeros(out_features)) if bias else None
+
+    def forward(self, X):
+        w = self.weight
+        if isinstance(w, _LazyParameter):
+            # Materialize in place, like PyTorch, so an optimizer created
+            # before the first call still updates this same parameter.
+            n = _as_tensor(X).shape[-1]
+            self.in_features = n
+            k = 1 / math.sqrt(n)
+            pending = w.pending
+            w._data = _rng.uniform(-k, k, (self.out_features, n)).astype(np.float32)
+            w.__class__ = Parameter
+            for op, args in pending:
+                getattr(w.data, op)(*args)
+        return Linear.forward(self, X)
+
+
+class _LazyParameter(Parameter):
+    """Placeholder weight of a LazyLinear before its first call."""
+
+    def __new__(cls):
+        t = Parameter.__new__(cls, np.zeros(0))
+        t.pending = []
+        return t
+
+    @property
+    def data(self):
+        lazy = self
+
+        class _Recorder:
+            def __getattr__(self, op):
+                def record(*args):
+                    lazy.pending.append((op, args))
+                return record
+        return _Recorder()
+
+
+class MSELoss(Module):
+    def __init__(self, reduction='mean'):
+        super().__init__()
+        self.reduction = reduction
+
+    def forward(self, y_hat, y):
+        l = (y_hat - y) ** 2
+        if self.reduction == 'mean':
+            return mean(l)
+        if self.reduction == 'sum':
+            return sum(l)
+        return l
+
+
+class Sequential(Module):
+    def __init__(self, *layers):
+        super().__init__()
+        for i, layer in enumerate(layers):
+            setattr(self, str(i), layer)
+
+    def forward(self, X):
+        for m in self._modules.values():
+            X = m(X)
+        return X
+
+    def __getitem__(self, i):
+        return list(self._modules.values())[i]
+
+    def __len__(self):
+        return len(self._modules)
+
+
+class _Init(types.ModuleType):
+    @staticmethod
+    def normal_(t, mean=0.0, std=1.0):
+        t.data.normal_(mean, std)
+        return t
+
+    @staticmethod
+    def uniform_(t, a=0.0, b=1.0):
+        t.data.uniform_(a, b)
+        return t
+
+    @staticmethod
+    def zeros_(t):
+        t.data.fill_(0)
+        return t
+
+    @staticmethod
+    def ones_(t):
+        t.data.fill_(1)
+        return t
+
+    @staticmethod
+    def constant_(t, value):
+        t.data.fill_(value)
+        return t
+
+    @staticmethod
+    def xavier_uniform_(t, gain=1.0):
+        fan_out, fan_in = t.shape[0], t.shape[1]
+        a = gain * math.sqrt(6 / (fan_in + fan_out))
+        t.data.uniform_(-a, a)
+        return t
+
+
+class _NN(types.ModuleType):
+    """torch.nn: the supported parts, and a clear error for the rest."""
+
+    def __getattr__(self, name):
+        if name.startswith('__'):
+            raise AttributeError(name)
+        raise NotImplementedError(
+            f'torch.nn.{name} is not available in the browser yet. This page runs torchlite, '
+            'a small NumPy-based subset of PyTorch; run this code in Colab or locally for full PyTorch.')
+
+
+nn = _NN('torch.nn')
+nn.Module = Module
+nn.Parameter = Parameter
+nn.Linear = Linear
+nn.LazyLinear = LazyLinear
+nn.MSELoss = MSELoss
+nn.Sequential = Sequential
+nn.init = _Init('torch.nn.init')
+nn.functional = types.ModuleType('torch.nn.functional')
+nn.functional.relu = relu
+nn.functional.mse_loss = lambda y_hat, y, reduction='mean': MSELoss(reduction)(y_hat, y)
+
+
+# -------------------------------------------------------------- torch.optim
+
+class SGD:
+    """torch.optim.SGD with weight decay and parameter groups."""
+
+    def __init__(self, params, lr=0.01, weight_decay=0.0, momentum=0.0):
+        params = list(params)
+        groups = params if params and isinstance(params[0], dict) else [{'params': params}]
+        self.param_groups = []
+        for g in groups:
+            g = dict(g)
+            g['params'] = list(g['params']) if not isinstance(g['params'], Tensor) else [g['params']]
+            g.setdefault('lr', lr)
+            g.setdefault('weight_decay', weight_decay)
+            self.param_groups.append(g)
+
+    def zero_grad(self, set_to_none=True):
+        for g in self.param_groups:
+            for p in g['params']:
+                p.grad = None
+
+    def step(self):
+        for g in self.param_groups:
+            for p in g['params']:
+                if p.grad is None:
+                    continue
+                grad = p.grad._data
+                if g['weight_decay']:
+                    grad = grad + g['weight_decay'] * p._data
+                p._data -= g['lr'] * grad
+
+
+optim = types.ModuleType('torch.optim')
+optim.SGD = SGD
+
+
+# --------------------------------------------------------- torch.utils.data
+
+class TensorDataset:
+    def __init__(self, *tensors):
+        self.tensors = tensors
+
+    def __len__(self):
+        return len(self.tensors[0])
+
+    def __getitem__(self, i):
+        return tuple(t[i] for t in self.tensors)
+
+
+class DataLoader:
+    """Minibatches from a TensorDataset (optionally shuffled each epoch)."""
+
+    def __init__(self, dataset, batch_size=1, shuffle=False, **kwargs):
+        self.dataset, self.batch_size, self.shuffle = dataset, batch_size, shuffle
+
+    def __len__(self):
+        return math.ceil(len(self.dataset) / self.batch_size)
+
+    def __iter__(self):
+        n = len(self.dataset)
+        order = _rng.permutation(n) if self.shuffle else np.arange(n)
+        tensors = self.dataset.tensors
+        for i in range(0, n, self.batch_size):
+            idx = order[i:i + self.batch_size]
+            yield tuple(Tensor._wrap(t._data[idx]) for t in tensors)
+
+
+utils = types.ModuleType('torch.utils')
+utils.data = types.ModuleType('torch.utils.data')
+utils.data.TensorDataset = TensorDataset
+utils.data.DataLoader = DataLoader
 linalg = types.ModuleType('torch.linalg')
 linalg.norm = norm
 linalg.matmul = matmul
@@ -821,8 +1224,11 @@ def install():
     sys.modules['torch.distributions'] = distributions
     sys.modules['torch.distributions.multinomial'] = distributions.multinomial
     sys.modules['torch.nn'] = nn
+    sys.modules['torch.nn.functional'] = nn.functional
+    sys.modules['torch.nn.init'] = nn.init
     sys.modules['torch.optim'] = optim
     sys.modules['torch.utils'] = utils
+    sys.modules['torch.utils.data'] = utils.data
     sys.modules['torch.linalg'] = linalg
 
 

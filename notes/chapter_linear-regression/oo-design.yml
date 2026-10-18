@@ -1,0 +1,14 @@
+# Notes for chapter_linear-regression/oo-design.md: each entry is shown at the end of the
+# section whose heading matches "after".
+- after: Utilities
+  notes:
+  - '`@d2l.add_to_class(C)` adds a method to class `C` after it''s defined. `save_hyperparameters()` stores `__init__` arguments as attributes.'
+- after: Models
+  notes:
+  - '`d2l.Module` (subclass of `nn.Module`): define `__init__` (parameters), `forward`, `loss`, `configure_optimizers`; `training_step`/`validation_step` compute and plot the loss.'
+- after: Data
+  notes:
+  - '`d2l.DataModule`: `train_dataloader()` / `val_dataloader()` return iterables of minibatches.'
+- after: Training
+  notes:
+  - '`d2l.Trainer(max_epochs).fit(model, data)`: per epoch, loop over training batches (forward → loss → `zero_grad` → `backward` → `step`), then evaluate on validation batches.'

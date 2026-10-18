@@ -1,0 +1,12 @@
+title: Underfitting and Overfitting with Polynomials
+description: |
+  Fit a polynomial of the chosen degree to noisy samples (orange) of the
+  dashed function by least squares. Watch the training error keep falling as
+  the degree grows while the **validation** error (on 200 fresh points) falls
+  and then rises: low degrees underfit, high degrees overfit, especially with
+  few training points. More data pushes overfitting to higher degrees.
+params:
+  - {name: degree, label: "degree", min: 0, max: 12, step: 1, value: 3}
+  - {name: n, label: "training points", min: 6, max: 80, step: 1, value: 15}
+  - {name: noise, label: "noise", min: 0, max: 0.6, step: 0.01, value: 0.25}
+  - {name: seed, label: "seed", min: 0, max: 20, step: 1, value: 3}

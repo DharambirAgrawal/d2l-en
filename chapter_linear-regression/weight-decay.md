@@ -218,6 +218,12 @@ the idea of regularization through
 shrinking the size of weights
 still holds true.
 
+Before the experiment below, see weight decay rein in an overfitting polynomial:
+
+```{=html}
+<div class="d2l-playground" data-playground="weight-decay-poly"></div>
+```
+
 ## High-Dimensional Linear Regression
 
 We can illustrate the benefits of weight decay 

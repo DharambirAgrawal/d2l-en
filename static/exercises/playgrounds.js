@@ -47,7 +47,7 @@
       this.ctx.clearRect(0, 0, w, h);
       this.w = w;
       this.h = h;
-      this.o = Object.assign({xlog: false, equal: false, xlabel: '', ylabel: ''}, opts);
+      this.o = Object.assign({xlog: false, ylog: false, equal: false, xlabel: '', ylabel: ''}, opts);
       this.pad = {l: 44, r: 12, t: 10, b: this.o.xlabel ? 38 : 26};
       let [x0, x1] = this.o.xlim;
       let [y0, y1] = this.o.ylim;
@@ -79,7 +79,9 @@
 
     fy(y) {
       const [a, b] = this.ylim;
-      return this.h - this.pad.b - (y - a) / (b - a) * (this.h - this.pad.t - this.pad.b);
+      const t = this.o.ylog ? (Math.log10(y) - Math.log10(a)) / (Math.log10(b) - Math.log10(a))
+        : (y - a) / (b - a);
+      return this.h - this.pad.b - t * (this.h - this.pad.t - this.pad.b);
     }
 
     axes() {
@@ -98,9 +100,13 @@
         const s = niceStep(x1 - x0, Math.max(3, Math.floor(this.w / 80)));
         for (let v = Math.ceil(x0 / s) * s; v <= x1 + 1e-9; v += s) xticks.push(Math.abs(v) < 1e-12 ? 0 : v);
       }
-      const ys = niceStep(y1 - y0, Math.max(3, Math.floor(this.h / 55)));
       const yticks = [];
-      for (let v = Math.ceil(y0 / ys) * ys; v <= y1 + 1e-9; v += ys) yticks.push(Math.abs(v) < 1e-12 ? 0 : v);
+      if (this.o.ylog) {
+        for (let e = Math.ceil(Math.log10(y0)); e <= Math.floor(Math.log10(y1)); e++) yticks.push(Math.pow(10, e));
+      } else {
+        const ys = niceStep(y1 - y0, Math.max(3, Math.floor(this.h / 55)));
+        for (let v = Math.ceil(y0 / ys) * ys; v <= y1 + 1e-9; v += ys) yticks.push(Math.abs(v) < 1e-12 ? 0 : v);
+      }
       c.textAlign = 'center';
       c.textBaseline = 'top';
       for (const v of xticks) {
@@ -121,7 +127,7 @@
         const X = Math.round(this.fx(0)) + 0.5;
         c.beginPath(); c.moveTo(X, this.pad.t); c.lineTo(X, this.h - this.pad.b); c.stroke();
       }
-      if (y0 < 0 && y1 > 0) {
+      if (!this.o.ylog && y0 < 0 && y1 > 0) {
         const Y = Math.round(this.fy(0)) + 0.5;
         c.beginPath(); c.moveTo(this.pad.l, Y); c.lineTo(this.w - this.pad.r, Y); c.stroke();
       }
@@ -259,6 +265,37 @@
 
   const n4 = (v) => (Math.round(v * 1e4) / 1e4).toFixed(4);
 
+  // Standard normal samples (Box-Muller) from a uniform generator.
+  function gaussian(rand) {
+    let u = 0;
+    while (u === 0) u = rand();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * rand());
+  }
+
+  /* Ridge least squares: minimize sum (Phi w - y)^2 + lambda ||w||^2 by
+   * solving (Phi^T Phi + lambda I) w = Phi^T y with Gaussian elimination. */
+  function ridge(Phi, y, lambda) {
+    const d = Phi[0].length;
+    const A = Array.from({length: d}, (_, i) => Array.from({length: d + 1}, (_, j) => {
+      if (j === d) return Phi.reduce((acc, row, k) => acc + row[i] * y[k], 0);
+      return Phi.reduce((acc, row) => acc + row[i] * row[j], 0) + (i === j ? lambda : 0);
+    }));
+    for (let c = 0; c < d; c++) {
+      let piv = c;
+      for (let r = c + 1; r < d; r++) if (Math.abs(A[r][c]) > Math.abs(A[piv][c])) piv = r;
+      [A[c], A[piv]] = [A[piv], A[c]];
+      for (let r = 0; r < d; r++) {
+        if (r === c || A[c][c] === 0) continue;
+        const f = A[r][c] / A[c][c];
+        for (let j = c; j <= d; j++) A[r][j] -= f * A[c][j];
+      }
+    }
+    return A.map((row, i) => row[d] / row[i]);
+  }
+
+  const polyFeatures = (x, degree) => Array.from({length: degree + 1}, (_, k) => Math.pow(x, k));
+  const mse = (pred, y) => pred.reduce((acc, p, i) => acc + (p - y[i]) ** 2, 0) / y.length;
+
   // ------------------------------------------------------------ playgrounds
 
   const registry = {};
@@ -370,6 +407,127 @@
       P.legend();
       return `P(disease | 1 positive) = ${n4(post(prevalence))}   ·   ` +
         `P(disease | 2 positives) = ${n4(two(prevalence))}`;
+    },
+  };
+
+  // ------------------------------------------------- Chapter 3 playgrounds
+
+  registry['sgd-learning-rate'] = {
+    aspect: 0.6,
+    draw(canvas, {lr, batch, epochs}) {
+      // Same setup as the section: y = X [2, -3.4] + 4.2 + noise, 1000 examples.
+      const rand = rng(7);
+      const n = 1000, wTrue = [2, -3.4], bTrue = 4.2;
+      const X = Array.from({length: n}, () => [gaussian(rand), gaussian(rand)]);
+      const y = X.map((x) => x[0] * wTrue[0] + x[1] * wTrue[1] + bTrue + 0.01 * gaussian(rand));
+      const fullLoss = (w, b) => X.reduce((acc, x, i) => acc + 0.5 * (x[0] * w[0] + x[1] * w[1] + b - y[i]) ** 2, 0) / n;
+      let w = [0, 0], b = 0, step = 0;
+      const steps = [0], losses = [fullLoss(w, b)];
+      const perEpoch = Math.ceil(n / batch);
+      const every = Math.max(1, Math.floor(perEpoch * epochs / 300));
+      const order = Array.from({length: n}, (_, i) => i);
+      let diverged = false;
+      for (let e = 0; e < epochs && !diverged; e++) {
+        for (let i = n - 1; i > 0; i--) {  // shuffle each epoch
+          const j = Math.floor(rand() * (i + 1));
+          [order[i], order[j]] = [order[j], order[i]];
+        }
+        for (let s0 = 0; s0 < n; s0 += batch) {
+          const idx = order.slice(s0, s0 + batch);
+          let g0 = 0, g1 = 0, gb = 0;
+          for (const i of idx) {
+            const r = X[i][0] * w[0] + X[i][1] * w[1] + b - y[i];
+            g0 += r * X[i][0]; g1 += r * X[i][1]; gb += r;
+          }
+          w = [w[0] - lr * g0 / idx.length, w[1] - lr * g1 / idx.length];
+          b -= lr * gb / idx.length;
+          step++;
+          if (step % every === 0) {
+            const l = fullLoss(w, b);
+            if (!isFinite(l) || l > 1e6) { diverged = true; steps.push(step); losses.push(1e6); break; }
+            steps.push(step); losses.push(l);
+          }
+        }
+      }
+      const P = new Plot(canvas, {xlim: [0, Math.max(10, steps[steps.length - 1])], ylim: [1e-5, 1e3],
+        ylog: true, xlabel: 'SGD steps (minibatch updates)', legend: 'lower right'});
+      P.line([0, steps[steps.length - 1]], [0.5e-4, 0.5e-4], {color: COLORS.gray, width: 1, dash: [4, 4], label: 'noise floor (σ²/2)'});
+      P.line(steps, losses.map((l) => Math.max(l, 1.1e-5)), {color: diverged ? COLORS.red : COLORS.blue,
+        label: diverged ? 'training loss (diverged!)' : 'training loss'});
+      P.legend();
+      if (diverged) return `lr = ${lr} is too large: the updates overshoot and the loss explodes. Try a smaller learning rate.`;
+      return `after ${step} steps: w = (${w[0].toFixed(3)}, ${w[1].toFixed(3)}) vs true (2, -3.4), ` +
+        `b = ${b.toFixed(3)} vs 4.2, loss = ${losses[losses.length - 1].toExponential(2)}`;
+    },
+  };
+
+  registry['loss-shapes'] = {
+    aspect: 0.6,
+    draw(canvas, {sigma, outlier}) {
+      const rs = linspace(-4, 4, 400);
+      const huber = (r) => (Math.abs(r) > sigma ? Math.abs(r) - sigma / 2 : r * r / (2 * sigma));
+      const P = new Plot(canvas, {xlim: [-4, 4], ylim: [0, 6], xlabel: 'residual  ŷ − y'});
+      P.line(rs, rs.map((r) => r * r / 2), {color: COLORS.blue, label: 'squared  ½r²'});
+      P.line(rs, rs.map(Math.abs), {color: COLORS.orange, label: 'absolute  |r|'});
+      P.line(rs, rs.map(huber), {color: COLORS.green, width: 2.5, label: `Huber (σ = ${sigma})`});
+      P.legend();
+      // Best constant b for data [1, 2, 3, 4, outlier] under each loss.
+      const data = [1, 2, 3, 4, outlier];
+      const mean = data.reduce((a, v) => a + v, 0) / data.length;
+      const median = [...data].sort((a, v) => a - v)[2];
+      let hb = median;  // minimize Huber loss by gradient steps on b
+      for (let i = 0; i < 400; i++) {
+        const g = data.reduce((a, v) => { const r = hb - v; return a + (Math.abs(r) > sigma ? Math.sign(r) : r / sigma); }, 0);
+        hb -= 0.05 * g;
+      }
+      return `fit one number b to data [1, 2, 3, 4, ${outlier}]:  squared → ${mean.toFixed(2)} (mean),  ` +
+        `absolute → ${median.toFixed(2)} (median),  Huber → ${hb.toFixed(2)}`;
+    },
+  };
+
+  function polyTask(seed, nTrain, noise) {
+    const rand = rng(seed);
+    const f = (x) => Math.sin(Math.PI * x) + 0.3 * x;
+    const xs = Array.from({length: nTrain}, () => 2 * rand() - 1);
+    const ys = xs.map((x) => f(x) + noise * gaussian(rand));
+    const vx = linspace(-1, 1, 200);
+    const vy = vx.map((x) => f(x) + noise * gaussian(rand));
+    return {f, xs, ys, vx, vy};
+  }
+
+  function drawPolyFit(canvas, task, degree, lambda) {
+    const {f, xs, ys, vx, vy} = task;
+    const w = ridge(xs.map((x) => polyFeatures(x, degree)), ys, lambda);
+    const predict = (x) => polyFeatures(x, degree).reduce((acc, v, k) => acc + v * w[k], 0);
+    const grid = linspace(-1, 1, 300);
+    const P = new Plot(canvas, {xlim: [-1, 1], ylim: [-2.2, 2.2], xlabel: 'x'});
+    P.line(grid, grid.map(f), {color: COLORS.gray, width: 1.5, dash: [5, 4], label: 'true function'});
+    P.line(grid, grid.map(predict), {color: COLORS.blue, width: 2.5, label: `degree-${degree} fit`});
+    xs.forEach((x, i) => P.point(x, ys[i], {color: COLORS.orange, r: 3.5}));
+    P.legend();
+    return {
+      train: mse(xs.map(predict), ys), val: mse(vx.map(predict), vy),
+      norm: Math.sqrt(w.slice(1).reduce((a, v) => a + v * v, 0)),
+    };
+  }
+
+  registry['polynomial-fit'] = {
+    aspect: 0.6,
+    draw(canvas, {degree, n, noise, seed}) {
+      const r = drawPolyFit(canvas, polyTask(seed, n, noise), degree, 1e-9);
+      const verdict = r.val > 3 * Math.max(r.train, noise * noise) && degree > 3 ? ' → overfitting'
+        : r.train > 0.05 && degree < 3 ? ' → underfitting' : '';
+      return `training error ${r.train.toFixed(4)}   ·   validation error ${r.val.toFixed(4)}${verdict}`;
+    },
+  };
+
+  registry['weight-decay-poly'] = {
+    aspect: 0.6,
+    draw(canvas, {log_lambda}) {
+      const lambda = Math.pow(10, log_lambda);
+      const r = drawPolyFit(canvas, polyTask(3, 15, 0.25), 12, lambda);
+      return `λ = ${lambda.toExponential(1)}:   training error ${r.train.toFixed(4)}   ·   ` +
+        `validation error ${r.val.toFixed(4)}   ·   ‖w‖ = ${r.norm.toFixed(2)}`;
     },
   };
 

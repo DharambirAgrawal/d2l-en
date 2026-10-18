@@ -1,4 +1,4 @@
-# Project: On-Call Alert Triage
+# Project: Hush
 :label:`sec_project_alert_triage`
 
 **Uses:** everything up to this point: data preprocessing with pandas
@@ -7,7 +7,9 @@ norms (:numref:`sec_linear-algebra`), derivatives and gradients
 (:numref:`sec_calculus`), and Bayes' theorem and expectations
 (:numref:`sec_prob`). Nothing beyond Chapter 2.
 
-**Time:** one or two evenings. **Build it in your own GitHub repository.**
+*Smarter on-call alerts: wake engineers up only when it matters.*
+
+**Time:** one or two evenings. **Build it in your own GitHub repository.** Name the repository `hush`.
 
 ## The Problem
 
@@ -19,7 +21,7 @@ and start ignoring pages. Monitoring and on-call companies (Datadog,
 PagerDuty, Grafana) and every large infrastructure team work on exactly this
 trade-off.
 
-You'll build a small, explainable alert-triage system: score how unusual
+You'll build **Hush**, a small, explainable alert-triage system: score how unusual
 each time window is, quantify why most alerts are false alarms, and choose
 the alert threshold that minimizes the real cost of paging.
 
@@ -91,11 +93,11 @@ harmless traffic spikes that look alarming but aren't incidents.
 
 ## For Your README and Resume
 
-Suggested repository layout: `triage/` (cleaning, scoring, evaluation
+Suggested repository layout: `hush/` (cleaning, scoring, evaluation
 modules), `notebooks/analysis.ipynb` (plots and results), `tests/`, and a
 README with the problem, approach, results table, and cost plot.
 
-> *Built an explainable alert-triage system for service telemetry
+> *Built **Hush**, an explainable alert-triage system for service telemetry
 > (pandas, NumPy): standardized anomaly scoring, Bayesian analysis of alert
 > precision, and cost-optimal thresholding that cut on-call pages by about
 > 40% versus a percentile baseline at comparable recall.*

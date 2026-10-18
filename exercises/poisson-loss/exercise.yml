@@ -1,0 +1,22 @@
+title: A Loss for Counting Apples
+difficulty: medium
+timeout: 10
+description: |
+  Exercise 8: sales are **counts** $k \in \{0, 1, 2, \ldots\}$, so a Poisson
+  model $p(k \mid \lambda) = \lambda^k e^{-\lambda} / k!$ fits better than
+  Gaussian noise. Predict $\log \lambda$ (any real number) and turn the
+  negative log-likelihood into a loss.
+
+  Write, for NumPy arrays `log_rate` ($\log \lambda_i$) and `k` (counts):
+
+  - `poisson_nll(log_rate, k)`: the **mean** over examples of
+    $-\log p(k_i \mid \lambda_i)$, dropping the constant $\log k_i!$ term.
+  - `poisson_nll_grad(log_rate, k)`: its gradient with respect to `log_rate`.
+explanation: |
+  $-\log p(k \mid \lambda) = \lambda - k \log \lambda + \log k!$. With
+  $\eta = \log \lambda$ this is $e^{\eta} - k\eta + \textrm{const}$, which is
+  convex in $\eta$, and its derivative is $e^{\eta} - k = \lambda - k$:
+  "prediction minus observation", like squared loss. The minimum is at
+  $\lambda = k$, consistent with $E[k] = \lambda$. Predicting $\log\lambda$
+  keeps the rate positive without constraints (Poisson regression, used for
+  demand forecasting).

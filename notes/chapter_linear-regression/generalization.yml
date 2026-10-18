@@ -1,0 +1,20 @@
+# Notes for chapter_linear-regression/generalization.md: each entry is shown at the end of the
+# section whose heading matches "after".
+- after: Training Error and Generalization Error
+  notes:
+  - '**Training error** = on data you trained on; **generalization error** = expected error on new data from the same distribution (estimate it with a held-out set).'
+  - Usually assume data are **IID** (independent and identically distributed); time series, users, etc. break this.
+- after: Model Complexity
+  notes:
+  - More complex models (more parameters, larger weights) can fit training data better but may generalize worse; fewer examples make this worse.
+- after: Underfitting or Overfitting?
+  notes:
+  - '**Underfitting:** training and validation error both high → more capacity/features.'
+  - '**Overfitting:** training error ≪ validation error → more data, regularization, simpler model.'
+- after: Dataset Size
+  notes:
+  - More data generally lowers generalization error and allows more complex models.
+- after: Model Selection
+  notes:
+  - Pick models/hyperparameters with a **validation set**, never the test set (which you use once, at the end).
+  - '**$K$-fold cross-validation:** train $K$ times, each time validating on a different fold; average the errors. Good for small data, expensive.'

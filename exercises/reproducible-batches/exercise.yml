@@ -1,0 +1,20 @@
+title: A Data Stream You Can Replay
+difficulty: medium
+timeout: 10
+description: |
+  Exercises 3 and 4: generate synthetic regression data **on the fly** (no
+  big array in memory), and make it **reproducible** so the same seed gives
+  the same data every time.
+
+  Write a generator `stream(w, b, num_batches, batch_size, seed, noise=0.01)`
+  that yields `(X, y)` pairs: `X` of shape `(batch_size, len(w))` from a
+  standard normal, and `y = X @ w + b + noise * N(0, 1)` of shape
+  `(batch_size,)`. Use `np.random.default_rng(seed)` **created inside the
+  generator** so that calling `stream(...)` again replays the same batches.
+explanation: |
+  A generator only holds one batch at a time, so the "dataset" can be
+  endless. Creating the random generator from the seed *each time the
+  stream starts* makes it replayable: the same seed always produces the same
+  sequence. This is how frameworks make data pipelines deterministic for
+  debugging, and how a fixed validation set can be regenerated instead of
+  stored.

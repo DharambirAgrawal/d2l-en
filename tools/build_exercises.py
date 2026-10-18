@@ -46,6 +46,8 @@ import sys
 import mistune
 import yaml
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 EXERCISES_DIR = os.path.join(ROOT, 'exercises')
 ANSWERS_DIR = os.path.join(ROOT, 'answers')
@@ -179,7 +181,10 @@ def load_exercise(folder):
         with open(os.path.join(folder, name), encoding='utf-8') as f:
             return f.read()
 
-    meta = yaml.safe_load(read('exercise.yml')) or {}
+    try:
+        meta = yaml.safe_load(read('exercise.yml')) or {}
+    except yaml.YAMLError as e:
+        raise ExerciseError(f'exercise.yml is not valid YAML (quote titles containing ":"):\n{e}')
     unknown = set(meta) - ALLOWED_KEYS
     if unknown:
         raise ExerciseError('unknown keys in exercise.yml: ' + ', '.join(sorted(unknown)))
@@ -435,6 +440,9 @@ def main():
                 json.dump(ex, f, ensure_ascii=False)
         for name in RUNTIME_FILES:
             shutil.copy(os.path.join(RUNTIME_DIR, name), args.out)
+        # The book's d2l library (its #@save code) for runnable cells.
+        import build_d2l_book
+        build_d2l_book.generate(os.path.join(args.out, 'd2l_book.py'))
         answers_out = os.path.join(os.path.dirname(os.path.abspath(args.out)), 'answers')
         for page, entries in answers.items():
             path = os.path.join(answers_out, page + '.json')

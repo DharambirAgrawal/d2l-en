@@ -1,0 +1,41 @@
+# Answers for chapter_linear-regression/linear-regression-concise.md "Exercises", in order.
+- answer: |
+    Averaging divides the gradient by the batch size $|B|$ compared with
+    summing. To take the same steps, **multiply the learning rate by $|B|$**
+    when switching from sum to mean (or divide it by $|B|$ when switching
+    from mean to sum). With the mean, the learning rate no longer depends on
+    the batch size, which is why it's the usual choice.
+- exercise: huber-loss
+  answer: |
+    PyTorch provides `nn.MSELoss`, `nn.L1Loss`, `nn.HuberLoss`,
+    `nn.SmoothL1Loss`, `nn.CrossEntropyLoss`, `nn.BCEWithLogitsLoss`,
+    `nn.PoissonNLLLoss`, and more. Swap the loss in the model:
+
+    ```python
+    @d2l.add_to_class(LinearRegression)
+    def loss(self, y_hat, y):
+        return nn.HuberLoss(delta=1.0)(y_hat, y)
+    ```
+
+    (`nn.SmoothL1Loss(beta=σ)` matches the formula in the exercise exactly;
+    `HuberLoss` is the same up to a factor of $\sigma$.)
+- answer: |
+    After `loss.backward()`, read `model.net.weight.grad` and
+    `model.net.bias.grad` (each parameter's `.grad` tensor), or loop over
+    `model.named_parameters()` and print `p.grad`.
+- answer: |
+    A higher learning rate or more epochs reduce the error up to a point. The
+    estimate stops improving once the error is dominated by the **noise** in
+    the data (and SGD's own noise, which a constant learning rate never fully
+    removes). Too high a learning rate diverges; too many epochs on a fixed
+    noisy dataset just fluctuate around the best fit.
+- answer: |
+    1. Train on datasets of 5, 10, 20, 50, ..., 10000 examples and plot
+       $\|\hat{\mathbf{w}} - \mathbf{w}\|$ and $|\hat{b} - b|$ against $n$
+       on **log–log** axes. The error falls roughly like $1/\sqrt{n}$ (a
+       straight line with slope $-1/2$).
+    2. Because the error changes multiplicatively (like $1/\sqrt{n}$), equal
+       *ratios* of data size give equal improvements. Logarithmic spacing
+       samples the interesting small-$n$ regime densely and still covers
+       large $n$, instead of wasting most runs where the curve is already
+       flat.

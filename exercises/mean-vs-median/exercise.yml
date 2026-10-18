@@ -1,0 +1,20 @@
+title: The Best Constant Under Two Losses
+difficulty: easy
+timeout: 10
+description: |
+  Exercise 1: find the constant $b$ that best summarizes data
+  $x_1, \ldots, x_n$ under two losses.
+
+  - `best_squared(x)`: the $b$ minimizing $\sum_i (x_i - b)^2$.
+  - `best_absolute(x)`: a $b$ minimizing $\sum_i |x_i - b|$.
+
+  Both take a 1-D NumPy array and return a float. Then compare them on data
+  with one huge outlier: which estimate moves?
+explanation: |
+  Setting the derivative $\sum_i -2(x_i - b)$ to zero gives $b = \frac{1}{n}\sum_i x_i$:
+  the **mean**. For the absolute loss the (sub)derivative is
+  $\sum_i -\textrm{sign}(x_i - b)$, which is zero when as many points lie
+  above $b$ as below: the **median**. One outlier drags the mean but barely
+  moves the median, which is why absolute (and Huber) losses are called
+  *robust*. Squared loss corresponds to Gaussian noise, absolute loss to
+  Laplace noise.

@@ -1,0 +1,14 @@
+# Notes for chapter_linear-regression/linear-regression-concise.md: each entry is shown at the end of the
+# section whose heading matches "after".
+- after: Defining the Model
+  notes:
+  - '`nn.LazyLinear(1)` = fully connected layer; input size inferred on the first call. Initialize with `net.weight.data.normal_(0, 0.01)`, `net.bias.data.fill_(0)`.'
+- after: Defining the Loss Function
+  notes:
+  - '`nn.MSELoss()` = mean squared error (no ½ factor). Robust alternatives: `nn.L1Loss`, `nn.HuberLoss`.'
+- after: Defining the Optimization Algorithm
+  notes:
+  - '`torch.optim.SGD(model.parameters(), lr)`; `optim.zero_grad()` and `optim.step()` replace the hand-written update.'
+- after: Training
+  notes:
+  - 'Same `Trainer` as before: the high-level API changes how much code you write, not what is computed.'

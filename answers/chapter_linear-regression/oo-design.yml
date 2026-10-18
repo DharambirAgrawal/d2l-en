@@ -1,0 +1,19 @@
+# Answers for chapter_linear-regression/oo-design.md "Exercises", in order.
+- answer: |
+    They live in the `d2l` package, e.g. `d2l/torch.py` in the repository
+    (search for `class Module`, `class Trainer`, `class DataModule`,
+    `class ProgressBoard`). The full `HyperParameters.save_hyperparameters`
+    and `ProgressBoard.draw` are defined in the book's *Utilities* appendix.
+    On this site, runnable cells use exactly those saved definitions (the
+    browser's `d2l` library is generated from the book's `#@save` cells), so
+    you can also read them by running `import inspect; print(inspect.getsource(d2l.Trainer))`.
+- answer: |
+    No: without `save_hyperparameters()`, `B.__init__` never assigns
+    `self.a` or `self.b`, so printing them raises `AttributeError`.
+
+    Why it works when present: `save_hyperparameters` uses
+    `inspect.currentframe().f_back` to look at the **caller's** local
+    variables (the arguments of `__init__`), stores them in `self.hparams`,
+    and calls `setattr(self, name, value)` for each, skipping `self`, names in
+    `ignore`, and names starting with `_`. It saves you from writing
+    `self.a = a; self.b = b; ...` in every class.

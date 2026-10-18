@@ -1,0 +1,10 @@
+title: Squared, Absolute and Huber Loss
+description: |
+  How hard each loss punishes a residual $r = \hat{y} - y$. Squared loss
+  grows quadratically, so one large error dominates; absolute loss grows
+  linearly but has a kink at 0; **Huber** loss is quadratic inside
+  $[-\sigma, \sigma]$ and linear outside. Move the outlier and see which
+  "best constant" it drags along.
+params:
+  - {name: sigma, label: "Huber $\\sigma$", min: 0.2, max: 3, step: 0.1, value: 1.0}
+  - {name: outlier, label: "outlier value", min: 4, max: 60, step: 1, value: 30}

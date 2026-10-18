@@ -517,6 +517,12 @@ there exist many configurations of the parameters
 that lead to highly accurate prediction.
 
 
+Now experiment with the optimization yourself (this also covers Exercise 6):
+
+```{=html}
+<div class="d2l-playground" data-playground="sgd-learning-rate"></div>
+```
+
 ## Summary
 
 In this section, we took a significant step 

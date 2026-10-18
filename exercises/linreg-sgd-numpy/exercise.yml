@@ -1,0 +1,24 @@
+title: Linear Regression with Hand-Derived Gradients
+difficulty: medium
+timeout: 20
+description: |
+  Train linear regression with **minibatch SGD** in plain NumPy, computing
+  the gradients yourself instead of using autograd. For the loss
+  $\ell = \frac{1}{|B|}\sum_{i \in B} \frac{1}{2}(\mathbf{x}_i^\top \mathbf{w} + b - y_i)^2$
+  on a minibatch $B$, the gradients are
+
+  $$\nabla_{\mathbf{w}} \ell = \frac{1}{|B|} \mathbf{X}_B^\top (\hat{\mathbf{y}}_B - \mathbf{y}_B), \qquad \partial_b \ell = \frac{1}{|B|} \sum_{i \in B} (\hat{y}_i - y_i).$$
+
+  Write `train(X, y, lr, epochs, batch_size, seed=0)` returning `(w, b)`:
+  start from `w = zeros`, `b = 0`; each epoch, shuffle the example order
+  with `np.random.default_rng(seed)` (create it once, before the loop) and
+  update on each minibatch.
+explanation: |
+  The gradient is the chain rule applied to the squared error: the residual
+  $\hat{y} - y$ times the input. Averaging over the minibatch keeps the step
+  size independent of the batch size. This is exactly what autograd computed
+  for `LinearRegressionScratch`; writing it out once makes the "learning"
+  part of deep learning concrete. With `lr=0.03`, 3 epochs leave errors of
+  about 0.1--0.2 (just like the section's output); 10 epochs get within 0.01.
+  Too large a learning rate makes the loss explode (try `lr=2.5`), too small
+  makes progress crawl.

@@ -1,0 +1,47 @@
+# Answers for chapter_linear-regression/weight-decay.md "Exercises", in order.
+- answer: |
+    As $\lambda$ grows, **training error rises** monotonically (the model is
+    constrained), while **validation error first falls, then rises**: small
+    $\lambda$ overfits (big gap between training and validation), large
+    $\lambda$ underfits (both errors high). The best $\lambda$ sits in
+    between. (For regression, "accuracy" means the loss/MSE here.) The weight
+    decay playground in this section shows the same U-shape.
+- answer: |
+    Train with several $\lambda$ values (on a log grid, e.g. $10^{-4}, \ldots, 10^{2}$)
+    and pick the one with the lowest validation error. It is optimal only for
+    *this* validation set, a noisy estimate, so the true best $\lambda$ may
+    differ somewhat, and choosing among many values overfits the validation
+    set slightly. It rarely matters much: the validation curve is usually
+    flat near its minimum, so any $\lambda$ in that range works similarly.
+    Confirm on a separate test set.
+- exercise: weight-decay-updates
+  answer: |
+    With penalty $\lambda\sum_i |w_i|$, the (sub)gradient is
+    $\lambda\,\textrm{sign}(\mathbf{w})$, so
+
+    $$\mathbf{w} \leftarrow \mathbf{w} - \eta\left(\frac{1}{|\mathcal{B}|}\sum_{i\in\mathcal{B}} \mathbf{x}^{(i)}(\mathbf{w}^\top\mathbf{x}^{(i)} + b - y^{(i)}) + \lambda\,\textrm{sign}(\mathbf{w})\right).$$
+
+    Instead of shrinking each weight proportionally, it subtracts a constant
+    $\eta\lambda$ toward zero, which drives small weights exactly to zero
+    (sparse models). In practice one uses soft-thresholding:
+    $w \leftarrow \textrm{sign}(w)\max(|w| - \eta\lambda, 0)$.
+- answer: |
+    The Frobenius norm: $\|\mathbf{W}\|_F^2 = \sum_{i,j} w_{ij}^2 = \textrm{tr}(\mathbf{W}^\top\mathbf{W})$,
+    the analog of $\mathbf{w}^\top\mathbf{w}$ (it's the squared $\ell_2$ norm of the
+    matrix flattened into a vector). Weight decay for a layer adds
+    $\frac{\lambda}{2}\|\mathbf{W}\|_F^2$.
+- answer: |
+    More training **data** (or data augmentation); **early stopping** on
+    validation error; **dropout** and noise injection (Chapter 5); smaller or
+    better-designed architectures; **ensembles**; cleaning label noise; L1 or
+    other priors; batch normalization; transfer learning from a pretrained
+    model.
+- answer: |
+    Take logs: $-\log P(\mathbf{w} \mid x) = -\log P(x \mid \mathbf{w}) - \log P(\mathbf{w}) + \textrm{const}$.
+    The data term is the loss and the prior term is the regularizer. A
+    Gaussian prior $P(\mathbf{w}) \propto \exp\left(-\frac{\lambda}{2}\|\mathbf{w}\|^2\right)$
+    gives exactly the $\ell_2$ penalty (weight decay), and a Laplace prior
+    $\propto \exp(-\lambda\|\mathbf{w}\|_1)$ gives $\ell_1$ regularization. So
+    regularized training finds the **MAP** (maximum a posteriori) estimate,
+    and a larger $\lambda$ means a stronger prior belief that weights are
+    small.

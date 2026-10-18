@@ -1,0 +1,28 @@
+# Notes for chapter_linear-regression/linear-regression.md: each entry is shown at the end of the
+# section whose heading matches "after".
+- after: Model
+  notes:
+  - '**Linear regression:** $\hat{y} = \mathbf{w}^\top \mathbf{x} + b$; for a dataset, $\hat{\mathbf{y}} = \mathbf{X}\mathbf{w} + b$ (rows of $\mathbf{X}$ = examples).'
+  - $\mathbf{w}$ = weights (how much each feature matters), $b$ = bias/intercept. Affine = linear + offset.
+- after: Loss Function
+  notes:
+  - '**Squared loss:** $l^{(i)} = \frac{1}{2}(\hat{y}^{(i)} - y^{(i)})^2$; train on the average over examples $L(\mathbf{w}, b) = \frac{1}{n}\sum_i l^{(i)}$.'
+  - Squared loss punishes large errors heavily, so it's sensitive to outliers.
+- after: Analytic Solution
+  notes:
+  - 'Closed form (bias folded into $\mathbf{w}$): $\mathbf{w}^* = (\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{y}$, needs $\mathbf{X}^\top\mathbf{X}$ invertible. Rare for deep models, so we optimize iteratively.'
+- after: Minibatch Stochastic Gradient Descent
+  notes:
+  - '**Minibatch SGD:** $(\mathbf{w}, b) \leftarrow (\mathbf{w}, b) - \frac{\eta}{|\mathcal{B}|}\sum_{i \in \mathcal{B}} \partial_{(\mathbf{w}, b)} l^{(i)}$.'
+  - 'For linear regression: $\mathbf{w} \leftarrow \mathbf{w} - \frac{\eta}{|\mathcal{B}|}\sum_{i\in\mathcal{B}} \mathbf{x}^{(i)}(\hat{y}^{(i)} - y^{(i)})$, $b \leftarrow b - \frac{\eta}{|\mathcal{B}|}\sum_{i} (\hat{y}^{(i)} - y^{(i)})$.'
+  - '**Hyperparameters** (set by you, not learned): learning rate $\eta$, batch size $|\mathcal{B}|$, number of epochs.'
+- after: Vectorization for Speed
+  notes:
+  - 'Use whole-tensor operations instead of Python loops: orders of magnitude faster (and less code).'
+- after: The Normal Distribution and Squared Loss
+  notes:
+  - 'Gaussian: $p(x) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(x-\mu)^2}{2\sigma^2}\right)$.'
+  - If $y = \mathbf{w}^\top\mathbf{x} + b + \epsilon$ with $\epsilon \sim \mathcal{N}(0, \sigma^2)$, then **maximum likelihood = minimizing squared error**.
+- after: Linear Regression as a Neural Network
+  notes:
+  - 'Linear regression = a **single-layer, fully connected** network: $d$ inputs, 1 output, no hidden layers.'

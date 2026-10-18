@@ -334,6 +334,12 @@ and both underfitting and overfitting in :numref:`fig_capacity_vs_error`.
 :label:`fig_capacity_vs_error`
 
 
+Try it: see underfitting and overfitting happen as you change the polynomial degree.
+
+```{=html}
+<div class="d2l-playground" data-playground="polynomial-fit"></div>
+```
+
 ### Dataset Size
 
 As the above bound already indicates,

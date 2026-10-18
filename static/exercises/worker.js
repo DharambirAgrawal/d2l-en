@@ -27,7 +27,7 @@ async function init(pyodideUrl, graderUrl) {
   // Runtime for the book's runnable cells and playgrounds, fetched next to
   // grader.py. Loaded lazily by the first cell run.
   const base = graderUrl.slice(0, graderUrl.lastIndexOf('/') + 1);
-  for (const name of ['notebook.py', 'torchlite.py', 'd2llite.py']) {
+  for (const name of ['notebook.py', 'torchlite.py', 'd2llite.py', 'd2l_book.py']) {
     const r = await fetch(base + name);
     if (r.ok) pyodide.FS.writeFile('/d2l/' + name, await r.text());
   }
