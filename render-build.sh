@@ -2,7 +2,8 @@
 set -euo pipefail
 
 # Use a modern pip so legacy packages build in an isolated environment
-python -m pip install --upgrade pip setuptools wheel
+# (setuptools<81 still ships pkg_resources, which notedown imports)
+python -m pip install --upgrade pip "setuptools<81" wheel
 
 # pandoc-attributes' setup.py calls pypandoc.convert(), which no longer
 # exists in current pypandoc. Install it before pypandoc so the build can't
