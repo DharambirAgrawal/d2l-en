@@ -11,13 +11,34 @@ python -m pip install --upgrade pip "setuptools<81" wheel
 python -m pip install --use-pep517 pandoc-attributes
 
 # Install the D2L book builder
+# (pybtex 0.25+ removed _FakeEntryPoint, which sphinxcontrib-bibtex 2.4 imports)
 python -m pip install \
   "git+https://github.com/d2l-ai/d2l-book.git" \
-  pypandoc_binary
+  pypandoc_binary \
+  "pybtex==0.24.0"
 
 # Make Pandoc available to the book builder
-export PATH="$(dirname "$(python -c \
-  'import pypandoc; print(pypandoc.get_pandoc_path())')"):$PATH"
+PANDOC_PATH="$(python -c 'import pypandoc; print(pypandoc.get_pandoc_path())')"
+export PATH="$(dirname "$PANDOC_PATH"):$PATH"
+
+# Fill in the navbar link placeholders in config.ini
+sed -i.bak \
+  -e "s@###_ALTERNATE_VERSION_###@Stable Version@g" \
+  -e "s@###_ALTERNATE_VERSION_BASE_LINK_###@https://d2l.ai@g" \
+  -e "s@###_CURRENT_VERSION_BASE_LINK_###@https://d2l.ai@g" \
+  config.ini
+rm -f config.ini.bak
+
+# Start from a clean output folder (Render may cache _build between deploys)
+rm -rf _build
+
+# Convert each framework's Markdown to notebooks; "rst --tab all" only
+# merges these, it does not create them. eval_notebook = False in config.ini,
+# so no code is run.
+d2lbook build eval --tab pytorch
+d2lbook build eval --tab mxnet
+d2lbook build eval --tab jax
+d2lbook build eval --tab tensorflow
 
 # Convert the book source
 d2lbook build rst --tab all
