@@ -58,6 +58,15 @@ site should respect them.
     way Apple names products: one short, evocative, human word (like
     "Pulse" or "Lumen"), plus a plain subtitle that says what it does.
     Never "XYZ-Analyzer-v2"-style names.
+15. **Show my growth in Quill.** Every Quill part shows a progress section:
+    the metric for every version so far (held-out perplexity), a real
+    generated sample from each version (so improvement is visible), the
+    skills each part added, and the next target.
+16. **Optional side projects in every chapter.** 2--3 short, fun specs per
+    chapter that apply that chapter's ideas to something real and
+    interesting (like using minimax to solve tic-tac-toe), and later more
+    ambitious ones that companies such as Google or Anthropic would value.
+    Brand names, one-line pitch, why it matters, tasks, "done when".
 
 ---
 
@@ -222,6 +231,17 @@ new kind of data file.
 - **3.9 Capstone: Quill, Part 2**, the bigram model trained by minibatch SGD;
   reference: validation perplexity 11.7 after 3 epochs (lr 10, batch 256),
   approaching the count baseline 11.4.
+
+### 2026-10-18: Quill progress + optional side projects
+- Both Quill pages have **"How Far Quill Has Come"**: perplexity for every
+  version (random 70.0 → counts 11.4 → SGD 11.7), rough goals for later parts
+  (MLP 6--8, RNN 4--6, Transformer below 4; to be replaced by measured
+  numbers), real samples from each version, and the skills each part added.
+- **Optional side projects** on each chapter's project page:
+  - Ch 2 (on Hush): *Ripple* (PageRank), *Spark* (an autograd engine),
+    *Verdict* (honest A/B testing).
+  - Ch 3 (on Tempo): *Scout* (hyperparameter search), *Drift* (online
+    learning under concept drift), *Watt* (energy demand forecasting).
 
 ---
 

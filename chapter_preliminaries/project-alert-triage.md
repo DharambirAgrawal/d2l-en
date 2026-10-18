@@ -91,6 +91,63 @@ harmless traffic spikes that look alarming but aren't incidents.
 - Make the threshold *per region*.
 - Write unit tests for your cleaning and scoring functions.
 
+## Optional Side Projects
+
+Short, fun builds for when you want more practice with this chapter's
+ideas. Each is a weekend at most; pick whichever excites you. Same rule:
+only what you've learned so far.
+
+### Ripple: Google's First Algorithm
+
+*Rank web pages the way Google started, with one matrix--vector product,
+repeated.*
+
+- **Why it's real:** PageRank made Google. The same idea ranks people in
+  social networks, papers by citations, and packages in dependency graphs.
+- **Uses:** matrix--vector products, norms (:numref:`sec_linear-algebra`),
+  probability (a random surfer, :numref:`sec_prob`).
+- **Build:** take a small link graph (for example, the links between this
+  book's pages, or 20 Wikipedia articles). Build the column-stochastic
+  transition matrix $\mathbf{M}$, then iterate
+  $\mathbf{r} \leftarrow 0.85\,\mathbf{M}\mathbf{r} + 0.15/n$ until the
+  $\ell_1$ change is below $10^{-8}$.
+- **Done when:** ranks sum to 1, the top pages make sense, and you can
+  explain why the 0.15 "teleport" term guarantees convergence (and what
+  happens to dead-end pages without it).
+
+### Spark: An Autograd Engine in 100 Lines
+
+*Build the core of PyTorch yourself.*
+
+- **Why it's real:** every deep learning framework (PyTorch, JAX,
+  TensorFlow) is built around reverse-mode automatic differentiation. Being
+  able to build one is a classic signal in ML engineering interviews at
+  places like Google and Anthropic.
+- **Uses:** the chain rule (:numref:`sec_calculus`) and how autograd records
+  a graph (:numref:`sec_autograd`).
+- **Build:** a `Value` class that stores a number, its gradient, and its
+  parents; support `+`, `*`, `**`, `exp`, `log`, `tanh`; implement
+  `backward()` with a topological sort.
+- **Done when:** its gradients match PyTorch's (or a numerical gradient) on
+  random expressions to $10^{-6}$, and you can fit $y = 3x + 1$ with it by
+  gradient descent.
+
+### Verdict: Honest A/B Testing
+
+*Decide whether a new button really beats the old one.*
+
+- **Why it's real:** every product company runs thousands of A/B tests;
+  shipping a "win" that was really noise is expensive.
+- **Uses:** probability, Bayes' theorem, expectations and variances
+  (:numref:`sec_prob`).
+- **Build:** simulate two versions with click rates of 10.0% and 10.5%.
+  Track the estimate and its uncertainty ($\sqrt{p(1-p)/n}$) as users
+  arrive, compute the probability that B beats A, and show how often
+  "peeking" and stopping early declares a false winner.
+- **Done when:** a plot shows how many users you need before the
+  difference is trustworthy, plus a one-paragraph recommendation a product
+  manager could act on.
+
 ## For Your README and Resume
 
 Suggested repository layout: `hush/` (cleaning, scoring, evaluation

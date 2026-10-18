@@ -78,6 +78,32 @@ held-out text.
   perplexity improve? What happens to the table size, and why is that a
   problem as context grows? (That problem is why neural models exist.)
 
+## How Far Quill Has Come
+
+| Part | After chapter | Model | Held-out perplexity | Status |
+|:--|:--|:--|--:|:--|
+| 0 | | random guessing (uniform over 70 characters) | 70.0 | starting point |
+| 1 | 2 | bigram from counts | **11.4** | done after this part |
+| 2 | 3 | bigram trained with minibatch SGD | **11.7** (→ 11.4) | Part 2 |
+| 3 | 4--5 | MLP over the previous few characters | goal: about 6--8 | next |
+| 4 | 9--10 | recurrent network (RNN/GRU) | goal: about 4--6 | later |
+| 5 | 11 | GPT-style Transformer | goal: below 4 | later |
+
+Goals for future parts are rough targets; we'll replace them with the real
+numbers you measure. Lower perplexity means the model is less "surprised"
+by real text: 70 is pure guessing; about 1 would be perfect prediction.
+
+What Part 1's model writes (vs. random guessing):
+
+| Version | Sample |
+|:--|:--|
+| Random guessing | `T(AmY)OR8h,LUO[hwDbeE yEFsYQk!fK)cv;aEhg?ocdnOjr,pLR1eEqDXL]:9iiXu;p8x_]xll"J(:;q-ESpxf;Wf"dJ[ccUW:S-RVkL U;hL"` |
+| Part 1: counts | `Tg thKPhas heckitarld walupis s9)_ughequgorkndes ted s t?)Gmaderes t whewis f afr d tur?'U(d orine l. mom masa` |
+
+| Part | Skills you gained (and can explain in an interview) |
+|:--|:--|
+| 1 | Tokenization; probability tables from data; smoothing; sampling; perplexity as an evaluation metric; deriving the softmax/cross-entropy gradient and checking it numerically |
+
 ## For Your README and Resume
 
 Structure the repo so it can grow: `quill/tokenizer.py`, `quill/bigram.py`,

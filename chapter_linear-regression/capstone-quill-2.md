@@ -83,6 +83,41 @@ the same quantity you used for perplexity in Part 1.
 - Add a learning-rate schedule (start high, decay each epoch). Does it reach
   the count baseline faster?
 
+## How Far Quill Has Come
+
+| Part | After chapter | Model | Held-out perplexity | Status |
+|:--|:--|:--|--:|:--|
+| 0 | | random guessing (uniform over 70 characters) | 70.0 | starting point |
+| 1 | 2 | bigram from counts | **11.4** | done |
+| 2 | 3 | bigram trained with minibatch SGD | **11.7** (→ 11.4) | done after this part |
+| 3 | 4--5 | MLP over the previous few characters | goal: about 6--8 | next |
+| 4 | 9--10 | recurrent network (RNN/GRU) | goal: about 4--6 | later |
+| 5 | 11 | GPT-style Transformer | goal: below 4 | later |
+
+Goals for future parts are rough targets; we'll replace them with the real
+numbers you measure. Lower perplexity means the model is less "surprised"
+by real text: 70 is pure guessing; about 1 would be perfect prediction.
+
+Samples from each version, all starting with "T" and the same random seed
+(newlines shown as spaces):
+
+| Version | Sample |
+|:--|:--|
+| Random guessing | `T(AmY)OR8h,LUO[hwDbeE yEFsYQk!fK)cv;aEhg?ocdnOjr,pLR1eEqDXL]:9iiXu;p8x_]xll"J(:;q-ESpxf;Wf"dJ[ccUW:S-RVkL U;hL"` |
+| Part 1: counts | `Tg thKPhas heckitarld walupis s9)_ughequgorkndes ted s t?)Gmaderes t whewis f afr d tur?'U(d orine l. mom masa` |
+| Part 2: SGD | `Thashand s ged steng 'uldinde omMhrSoghilorkndes the rdimed addely t whewis f adie. turang pemione ieelom lasa` |
+
+Random guessing produces symbol soup. Both bigram versions have learned
+which letters follow which: spaces, common pairs like "th", "he", "ed", and
+short word-like chunks. Parts 1 and 2 *look* alike because they are the same
+model; Part 2's achievement is *how* it learned. Real words and grammar need
+more context, which Part 3 adds.
+
+| Part | Skills you gained (and can explain in an interview) |
+|:--|:--|
+| 1 | Tokenization; probability tables from data; smoothing; sampling; perplexity as an evaluation metric; deriving the softmax/cross-entropy gradient and checking it numerically |
+| 2 | Training a model by minibatch SGD; designing Module/DataModule/Trainer code; tuning the learning rate; train vs. validation curves; weight decay as regularization (and when it hurts) |
+
 ## Why This Matters
 
 Part 2 is the turning point of the capstone: the model is now *learned* by

@@ -105,6 +105,62 @@ are disasters (a courier got lost) that took 35--90 extra minutes.
   :numref:`sec_linear_regression`). Do they agree?
 - Predict `log(delivery_min)` instead and compare MAE. When is that better?
 
+## Optional Side Projects
+
+Short, fun builds for more practice with this chapter's ideas. Each is a
+weekend at most; pick whichever excites you. Same rule: only what you've
+learned so far.
+
+### Scout: Find Good Hyperparameters Automatically
+
+*A small hyperparameter search tool, like a mini Google Vizier.*
+
+- **Why it's real:** choosing learning rates, batch sizes, and weight decay
+  is a big part of every ML team's compute bill; Google, Meta, and Anthropic
+  all run internal tuning services.
+- **Uses:** validation sets and $K$-fold cross-validation
+  (:numref:`sec_generalization_basics`), weight decay (:numref:`sec_weight_decay`),
+  your SGD `Trainer` (:numref:`sec_linear_scratch`).
+- **Build:** a function `search(train_fn, space, budget)` that runs random
+  search over log-scaled ranges (learning rate, batch size, $\lambda$), uses
+  $K$-fold cross-validation, and returns the best settings with a results
+  table.
+- **Done when:** on Tempo's data, Scout finds settings at least as good as
+  your hand-tuned ones, and you show that random search beats a grid with
+  the same budget.
+
+### Drift: A Model That Keeps Up With the World
+
+*Online learning that adapts when the data changes.*
+
+- **Why it's real:** prices, demand, and user behavior shift over time
+  (concept drift). Models at ride-sharing, delivery, and ad companies update
+  continuously instead of retraining from scratch.
+- **Uses:** SGD on one example at a time, learning rates, and why the IID
+  assumption matters (:numref:`sec_generalization_basics`).
+- **Build:** stream Tempo's orders in time order. Halfway through, simulate
+  a change (rain now adds 15 minutes). Compare a model trained once on the
+  first half against one that keeps doing SGD updates on each new order.
+- **Done when:** a plot of rolling error over time shows the frozen model
+  degrading and the online model recovering, and you explain how the
+  learning rate trades stability for speed of adaptation.
+
+### Watt: Forecast a Building's Energy Use
+
+*Predict tomorrow's electricity demand from the weather.*
+
+- **Why it's real:** DeepMind famously cut the energy used to cool Google's
+  data centers by about 40% with learned models; utilities forecast demand
+  every hour to plan power generation.
+- **Uses:** linear regression, feature engineering, squared vs. robust loss,
+  weight decay, time-based validation (all of this chapter).
+- **Build:** simulate (or download a public dataset of) hourly temperature
+  and energy use. Engineer features (temperature, temperature squared for
+  heating *and* cooling, hour of day, weekday), train with a time-based
+  split, and compare with "same hour yesterday".
+- **Done when:** your model beats the "yesterday" baseline on the last two
+  weeks, and you can show which features matter most.
+
 ## For Your README and Resume
 
 Suggested layout: `tempo/data.py` (loading, splitting, features),
