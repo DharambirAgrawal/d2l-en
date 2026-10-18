@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Use a modern pip so legacy packages build in an isolated environment
+python -m pip install --upgrade pip setuptools wheel
+
+# pandoc-attributes' setup.py calls pypandoc.convert(), which no longer
+# exists in current pypandoc. Install it before pypandoc so the build can't
+# import pypandoc, and fall back to an empty long_description.
+python -m pip install --use-pep517 pandoc-attributes
+
 # Install the D2L book builder
 python -m pip install \
   "git+https://github.com/d2l-ai/d2l-book.git" \
