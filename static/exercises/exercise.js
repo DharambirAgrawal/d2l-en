@@ -621,136 +621,143 @@
       });
     });
 
-    const note = el('div', {class: 'd2l-cell-note'}, [
-      el('strong', {}, 'Runnable examples: '),
-      'press ▶ Run or ✎ Edit on any PyTorch cell to experiment. They run in your browser on ',
-      el('em', {}, 'torchlite'),
-      ', a small NumPy-based version of PyTorch that covers the basics (tensors, math, ' +
-      'autograd, plotting). Cells share variables like a notebook.',
-    ]);
+    const note = el('div', {class: 'd2l-cell-note'},
+      'PyTorch examples on this page can be edited and run (▶ Run, ✎ Edit). They share ' +
+      'variables like a notebook and run in your browser on torchlite, a small NumPy-based PyTorch.');
     blocks[0].before(note);
   }
 
   // ------------------------------------------------------------ playgrounds
 
-  /* Interactive playgrounds: sliders feed variables into a short Python
-   * program whose plot and printed output update live. Defined in
-   * playgrounds/<id>.yml, embedded with
+  /* Live playgrounds: sliders redraw a plot on every movement. Text and
+   * sliders come from playgrounds/<id>.yml (as _static/playgrounds/<id>.json);
+   * the drawing code is in playgrounds.js (window.D2LPlaygrounds). The yml's
+   * optional Python version can be opened, edited and run.
    *   <div class="d2l-playground" data-playground="<id>"></div>
    */
   function mountPlayground(container) {
     const id = container.getAttribute('data-playground');
+    const drawer = (window.D2LPlaygrounds || {})[id];
     container.textContent = 'Loading playground…';
     const root = new URL('../playgrounds/', staticRoot()).href;
-    if (!editorLib) editorLib = loadCodeMirror().catch(() => null);
-    Promise.all([
-      fetch(root + encodeURIComponent(id) + '.json', {cache: 'no-cache'}).then((res) => {
+    fetch(root + encodeURIComponent(id) + '.json', {cache: 'no-cache'})
+      .then((res) => {
         if (!res.ok) throw new Error(`playground "${id}" not found (${res.status})`);
         return res.json();
-      }),
-      editorLib,
-    ]).then(([pg, CodeMirror]) => buildPlayground(container, pg, CodeMirror))
+      })
+      .then((pg) => {
+        if (!drawer) throw new Error(`no drawing code for "${id}"`);
+        buildPlayground(container, pg, drawer);
+      })
       .catch((err) => {
         container.textContent = 'Could not load this playground: ' + err.message;
         container.classList.add('d2l-ex-broken');
       });
   }
 
-  function buildPlayground(container, pg, CodeMirror) {
+  function buildPlayground(container, pg, drawer) {
     const values = {};
-    const out = el('div', {class: 'd2l-pg-out'});
-    const status = el('span', {class: 'd2l-ex-status', role: 'status', 'aria-live': 'polite'});
+    const canvas = el('canvas', {class: 'd2l-pg-canvas', role: 'img', 'aria-label': pg.title});
+    const readout = el('div', {class: 'd2l-pg-readout', 'aria-live': 'polite'});
     const controls = el('div', {class: 'd2l-pg-controls'});
-    let code = pg.code;
-    let pending = false;
-    let timer = null;
+    let frame = 0;
 
-    async function update() {
-      if (runner.busy) {  // another cell or exercise is running; try again soon
-        clearTimeout(timer);
-        timer = setTimeout(update, 300);
-        return;
-      }
-      status.textContent = 'Running…';
-      const r = await runner.run({
-        mode: 'cell', code, session: 'playground:' + pg.id, reset: true,
-        params: Object.assign({}, values), timeout: pg.timeout || 20,
-        onStatus: (t) => { status.textContent = t; },
-      });
-      status.textContent = r.status === 'ok' ? '' : (r.status === 'busy' ? '' : 'Error');
-      if (r.status !== 'busy') showCellResult(out, r);
-      if (pending) {
-        pending = false;
-        setTimeout(update, 50);
+    function draw() {
+      frame = 0;
+      const width = canvas.parentElement.clientWidth;
+      canvas.style.height = Math.round(Math.min(width * drawer.aspect, drawer.aspect >= 1 ? 440 : 480)) + 'px';
+      try {
+        readout.textContent = drawer.draw(canvas, values) || '';
+      } catch (e) {
+        readout.textContent = 'Error: ' + e.message;
       }
     }
-
-    function schedule() {
-      // Slider moved: rerun after a short pause (or right after the current run).
-      if (runner.busy && status.textContent) { pending = true; return; }
-      clearTimeout(timer);
-      timer = setTimeout(update, 200);
-    }
+    const redraw = () => { if (!frame) frame = requestAnimationFrame(draw); };
 
     for (const p of pg.params) {
       values[p.name] = p.value;
-      const valueLabel = el('span', {class: 'd2l-pg-value'}, String(p.value));
+      const decimals = (String(p.step).split('.')[1] || '').length;
+      const valueLabel = el('output', {class: 'd2l-pg-value'}, Number(p.value).toFixed(decimals));
       const input = el('input', {type: 'range', min: p.min, max: p.max, step: p.step,
         value: p.value, 'aria-label': p.label});
       input.addEventListener('input', () => {
         values[p.name] = Number(input.value);
-        valueLabel.textContent = input.value;
-        schedule();
+        valueLabel.textContent = Number(input.value).toFixed(decimals);
+        redraw();
       });
       controls.append(el('label', {class: 'd2l-pg-param'}, [
         el('span', {class: 'd2l-pg-label', html: p.label_html || p.label}), input, valueLabel]));
     }
 
-    const codeBox = el('div', {class: 'd2l-ex-editor', hidden: true});
-    const codeBtn = el('button', {class: 'd2l-ex-btn', type: 'button'}, 'Show / edit code');
-    const runBtn = el('button', {class: 'd2l-ex-btn d2l-ex-primary', type: 'button'}, '▶ Run');
-    let editor = null;
-    codeBtn.addEventListener('click', () => {
-      codeBox.hidden = !codeBox.hidden;
-      if (!editor && !codeBox.hidden) {
-        editor = makeEditor(CodeMirror, codeBox, code, {
-          extraKeys: {'Ctrl-Enter': () => runBtn.click(), 'Cmd-Enter': () => runBtn.click()},
-        });
-        editor.on('change', () => { code = editor.getValue(); });
-      }
-    });
-    runBtn.addEventListener('click', update);
-
-    const box = el('div', {class: 'd2l-ex d2l-playground-box'}, [
-      el('div', {class: 'd2l-ex-head'}, [
-        el('span', {class: 'd2l-ex-kicker'}, 'Playground'),
-        el('span', {class: 'd2l-ex-title'}, pg.title),
+    const parts = [
+      el('div', {class: 'd2l-card-head'}, [
+        el('span', {class: 'd2l-card-kicker'}, 'Playground'),
+        el('span', {class: 'd2l-card-title'}, pg.title),
       ]),
-      el('div', {class: 'd2l-ex-desc', html: pg.description_html}),
-      controls,
-      el('div', {class: 'd2l-ex-bar'}, [runBtn, status, el('span', {class: 'd2l-ex-spacer'}), codeBtn]),
-      codeBox,
-      out,
-      el('div', {class: 'd2l-ex-foot'},
-        'Move the sliders to experiment. Variables: ' + pg.params.map((p) => p.name).join(', ') +
-        ' · runs in your browser'),
-    ]);
-    container.replaceChildren(box);
-    typeset(box);
-    // Run once when the playground scrolls into view.
-    const io = new IntersectionObserver((entries) => {
-      if (entries.some((e) => e.isIntersecting)) {
-        io.disconnect();
-        update();
-      }
-    });
-    io.observe(box);
+      el('div', {class: 'd2l-card-body'}, [
+        el('div', {class: 'd2l-ex-desc', html: pg.description_html}),
+        controls,
+        el('div', {class: 'd2l-pg-figure'}, [canvas]),
+        readout,
+      ]),
+    ];
+
+    if (pg.python) {
+      // Optional Python version: shows how the plot is computed; runnable.
+      const box = el('div', {class: 'd2l-pg-python', hidden: true});
+      const out = el('div', {class: 'd2l-cell-out', hidden: true});
+      const status = el('span', {class: 'd2l-cell-status', role: 'status'});
+      const toggle = el('button', {class: 'd2l-link-btn', type: 'button', 'aria-expanded': 'false'},
+        'Show Python version');
+      const runBtn = el('button', {class: 'd2l-btn d2l-btn-small', type: 'button'}, '▶ Run with these values');
+      let editor = null;
+      toggle.addEventListener('click', () => {
+        box.hidden = !box.hidden;
+        toggle.textContent = box.hidden ? 'Show Python version' : 'Hide Python version';
+        toggle.setAttribute('aria-expanded', String(!box.hidden));
+        if (!box.hidden && !editor) {
+          if (!editorLib) editorLib = loadCodeMirror().catch(() => null);
+          editorLib.then((CodeMirror) => {
+            const holder = el('div', {class: 'd2l-ex-editor d2l-cell-editor'});
+            box.prepend(holder);
+            editor = makeEditor(CodeMirror, holder, pg.python, {
+              extraKeys: {'Ctrl-Enter': () => runBtn.click(), 'Cmd-Enter': () => runBtn.click()},
+            });
+          });
+        }
+      });
+      runBtn.addEventListener('click', async () => {
+        if (runner.busy || !editor) return;
+        status.textContent = 'Running…';
+        const r = await runner.run({
+          mode: 'cell', code: editor.getValue(), session: 'playground:' + pg.id, reset: true,
+          params: Object.assign({}, values), timeout: pg.timeout || 30,
+          onStatus: (t) => { status.textContent = t; },
+        });
+        status.textContent = '';
+        if (r.status !== 'busy') showCellResult(out, r);
+      });
+      box.append(el('div', {class: 'd2l-cell-bar'}, [runBtn, status]), out);
+      parts[1].append(el('div', {class: 'd2l-pg-footer'}, [toggle]), box);
+    }
+
+    const card = el('div', {class: 'd2l-card d2l-playground-box'}, parts);
+    container.replaceChildren(card);
+    typeset(card);
+    draw();
+    window.addEventListener('resize', redraw);
   }
 
   // ------------------------------------------------------------------ notes
 
-  /* "Notes to remember" box before a page's Exercises (or at its end), from
-   * _static/notes/<page>.json (generated from notes/<chapter>/<section>.yml). */
+  /* Notes placed where each idea is taught: at the end of the named section
+   * (or before its first subsection). From _static/notes/<page>.json,
+   * generated from notes/<chapter>/<section>.yml. */
+  function normHeading(text) {
+    return text.replace(/^[\d.]+\s*/, '').replace(/¶/g, '').replace(/---/g, '—')
+      .replace(/--/g, '–').replace(/\s+/g, ' ').trim();
+  }
+
   function addNotes() {
     const opts = document.getElementById('documentation_options');
     const rootUrl = new URL((opts && opts.getAttribute('data-url_root')) || './', window.location.href);
@@ -762,26 +769,34 @@
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (!data) return;
-        const copyBtn = el('button', {class: 'd2l-answer-btn', type: 'button'}, 'Copy notes');
-        copyBtn.addEventListener('click', () => {
-          const done = () => {
-            copyBtn.textContent = 'Copied!';
-            setTimeout(() => { copyBtn.textContent = 'Copy notes'; }, 1500);
-          };
-          if (navigator.clipboard) navigator.clipboard.writeText(data.text).then(done, () => {});
-        });
-        const box = el('div', {class: 'd2l-notes'}, [
-          el('div', {class: 'd2l-notes-head'}, [
-            el('span', {class: 'd2l-notes-title'}, '📝 Notes to remember'),
-            el('span', {class: 'd2l-ex-spacer'}), copyBtn,
-          ]),
-          el('div', {class: 'd2l-notes-body', html: data.html}),
-        ]);
-        const exercises = document.querySelector('#exercises');
-        const main = document.querySelector('.document section, .document .section');
-        if (exercises) exercises.before(box);
-        else if (main) main.append(box);
-        typeset(box);
+        const sections = Array.from(document.querySelectorAll('.document section, .document div.section'));
+        for (const entry of data.sections) {
+          const want = normHeading(entry.heading);
+          const section = sections.find((s) => {
+            const h = s.querySelector(':scope > h2, :scope > h3, :scope > h4, :scope > h5');
+            return h && normHeading(h.textContent) === want;
+          });
+          if (!section) continue;
+          const copyBtn = el('button', {class: 'd2l-link-btn', type: 'button', title: 'Copy these notes'}, 'Copy');
+          copyBtn.addEventListener('click', () => {
+            if (!navigator.clipboard) return;
+            navigator.clipboard.writeText(entry.text).then(() => {
+              copyBtn.textContent = 'Copied';
+              setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500);
+            }, () => {});
+          });
+          const box = el('aside', {class: 'd2l-notes', 'aria-label': 'Notes: ' + entry.heading}, [
+            el('div', {class: 'd2l-notes-head'}, [
+              el('span', {class: 'd2l-notes-title'}, 'Notes'),
+              el('span', {class: 'd2l-ex-spacer'}), copyBtn,
+            ]),
+            el('div', {class: 'd2l-notes-body', html: entry.html}),
+          ]);
+          const firstSub = section.querySelector(':scope > section, :scope > div.section');
+          if (firstSub) firstSub.before(box);
+          else section.append(box);
+          typeset(box);
+        }
       })
       .catch(() => {});
   }

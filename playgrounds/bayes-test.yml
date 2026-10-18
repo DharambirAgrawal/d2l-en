@@ -11,7 +11,7 @@ params:
   - {name: prevalence, label: "prevalence $P(H{=}1)$", min: 0.0005, max: 0.3, step: 0.0005, value: 0.0015}
   - {name: sensitivity, label: "sensitivity", min: 0.5, max: 1, step: 0.01, value: 1.0}
   - {name: fpr, label: "false positive rate", min: 0.001, max: 0.2, step: 0.001, value: 0.01}
-code: |
+python: |  # Python version of the plot (readers can open and run it)
   import numpy as np
   import matplotlib.pyplot as plt
 

@@ -1,8 +1,16 @@
-- "`pd.read_csv(path)` loads CSV data into a `DataFrame`; `NA` and empty cells become `NaN` (missing)."
-- "Split columns into **inputs** and **target**: `data.iloc[:, 0:2]` (by position) or `data[['NumRooms', 'RoofType']]` (by name, safer)."
-- "**Missing values:** *imputation* (fill in estimates) or *deletion* (drop rows/columns)."
-- "Categorical: `pd.get_dummies(df, dummy_na=True)` = one-hot encoding with a separate column for `NaN`."
-- "Numerical: `df.fillna(df.mean())` = replace `NaN` with the column mean."
-- "Check missingness: `df.isna().mean()` (per column), `df.isna().any(axis=1).mean()` (rows with any)."
-- "To tensor: `torch.tensor(df.to_numpy(dtype=float))` once everything is numeric."
-- "Real-world data: watch for outliers, faulty sensors, and recording errors; visualize before modeling."
+# Notes for chapter_preliminaries/pandas.md: each entry is shown at the end of the section
+# whose heading matches "after".
+- after: Reading the Dataset
+  notes:
+  - '`pd.read_csv(path)` → `DataFrame`; `NA`/empty cells become `NaN` (missing).'
+- after: Data Preparation
+  notes:
+  - Split columns into **inputs** and **target** with `iloc` (position) or by name (safer).
+  - 'Missing values: **imputation** (fill estimates, e.g. `fillna(mean)`) or **deletion** (drop rows/columns).'
+  - 'Categorical: `pd.get_dummies(df, dummy_na=True)` = one-hot, with a column for `NaN`.'
+- after: Conversion to the Tensor Format
+  notes:
+  - 'Once all columns are numeric: `torch.tensor(df.to_numpy(dtype=float))`.'
+- after: Discussion
+  notes:
+  - 'Real data: multiple tables, many data types, outliers, faulty sensors. Visualize before modeling.'

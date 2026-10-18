@@ -1,10 +1,39 @@
-- "Scalars $x$ (0 axes), vectors $\\mathbf{x} \\in \\mathbb{R}^n$ (1 axis), matrices $\\mathbf{A} \\in \\mathbb{R}^{m \\times n}$ (2 axes), tensors $\\mathsf{X}$ (any). **Order** = number of axes; **dimensionality** = number of components."
-- "Transpose: $[\\mathbf{A}^\\top]_{ij} = a_{ji}$; **symmetric** if $\\mathbf{A} = \\mathbf{A}^\\top$. `len(X)` = length of axis 0."
-- "**Hadamard product** $\\mathbf{A} \\odot \\mathbf{B}$ = elementwise (`A * B`)."
-- "**Reduction:** `A.sum(axis=0)` removes axis 0; `keepdims=True` keeps it (length 1) so you can **broadcast**: `A / A.sum(axis=1, keepdims=True)` makes rows sum to 1."
-- "**Dot product:** $\\mathbf{x}^\\top \\mathbf{y} = \\sum_i x_i y_i$ (= `(x * y).sum()`). Weighted average if weights $\\geq 0$ sum to 1; cosine of the angle for unit vectors."
-- "**Matrix–vector:** $\\mathbf{A}\\mathbf{x}$ = dot product of each row with $\\mathbf{x}$; maps $\\mathbb{R}^n \\to \\mathbb{R}^m$. Columns of $\\mathbf{A}$ = images of the unit vectors."
-- "**Matrix–matrix:** $c_{ij} = \\mathbf{a}_i^\\top \\mathbf{b}_j$; $(n \\times k)(k \\times m) \\to n \\times m$, costs $\\approx nkm$. `A @ B`. Order of a chain product matters for cost!"
-- "**Norm** properties: $\\|\\alpha\\mathbf{x}\\| = |\\alpha|\\|\\mathbf{x}\\|$, triangle inequality, $\\|\\mathbf{x}\\| > 0$ for $\\mathbf{x} \\neq 0$."
-- "$\\ell_2$: $\\sqrt{\\sum_i x_i^2}$ (Euclidean). $\\ell_1$: $\\sum_i |x_i|$ (Manhattan, robust to outliers). $\\ell_p$: $(\\sum_i |x_i|^p)^{1/p}$. Frobenius: $\\sqrt{\\sum_{ij} x_{ij}^2}$."
-- "Deep learning objectives (distances, errors) are usually norms."
+# Notes for chapter_preliminaries/linear-algebra.md: each entry is shown at the end of the section
+# whose heading matches "after".
+- after: Scalars
+  notes:
+  - 'Scalars: lowercase $x \in \mathbb{R}$; $\in$ means "is a member of".'
+- after: Vectors
+  notes:
+  - 'Vector $\mathbf{x} \in \mathbb{R}^n$: bold lowercase, elements $x_i$; code indices start at **0**, math at **1**.'
+  - '**Order** = number of axes; **dimensionality** = number of components (`len(x)`, `x.shape`).'
+- after: Matrices
+  notes:
+  - 'Matrix $\mathbf{A} \in \mathbb{R}^{m \times n}$: $m$ rows, $n$ columns, element $a_{ij}$; square if $m = n$.'
+  - 'Transpose: $[\mathbf{A}^\top]_{ij} = a_{ji}$; **symmetric** if $\mathbf{A} = \mathbf{A}^\top$. Rows = examples, columns = attributes.'
+- after: Tensors
+  notes:
+  - Images = 3rd-order tensors (height, width, channel); a batch of images = 4th-order.
+- after: Basic Properties of Tensor Arithmetic
+  notes:
+  - '**Hadamard product** $\mathbf{A} \odot \mathbf{B}$ = elementwise (`A * B`). Scalar + tensor keeps the tensor''s shape.'
+- after: Reduction
+  notes:
+  - '`A.sum(axis=0)` sums **down the rows** and removes axis 0; `axis=[0, 1]` sums everything. `mean` works the same way.'
+- after: Non-Reduction Sum
+  notes:
+  - '`keepdims=True` keeps the reduced axis (length 1) so you can broadcast: `A / A.sum(axis=1, keepdims=True)` makes rows sum to 1. `cumsum` doesn''t reduce.'
+- after: Dot Products
+  notes:
+  - $\mathbf{x}^\top \mathbf{y} = \sum_i x_i y_i$ (= `(x * y).sum()`). Weighted average if weights $\geq 0$ sum to 1; cosine of the angle for unit vectors.
+- after: Matrix--Vector Products
+  notes:
+  - $\mathbf{A}\mathbf{x}$ = dot product of every row with $\mathbf{x}$; maps $\mathbb{R}^n \to \mathbb{R}^m$. It's what each neural-network layer computes. Columns of $\mathbf{A}$ = where the unit vectors go.
+- after: Matrix--Matrix Multiplication
+  notes:
+  - $c_{ij} = \mathbf{a}_i^\top \mathbf{b}_j$; $(n \times k)(k \times m) \to (n \times m)$, cost $\approx nkm$ (`A @ B`). Not the Hadamard product. Chain order matters for cost.
+- after: Norms
+  notes:
+  - 'Norm properties: $\|\alpha\mathbf{x}\| = |\alpha|\|\mathbf{x}\|$, triangle inequality, $\|\mathbf{x}\| > 0$ unless $\mathbf{x} = 0$.'
+  - $\ell_2 = \sqrt{\sum_i x_i^2}$ (Euclidean), $\ell_1 = \sum_i |x_i|$ (Manhattan, less sensitive to outliers), $\ell_p = (\sum_i |x_i|^p)^{1/p}$, Frobenius $= \sqrt{\sum_{ij} x_{ij}^2}$.
+  - Deep learning objectives (distances between predictions and targets) are usually norms.

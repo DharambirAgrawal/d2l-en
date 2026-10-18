@@ -1,10 +1,52 @@
-- "**Machine learning** = programs that improve with experience (data). Use it when you can't write the rules but have many examples: *programming with data*."
-- "**Model** = program with tunable **parameters** (knobs); **model family** = all programs you get by turning the knobs; **learning algorithm** = picks the knobs using data."
-- "**Four components** of every ML problem: **data**, **model**, **objective (loss) function** (lower is better), **optimization algorithm** (usually gradient descent)."
-- "**Training loop:** random model → look at data → tweak parameters to do better → repeat."
-- "**Overfitting:** great on training data, poor on unseen data. Always evaluate on a held-out **test set**."
-- "**Supervised** (features → labels): **regression** = *how much?* (squared loss); **classification** = *which one?* (cross-entropy loss); also tagging (multi-label), search/ranking, recommendation, **sequence learning**."
-- "**Unsupervised:** clustering, subspace estimation (PCA), generative models. **Self-supervised:** create labels from the data itself (e.g., predict masked words)."
-- "**Reinforcement learning:** agent, observations, actions, rewards, policy. Key problems: credit assignment, partial observability, **explore vs. exploit**."
-- "**Decisions ≠ most likely class:** weigh outcomes by cost (the death cap mushroom: 20% risk × ∞ cost)."
-- "**Deep learning** = many layers of learned transformations, trained **end to end**; replaces hand-made feature engineering. Fueled by big data + GPUs + good software frameworks."
+# Notes for chapter_introduction/index.md: each entry is shown at the end of the section
+# whose heading matches "after".
+- after: A Motivating Example
+  notes:
+  - '**Machine learning** = programs that improve with experience (data). Use it when you can''t write the rules but have many examples: *programming with data*.'
+  - '**Model** = program with tunable **parameters** (knobs); **model family** = all programs reachable by turning the knobs; **learning algorithm** = picks the knobs using data.'
+  - '**Training loop:** random model → grab data → tweak parameters to do better on it → repeat.'
+- after: Key Components
+  notes:
+  - 'Every ML problem has four parts: **data**, **model**, **objective (loss) function** (lower is better), **optimization algorithm**.'
+- after: Data
+  notes:
+  - Example = **features** (inputs) + **label** (target). Fixed-length feature vectors have a **dimensionality**; deep learning also handles **varying-length** data.
+  - 'More data → more powerful models; but it must be the *right* data: **garbage in, garbage out**, and biased data automates bias.'
+- after: Objective Functions
+  notes:
+  - Regression → **squared error**; classification → **error rate** (optimized through a differentiable **surrogate**).
+  - Split data into **training** and **test** sets. Good on training data but bad on unseen data = **overfitting**.
+- after: Optimization Algorithms
+  notes:
+  - '**Gradient descent:** check how the loss changes when each parameter moves a little, then move it in the direction that lowers the loss.'
+- after: Regression
+  notes:
+  - '**Regression** answers *how much? / how many?* Labels are numbers. Usually minimize squared error (= assuming Gaussian noise).'
+- after: Classification
+  notes:
+  - '**Classification** answers *which one?* Models output **probabilities** per class; loss = **cross-entropy**.'
+  - 'Act on **expected cost**, not the most likely class (death cap: $0.2 \times \infty$ beats $0.8 \times 1$).'
+- after: Tagging
+  notes:
+  - '**Multi-label classification:** several non-exclusive labels per example (auto-tagging).'
+- after: Recommender Systems
+  notes:
+  - 'Recommenders = personalized ranking. Pitfalls: **censored feedback** and **feedback loops**.'
+- after: Sequence Learning
+  notes:
+  - '**Sequence learning:** inputs and/or outputs are sequences; **seq2seq** when both are (translation, speech recognition). Aligned (tagging) vs. unaligned (translation).'
+- after: Unsupervised and Self-Supervised Learning
+  notes:
+  - '**Unsupervised:** clustering, subspace estimation (PCA), causality, **generative models** (VAE, GAN, diffusion).'
+  - '**Self-supervised:** make labels from the data itself (predict masked words), then fine-tune.'
+- after: Interacting with an Environment
+  notes:
+  - '**Offline learning** ignores how predictions change the world. **Distribution shift:** test data differs from training data.'
+- after: Reinforcement Learning
+  notes:
+  - 'RL: agent gets **observations**, takes **actions**, receives **rewards**; a **policy** maps observations to actions.'
+  - 'Challenges: **credit assignment**, partial observability, **explore vs. exploit**. Special cases: MDP, contextual bandit, multi-armed bandit.'
+- after: The Essence of Deep Learning
+  notes:
+  - '**Deep learning** = many layers of transformations learned **jointly, end to end**; replaces hand-made feature engineering.'
+  - Progress came from big data + cheap compute (GPUs) + good frameworks + new ideas (dropout, attention, Transformers, GANs, diffusion).

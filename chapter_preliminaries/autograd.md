@@ -6,25 +6,43 @@ tab.interact_select(['mxnet', 'pytorch', 'tensorflow', 'jax'])
 # Automatic Differentiation
 :label:`sec_autograd`
 
-Recall from :numref:`sec_calculus` that computing derivatives is the crucial
-step in every optimization algorithm we'll use to train deep networks. The
-calculations are straightforward, but doing them by hand is tedious and
-error-prone, and gets worse as models grow more complex.
+Recall from :numref:`sec_calculus` 
+that calculating derivatives is the crucial step
+in all the optimization algorithms
+that we will use to train deep networks.
+While the calculations are straightforward,
+working them out by hand can be tedious and error-prone, 
+and these issues only grow
+as our models become more complex.
 
-Fortunately, all modern deep learning frameworks do this for us with
-*automatic differentiation* (*autograd*). As data passes through each
-function, the framework builds a *computational graph* tracking how each value
-depends on others. To compute derivatives, autograd works backwards through
-this graph applying the chain rule, an algorithm called *backpropagation*.
+Fortunately all modern deep learning frameworks
+take this work off our plates
+by offering *automatic differentiation*
+(often shortened to *autograd*). 
+As we pass data through each successive function,
+the framework builds a *computational graph* 
+that tracks how each value depends on others.
+To calculate derivatives, 
+automatic differentiation 
+works backwards through this graph
+applying the chain rule. 
+The computational algorithm for applying the chain rule
+in this fashion is called *backpropagation*.
 
-Autograd libraries have been a hot topic for the past decade, but they have a
-long history: the earliest references date back over half a century
-:cite:`Wengert.1964`. The core ideas of modern backpropagation come from a
-1980 PhD thesis :cite:`Speelpenning.1980` and were developed further in the
-late 1980s :cite:`Griewank.1989`. Backpropagation is now the default way to
-compute gradients, but not the only one: the Julia language, for instance,
-uses forward propagation :cite:`Revels.Lubin.Papamarkou.2016`. First, let's
-master the autograd package.
+While autograd libraries have become
+a hot concern over the past decade,
+they have a long history. 
+In fact the earliest references to autograd
+date back over half of a century :cite:`Wengert.1964`.
+The core ideas behind modern backpropagation
+date to a PhD thesis from 1980 :cite:`Speelpenning.1980`
+and were further developed in the late 1980s :cite:`Griewank.1989`.
+While backpropagation has become the default method 
+for computing gradients, it is not the only option. 
+For instance, the Julia programming language employs 
+forward propagation :cite:`Revels.Lubin.Papamarkou.2016`. 
+Before exploring methods, 
+let's first master the autograd package.
 
 ```{.python .input}
 %%tab mxnet
@@ -49,8 +67,11 @@ from jax import numpy as jnp
 
 ## A Simple Function
 
-Say we want to differentiate $y = 2\mathbf{x}^{\top}\mathbf{x}$ with respect
-to the column vector $\mathbf{x}$. First, we give `x` an initial value.
+Let's assume that we are interested
+in (**differentiating the function
+$y = 2\mathbf{x}^{\top}\mathbf{x}$
+with respect to the column vector $\mathbf{x}$.**)
+To start, we assign `x` an initial value.
 
 ```{.python .input  n=1}
 %%tab mxnet
@@ -76,12 +97,20 @@ x = jnp.arange(4.0)
 x
 ```
 
-:begin_tab:`pytorch, tensorflow`
-Before computing the gradient of $y$ with respect to $\mathbf{x}$, we need
-somewhere to store it. We avoid allocating new memory for every derivative,
-since deep learning computes derivatives with respect to the same parameters
-a great many times and could run out of memory. The gradient of a
-scalar-valued function with respect to a vector $\mathbf{x}$ is a vector with
+:begin_tab:`mxnet, pytorch, tensorflow`
+[**Before we calculate the gradient
+of $y$ with respect to $\mathbf{x}$,
+we need a place to store it.**]
+In general, we avoid allocating new memory
+every time we take a derivative 
+because deep learning requires 
+successively computing derivatives
+with respect to the same parameters
+a great many times,
+and we might risk running out of memory.
+Note that the gradient of a scalar-valued function
+with respect to a vector $\mathbf{x}$
+is vector-valued with 
 the same shape as $\mathbf{x}$.
 :end_tab:
 
@@ -106,7 +135,7 @@ x.grad  # The gradient is None by default
 x = tf.Variable(x)
 ```
 
-Now we compute our function of `x` and assign the result to `y`.
+(**We now calculate our function of `x` and assign the result to `y`.**)
 
 ```{.python .input  n=10}
 %%tab mxnet
@@ -137,19 +166,32 @@ y = lambda x: 2 * jnp.dot(x, x)
 y(x)
 ```
 
+:begin_tab:`mxnet`
+[**We can now take the gradient of `y`
+with respect to `x`**] by calling 
+its `backward` method.
+Next, we can access the gradient 
+via `x`'s `grad` attribute.
+:end_tab:
+
 :begin_tab:`pytorch`
-Now we take the gradient of `y` with respect to `x` by calling its
-`backward` method, and read it from `x`'s `grad` attribute.
+[**We can now take the gradient of `y`
+with respect to `x`**] by calling 
+its `backward` method.
+Next, we can access the gradient 
+via `x`'s `grad` attribute.
 :end_tab:
 
 :begin_tab:`tensorflow`
-Now we compute the gradient of `y` with respect to `x` by calling the
-`gradient` method.
+[**We can now calculate the gradient of `y`
+with respect to `x`**] by calling 
+the `gradient` method.
 :end_tab:
 
 :begin_tab:`jax`
-Now we take the gradient of `y` with respect to `x` by passing it through
-the `grad` transform.
+[**We can now take the gradient of `y`
+with respect to `x`**] by passing through the
+`grad` transform.
 :end_tab:
 
 ```{.python .input}
@@ -179,8 +221,10 @@ x_grad = grad(y)(x)
 x_grad
 ```
 
-We know the gradient of $y = 2\mathbf{x}^{\top}\mathbf{x}$ with respect to
-$\mathbf{x}$ should be $4\mathbf{x}$. Let's verify that autograd agrees.
+(**We already know that the gradient of the function $y = 2\mathbf{x}^{\top}\mathbf{x}$
+with respect to $\mathbf{x}$ should be $4\mathbf{x}$.**)
+We can now verify that the automatic gradient computation
+and the expected result are identical.
 
 ```{.python .input  n=13}
 %%tab mxnet
@@ -202,16 +246,36 @@ x_grad == 4 * x
 x_grad == 4 * x
 ```
 
+:begin_tab:`mxnet`
+[**Now let's calculate 
+another function of `x`
+and take its gradient.**] 
+Note that MXNet resets the gradient buffer 
+whenever we record a new gradient. 
+:end_tab:
+
 :begin_tab:`pytorch`
-Now let's compute another function of `x` and take its gradient. PyTorch
-does not reset the gradient buffer when recording a new gradient; it adds the
-new gradient to the stored one. That's handy for optimizing a sum of several
-objective functions. To reset the buffer, call `x.grad.zero_()`:
+[**Now let's calculate 
+another function of `x`
+and take its gradient.**]
+Note that PyTorch does not automatically 
+reset the gradient buffer 
+when we record a new gradient. 
+Instead, the new gradient
+is added to the already-stored gradient.
+This behavior comes in handy
+when we want to optimize the sum 
+of multiple objective functions.
+To reset the gradient buffer,
+we can call `x.grad.zero_()` as follows:
 :end_tab:
 
 :begin_tab:`tensorflow`
-Now let's compute another function of `x` and take its gradient. TensorFlow
-resets the gradient buffer whenever we record a new gradient.
+[**Now let's calculate 
+another function of `x`
+and take its gradient.**]
+Note that TensorFlow resets the gradient buffer 
+whenever we record a new gradient. 
 :end_tab:
 
 ```{.python .input}
@@ -245,33 +309,63 @@ grad(y)(x)
 
 ## Backward for Non-Scalar Variables
 
-When `y` is a vector, the natural derivative of `y` with respect to a vector
-`x` is a matrix, the *Jacobian*, holding the partial derivative of each
-component of `y` with respect to each component of `x`. For higher-order `y`
-and `x`, the result can be an even higher-order tensor.
+When `y` is a vector, 
+the most natural representation 
+of the derivative of  `y`
+with respect to a vector `x` 
+is a matrix called the *Jacobian*
+that contains the partial derivatives
+of each component of `y` 
+with respect to each component of `x`.
+Likewise, for higher-order `y` and `x`,
+the result of differentiation could be an even higher-order tensor.
 
-Jacobians appear in some advanced techniques, but more often we want to sum
-the gradients of each component of `y` with respect to all of `x`, giving a
-vector shaped like `x`. For example, we often have a vector of loss values,
-one per example in a *batch* of training examples, and just want to sum up
-the per-example gradients.
+While Jacobians do show up in some
+advanced machine learning techniques,
+more commonly we want to sum up 
+the gradients of each component of `y`
+with respect to the full vector `x`,
+yielding a vector of the same shape as `x`.
+For example, we often have a vector 
+representing the value of our loss function
+calculated separately for each example among
+a *batch* of training examples.
+Here, we just want to (**sum up the gradients
+computed individually for each example**).
+
+:begin_tab:`mxnet`
+MXNet handles this problem by reducing all tensors to scalars 
+by summing before computing a gradient. 
+In other words, rather than returning the Jacobian 
+$\partial_{\mathbf{x}} \mathbf{y}$,
+it returns the gradient of the sum
+$\partial_{\mathbf{x}} \sum_i y_i$. 
+:end_tab:
 
 :begin_tab:`pytorch`
-Frameworks differ in how they interpret gradients of non-scalar tensors, so
-PyTorch avoids confusion: calling `backward` on a non-scalar raises an error
-unless we say how to reduce it to a scalar. Formally, we provide a vector
-$\mathbf{v}$ so that `backward` computes
-$\mathbf{v}^\top \partial_{\mathbf{x}} \mathbf{y}$ instead of
-$\partial_{\mathbf{x}} \mathbf{y}$. Confusingly (for reasons that become clear
-later), this argument representing $\mathbf{v}$ is named `gradient`. For
-details, see Yang Zhang's
-[Medium post](https://zhang-yang.medium.com/the-gradient-argument-in-pytorchs-backward-function-explained-by-examples-68f266950c29).
+Because deep learning frameworks vary 
+in how they interpret gradients of
+non-scalar tensors,
+PyTorch takes some steps to avoid confusion.
+Invoking `backward` on a non-scalar elicits an error 
+unless we tell PyTorch how to reduce the object to a scalar. 
+More formally, we need to provide some vector $\mathbf{v}$ 
+such that `backward` will compute 
+$\mathbf{v}^\top \partial_{\mathbf{x}} \mathbf{y}$ 
+rather than $\partial_{\mathbf{x}} \mathbf{y}$. 
+This next part may be confusing,
+but for reasons that will become clear later, 
+this argument (representing $\mathbf{v}$) is named `gradient`. 
+For a more detailed description, see Yang Zhang's 
+[Medium post](https://zhang-yang.medium.com/the-gradient-argument-in-pytorchs-backward-function-explained-by-examples-68f266950c29). 
 :end_tab:
 
 :begin_tab:`tensorflow`
-By default, TensorFlow returns the gradient of the sum,
-$\partial_{\mathbf{x}} \sum_i y_i$, instead of the Jacobian
-$\partial_{\mathbf{x}} \mathbf{y}$.
+By default, TensorFlow returns the gradient of the sum.
+In other words, rather than returning 
+the Jacobian $\partial_{\mathbf{x}} \mathbf{y}$,
+it returns the gradient of the sum
+$\partial_{\mathbf{x}} \sum_i y_i$. 
 :end_tab:
 
 ```{.python .input}
@@ -306,14 +400,28 @@ grad(lambda x: y(x).sum())(x)
 
 ## Detaching Computation
 
-Sometimes we want to move some calculations outside the recorded graph, e.g.,
-auxiliary intermediate terms we don't want gradients for. Then we *detach*
-them from the final result. Toy example: `z = x * y` and `y = x * x`, but we
-want only the *direct* influence of `x` on `z`, not the influence through
-`y`. We create `u` with the same value as `y` but with its *provenance* (how
-it was created) wiped out, so `u` has no ancestors in the graph and gradients
-don't flow through it to `x`. The gradient of `z = x * u` is then `u`, not
-`3 * x * x` as you might expect from `z = x * x * x`.
+Sometimes, we wish to [**move some calculations
+outside of the recorded computational graph.**]
+For example, say that we use the input 
+to create some auxiliary intermediate terms 
+for which we do not want to compute a gradient. 
+In this case, we need to *detach* 
+the respective computational graph
+from the final result. 
+The following toy example makes this clearer: 
+suppose we have `z = x * y` and `y = x * x` 
+but we want to focus on the *direct* influence of `x` on `z` 
+rather than the influence conveyed via `y`. 
+In this case, we can create a new variable `u`
+that takes the same value as `y` 
+but whose *provenance* (how it was created)
+has been wiped out.
+Thus `u` has no ancestors in the graph
+and gradients do not flow through `u` to `x`.
+For example, taking the gradient of `z = x * u`
+will yield the result `u`,
+(not `3 * x * x` as you might have 
+expected since `z = x * x * x`).
 
 ```{.python .input}
 %%tab mxnet
@@ -361,9 +469,12 @@ z = lambda x: u * x
 grad(lambda x: z(x).sum())(x) == y(x)
 ```
 
-This detaches `y`'s ancestors from the graph leading to `z`, but the graph
-leading to `y` remains, so we can still compute the gradient of `y` with
-respect to `x`.
+Note that while this procedure
+detaches `y`'s ancestors
+from the graph leading to `z`, 
+the computational graph leading to `y` 
+persists and thus we can calculate
+the gradient of `y` with respect to `x`.
 
 ```{.python .input}
 %%tab mxnet
@@ -390,13 +501,20 @@ grad(lambda x: y(x).sum())(x) == 2 * x
 
 ## Gradients and Python Control Flow
 
-So far, the path from input to output was a fixed function such as
-`z = x * x * x`. But code can compute results much more freely: depending on
-auxiliary variables, or branching on intermediate results. A big benefit of
-autograd is that even if the computation passes through a maze of Python
-control flow (conditionals, loops, arbitrary function calls), we can still
-compute the gradient of the result. In the snippet below, both the number of
-`while` iterations and the `if` branch depend on the input `a`.
+So far we reviewed cases where the path from input to output 
+was well defined via a function such as `z = x * x * x`.
+Programming offers us a lot more freedom in how we compute results. 
+For instance, we can make them depend on auxiliary variables 
+or condition choices on intermediate results. 
+One benefit of using automatic differentiation
+is that [**even if**] building the computational graph of 
+(**a function required passing through a maze of Python control flow**)
+(e.g., conditionals, loops, and arbitrary function calls),
+(**we can still calculate the gradient of the resulting variable.**)
+To illustrate this, consider the following code snippet where 
+the number of iterations of the `while` loop
+and the evaluation of the `if` statement
+both depend on the value of the input `a`.
 
 ```{.python .input}
 %%tab mxnet
@@ -450,10 +568,14 @@ def f(a):
     return c
 ```
 
-We call the function with a random input. Since the input is random, we
-don't know what the computational graph will look like, but each call of
-`f(a)` on a specific input builds a specific graph, on which we can then run
-`backward`.
+Below, we call this function, passing in a random value, as input.
+Since the input is a random variable, 
+we do not know what form 
+the computational graph will take.
+However, whenever we execute `f(a)` 
+on a specific input, we realize 
+a specific computational graph
+and can subsequently run `backward`.
 
 ```{.python .input}
 %%tab mxnet
@@ -488,9 +610,13 @@ d = f(a)
 d_grad = grad(f)(a)
 ```
 
-The function `f` is contrived, but its dependence on the input is simple: it
-is *linear* in `a` with a piecewise-defined scale. So `f(a) / a` is a vector
-of constant entries and must match the gradient of `f(a)` with respect to `a`.
+Even though our function `f` is, for demonstration purposes, a bit contrived,
+its dependence on the input is quite simple: 
+it is a *linear* function of `a` 
+with piecewise defined scale. 
+As such, `f(a) / a` is a vector of constant entries 
+and, moreover, `f(a) / a` needs to match 
+the gradient of `f(a)` with respect to `a`.
 
 ```{.python .input}
 %%tab mxnet
@@ -512,25 +638,35 @@ d_grad == d / a
 d_grad == d / a
 ```
 
-Dynamic control flow is very common in deep learning; when processing text,
-for example, the graph depends on the input's length. Then automatic
-differentiation is vital, since the gradient can't be computed *a priori*.
+Dynamic control flow is very common in deep learning. 
+For instance, when processing text, the computational graph
+depends on the length of the input. 
+In these cases, automatic differentiation 
+becomes vital for statistical modeling 
+since it is impossible to compute the gradient *a priori*. 
 
 ## Discussion
 
-You've now seen the power of automatic differentiation. Libraries that
-compute derivatives automatically and efficiently have been a massive
-productivity boost for deep learning practitioners, freeing them from menial
-work, and they make it possible to design huge models whose gradients would
-take prohibitively long to derive by hand. Interestingly, while we use
-autograd to *optimize* models (statistically), *optimizing* autograd
-libraries themselves (computationally) is a rich subject for framework
-designers, drawing on compilers and graph manipulation to compute results as
-quickly and memory-efficiently as possible.
+You have now gotten a taste of the power of automatic differentiation. 
+The development of libraries for calculating derivatives
+both automatically and efficiently 
+has been a massive productivity booster
+for deep learning practitioners,
+liberating them so they can focus on less menial.
+Moreover, autograd lets us design massive models
+for which pen and paper gradient computations 
+would be prohibitively time consuming.
+Interestingly, while we use autograd to *optimize* models
+(in a statistical sense)
+the *optimization* of autograd libraries themselves
+(in a computational sense)
+is a rich subject
+of vital interest to framework designers.
+Here, tools from compilers and graph manipulation 
+are leveraged to compute results 
+in the most expedient and memory-efficient manner. 
 
-For now, remember the basics: (i) attach gradients to the variables we want
-derivatives with respect to; (ii) record the computation of the target value;
-(iii) run the backpropagation function; and (iv) read the resulting gradient.
+For now, try to remember these basics: (i) attach gradients to those variables with respect to which we desire derivatives; (ii) record the computation of the target value; (iii) execute the backpropagation function; and  (iv) access the resulting gradient.
 
 
 ## Exercises
@@ -542,4 +678,4 @@ derivatives with respect to; (ii) record the computation of the target value;
 1. Let $f(x) = ((\log x^2) \cdot \sin x) + x^{-1}$. Write out a dependency graph tracing results from $x$ to $f(x)$. 
 1. Use the chain rule to compute the derivative $\frac{df}{dx}$ of the aforementioned function, placing each term on the dependency graph that you constructed previously. 
 1. Given the graph and the intermediate derivative results, you have a number of options when computing the gradient. Evaluate the result once starting from $x$ to $f$ and once from $f$ tracing back to $x$. The path from $x$ to $f$ is commonly known as *forward differentiation*, whereas the path from $f$ to $x$ is known as backward differentiation. 
-1. When might you want to use forward, and when backward, differentiation? Hint: consider the amount of intermediate data needed, the ability to parallelize steps, and the size of matrices and vectors involved.
+1. When might you want to use forward, and when backward, differentiation? Hint: consider the amount of intermediate data needed, the ability to parallelize steps, and the size of matrices and vectors involved. 

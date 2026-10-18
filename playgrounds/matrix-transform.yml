@@ -1,8 +1,8 @@
 title: A Matrix Is a Transformation
 description: |
   Multiplying by $\mathbf{A} = \begin{bmatrix} a & b \\ c & d \end{bmatrix}$
-  maps every point $\mathbf{x}$ to $\mathbf{A}\mathbf{x}$. The blue circle and
-  square are the inputs; orange shows where $\mathbf{A}$ sends them. The
+  maps every point $\mathbf{x}$ to $\mathbf{A}\mathbf{x}$. The gray circle and
+  square are the inputs; blue shows where $\mathbf{A}$ sends them. The
   arrows are $\mathbf{A}\mathbf{e}_1 = (a, c)$ and $\mathbf{A}\mathbf{e}_2 = (b, d)$,
   the **columns** of $\mathbf{A}$. Try a rotation ($a = d = 0.7$,
   $b = -0.7$, $c = 0.7$), a stretch ($a = 2$, $d = 1$, rest 0), or making
@@ -12,7 +12,7 @@ params:
   - {name: b, label: $b$, min: -2, max: 2, step: 0.1, value: 0.5}
   - {name: c, label: $c$, min: -2, max: 2, step: 0.1, value: 0.0}
   - {name: d, label: $d$, min: -2, max: 2, step: 0.1, value: 1.0}
-code: |
+python: |  # Python version of the plot (readers can open and run it)
   import numpy as np
   import matplotlib.pyplot as plt
 

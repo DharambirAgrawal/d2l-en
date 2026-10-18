@@ -1,12 +1,28 @@
-- "**Probability** = theoretical property of the process; **statistic** = computed from data; **estimator** produces estimates of probabilities/parameters."
-- "Sample space $\\mathcal{S}$, events = subsets. Axioms: $P(\\mathcal{A}) \\geq 0$, $P(\\mathcal{S}) = 1$, disjoint events add."
-- "**Random variable:** maps outcomes to values; discrete (coin) vs. continuous (height → **density**, integrate over intervals)."
-- "**Joint** $P(A, B)$; **marginal** $P(A) = \\sum_b P(A, B=b)$; **conditional** $P(B \\mid A) = \\frac{P(A, B)}{P(A)}$."
-- "**Bayes' theorem:** $P(A \\mid B) = \\frac{P(B \\mid A) P(A)}{P(B)}$; posterior ∝ likelihood × prior."
-- "**Independence** $A \\perp B$: $P(A, B) = P(A)P(B)$. Conditional independence: $P(A, B \\mid C) = P(A \\mid C)P(B \\mid C)$."
-- "**Base rates matter:** a 99%-accurate test for a rare disease (0.15%) gives only 13% probability after one positive; a second *independent* test raises it to 83%."
-- "**Expectation** $E[X] = \\sum_x x P(X = x)$; **variance** $\\textrm{Var}[X] = E[(X - E[X])^2] = E[X^2] - E[X]^2$; std $= \\sqrt{\\textrm{Var}}$."
-- "**Covariance matrix** $\\boldsymbol{\\Sigma} = E[(\\mathbf{x} - \\boldsymbol{\\mu})(\\mathbf{x} - \\boldsymbol{\\mu})^\\top]$; $\\textrm{Var}[\\mathbf{v}^\\top\\mathbf{x}] = \\mathbf{v}^\\top \\boldsymbol{\\Sigma} \\mathbf{v}$."
-- "Estimates converge at rate $1/\\sqrt{n}$ (law of large numbers, CLT): 100× the data for 10× the precision."
-- "**Aleatoric** (inherent randomness, irreducible) vs. **epistemic** (about parameters, reducible with data) uncertainty."
-- "**Chebyshev:** $P(|X - \\mu| \\geq k\\sigma) \\leq 1/k^2$."
+# Notes for chapter_preliminaries/probability.md: each entry is shown at the end of the section
+# whose heading matches "after".
+- after: 'A Simple Example: Tossing Coins'
+  notes:
+  - '**Probability** = property of the process (theoretical); **statistic** = computed from data; **estimator** → estimates.'
+  - 'Law of large numbers: estimates converge; error shrinks like $1/\sqrt{n}$ (central limit theorem).'
+- after: A More Formal Treatment
+  notes:
+  - 'Sample space $\mathcal{S}$, events = subsets. Axioms: $P(\mathcal{A}) \geq 0$, $P(\mathcal{S}) = 1$, disjoint events add. So $P(\emptyset) = 0$.'
+- after: Random Variables
+  notes:
+  - Random variables map outcomes to values; can be coarser than $\mathcal{S}$. Discrete (coin) vs. continuous (height → **density**; integrate over intervals).
+- after: Multiple Random Variables
+  notes:
+  - Joint $P(A, B)$; marginal $P(A) = \sum_b P(A, B = b)$; conditional $P(B \mid A) = P(A, B) / P(A)$.
+  - '**Bayes:** $P(A \mid B) = \frac{P(B \mid A) P(A)}{P(B)}$ (posterior ∝ likelihood × prior).'
+  - Independence $P(A, B) = P(A)P(B)$; conditional independence $P(A, B \mid C) = P(A \mid C)P(B \mid C)$. Variables can become dependent or independent once you condition.
+- after: An Example
+  notes:
+  - '**Base rates matter:** a test with 1% false positives for a 0.15%-prevalence disease gives only 13% after one positive; a second *conditionally independent* test raises it to 83%.'
+- after: Expectations
+  notes:
+  - $E[X] = \sum_x x P(X = x)$; $\textrm{Var}[X] = E[(X - E[X])^2] = E[X^2] - E[X]^2$; std $= \sqrt{\textrm{Var}}$ (same units as $X$).
+  - Covariance $\boldsymbol{\Sigma} = E[(\mathbf{x} - \boldsymbol{\mu})(\mathbf{x} - \boldsymbol{\mu})^\top]$; $\textrm{Var}[\mathbf{v}^\top\mathbf{x}] = \mathbf{v}^\top\boldsymbol{\Sigma}\mathbf{v}$.
+- after: Discussion
+  notes:
+  - '**Aleatoric** (inherent, irreducible) vs. **epistemic** (about parameters, reducible with data) uncertainty.'
+  - 'Chebyshev: $P(|X - \mu| \geq k\sigma) \leq 1/k^2$.'

@@ -1,9 +1,16 @@
-- "**Autograd** builds a *computational graph* during the forward pass and applies the chain rule **backwards** through it (**backpropagation**)."
-- "Recipe: (i) `x.requires_grad_(True)`; (ii) compute `y`; (iii) `y.backward()`; (iv) read `x.grad`."
-- "Example: $y = 2\\mathbf{x}^\\top\\mathbf{x}$ has gradient $4\\mathbf{x}$."
-- "**PyTorch accumulates gradients:** call `x.grad.zero_()` before the next backward pass."
-- "`backward()` needs a **scalar**; for a vector `y`, use `y.sum().backward()` (sums the per-example gradients)."
-- "`u = y.detach()`: same values, but gradients don't flow through `u`."
-- "Autograd works through Python control flow (`if`, `while`): the graph is recorded for the path actually taken."
-- "**Backward mode** = one pass per *output* (great for many parameters → one loss); forward mode = one pass per *input*."
-- "Second derivatives (Hessians) are much more expensive: $n^2$ entries, and you differentiate the backward pass itself."
+# Notes for chapter_preliminaries/autograd.md: each entry is shown at the end of the section
+# whose heading matches "after".
+- after: A Simple Function
+  notes:
+  - '**Autograd** records a computational graph during the forward pass, then applies the chain rule **backwards** (**backpropagation**).'
+  - 'Recipe: `x.requires_grad_(True)` → compute `y` → `y.backward()` → read `x.grad`. For $y = 2\mathbf{x}^\top\mathbf{x}$, gradient $= 4\mathbf{x}$.'
+  - 'PyTorch **accumulates** gradients: call `x.grad.zero_()` before the next backward pass.'
+- after: Backward for Non-Scalar Variables
+  notes:
+  - '`backward()` needs a scalar; for vector `y`, use `y.sum().backward()` to sum the per-example gradients (the full derivative would be a **Jacobian**).'
+- after: Detaching Computation
+  notes:
+  - '`u = y.detach()`: same values, but gradients stop flowing through `u`.'
+- after: Gradients and Python Control Flow
+  notes:
+  - 'Autograd works through `if`/`while`/function calls: the graph is the path actually taken for this input.'

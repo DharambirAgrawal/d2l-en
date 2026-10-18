@@ -26,14 +26,6 @@ python tools/build_exercises.py
 PANDOC_PATH="$(python -c 'import pypandoc; print(pypandoc.get_pandoc_path())')"
 export PATH="$(dirname "$PANDOC_PATH"):$PATH"
 
-# Fill in the navbar link placeholders in config.ini
-sed -i.bak \
-  -e "s@###_ALTERNATE_VERSION_###@Stable Version@g" \
-  -e "s@###_ALTERNATE_VERSION_BASE_LINK_###@https://d2l.ai@g" \
-  -e "s@###_CURRENT_VERSION_BASE_LINK_###@https://d2l.ai@g" \
-  config.ini
-rm -f config.ini.bak
-
 # Start from a clean output folder (Render may cache _build between deploys)
 rm -rf _build
 

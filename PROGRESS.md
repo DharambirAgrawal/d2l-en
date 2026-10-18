@@ -16,10 +16,10 @@ site should respect them.
 
 1. **Distraction-free.** No GitHub, 中文版, MXNet, Discussions/forum, or
    analytics. Only things that help me learn.
-2. **Shorter text, same understanding.** Compress the book's prose (about 40%
-   shorter, "medium") **without losing important explanations, examples, math,
-   figures or code**. Don't force it: sections that are already short stay
-   as they are. Originals remain in git history.
+2. **Readable text first.** Only trim real filler. **Never cut explanations,
+   examples, math, figures or code**: the technical chapters (2+) keep the
+   original wording, because heavy compression made them hard to read
+   (2026-10-18 feedback on 2.3). Originals remain in git history.
 3. **Hidden answers for every end-of-section exercise.** A "Show answer"
    button, so I can solve first and then check.
 4. **Coding questions get an interactive coding exercise** (run + tests).
@@ -47,8 +47,13 @@ site should respect them.
 10. **Reusable interactive components** (build once, reuse everywhere):
     graphs/plots, playgrounds with sliders for trying different values, so
     adding interactivity to later chapters stays easy.
-11. **Short "notes to remember" boxes** in each section: the key ideas,
-    formulas and facts worth copying into my handwritten notes.
+11. **Short "notes to remember"**, placed **right where the idea is taught**
+    (end of the relevant subsection), not collected at the end of the page,
+    so I can write notes while I learn.
+12. **Playgrounds must be smooth:** plots update continuously while dragging
+    a slider (not only after I let go).
+13. **Clean, calm UI:** neutral, readable design; no colorful side borders
+    or flashy "AI-looking" decoration.
 
 ---
 
@@ -63,7 +68,6 @@ site should respect them.
 ### How the build works (`render-build.sh`)
 
 1. Installs d2lbook plus pinned dependencies (see "Pinned versions" below).
-2. Fills the navbar link placeholders (`###_..._###`) in `config.ini`.
 3. Deletes `_build` so every deploy starts clean.
 4. `d2lbook build eval --tab <framework>` for each framework. This converts
    the Markdown to notebooks. `rst --tab all` only merges these; it does not
@@ -102,8 +106,7 @@ Data files are kept by exceptions at the end of `.gitignore`
 (`!exercises/*/files/*.csv`, `!static/projects/*.csv`); add one if you add a
 new kind of data file.
 
-The script edits `config.ini` while it runs. Don't commit that change
-(`git checkout config.ini` afterwards).
+
 
 ---
 
@@ -154,15 +157,27 @@ The script edits `config.ini` while it runs. Don't commit that change
   - 2.9 *Capstone, Part 1: MiniGPT from Counts* (baseline: held-out
     perplexity about 11.4 on *The Time Machine*).
 
+### 2026-10-18: Readability and UI pass (feedback)
+- **Chapter 2 text restored to the original wording** (my 28% compression
+  cut too much; 2.3 was hard to read). Preface/Introduction stay lightly
+  shortened.
+- **Notes moved inline**: each notes box sits at the end of the subsection
+  it summarizes (`after: <heading>` in `notes/*.yml`), not at page end.
+- **Playgrounds redrawn in the browser** (canvas, `static/exercises/playgrounds.js`):
+  plots update on every slider movement. Each keeps a runnable
+  "Python version".
+- **Calmer UI**: neutral cards, thin gray borders, one accent color, no
+  colored side stripes; quieter answer/notes/cell controls.
+- **Cleanup**: removed the remaining navbar links (Stable Version, PDF,
+  Notebooks, Courses), the Colab/SageMaker buttons (`github_repo` emptied in
+  `[colab]`/`[sagemaker]`, which also skips generating their notebooks), the
+  homepage news list, Twitter button and forum promo.
+
 ---
 
 ## Still on the site (possible next cleanups)
 
-- Navbar: "Stable Version" (→ d2l.ai), "PyTorch" PDF, "Notebooks", "Courses".
 - JAX and TensorFlow code tabs.
-- "Open the notebook in Colab / SageMaker" buttons (they point to the
-  original D2L notebooks).
-- Homepage news items, Twitter follow button, and author/translation sections.
 - An empty `<script src="">` in the theme causes a harmless
   "Refused to execute script" console error.
 
@@ -177,8 +192,8 @@ by `tools/build_exercises.py` (the deploy fails if something is broken).
 |---|---|---|
 | Coding exercise | `exercises/<id>/` (exercise.yml, starter.py, solution.py, tests.py, optional `files/`) | ```` ```{=html} ```` + `<div class="d2l-exercise" data-exercise="<id>"></div>` in a chapter, or `exercise:` in an answers file |
 | Hidden answers | `answers/<chapter>/<section>.yml`: one entry per item of the section's "## Exercises" list (`answer:` Markdown, optional `exercise:` id) | automatic, under each exercise |
-| Notes to remember | `notes/<chapter>/<section>.yml`: list of Markdown strings | automatic, before "Exercises" |
-| Playground | `playgrounds/<id>.yml`: title, description, params (sliders), code | `<div class="d2l-playground" data-playground="<id>"></div>` |
+| Notes to remember | `notes/<chapter>/<section>.yml`: `- after: <section heading>` + `notes:` list of Markdown | automatic, at the end of that section |
+| Playground | `playgrounds/<id>.yml` (title, description, slider params, optional `python` version) + drawing code `registry['<id>']` in `static/exercises/playgrounds.js` | `<div class="d2l-playground" data-playground="<id>"></div>` |
 | Runnable book cells | nothing to add: every `pytorch`-tab / shared cell | automatic |
 | Progress | nothing to add | automatic on every TOC page |
 | Project data | `static/projects/` → `_static/projects/` | link from a project page |

@@ -7,7 +7,7 @@ description: |
 params:
   - {name: x0, label: $x_0$, min: -1, max: 3, step: 0.1, value: 1.0}
   - {name: h, label: $h$, min: 0.01, max: 2, step: 0.01, value: 1.0}
-code: |
+python: |  # Python version of the plot (readers can open and run it)
   import numpy as np
   import matplotlib.pyplot as plt
 

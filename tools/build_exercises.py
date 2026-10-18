@@ -61,7 +61,8 @@ ALLOWED_KEYS = {'title', 'difficulty', 'description', 'explanation',
                 'packages', 'timeout'}
 EMBED_PATTERN = re.compile(r'data-exercise="([^"]+)"')
 PLAYGROUND_EMBED = re.compile(r'data-playground="([^"]+)"')
-PLAYGROUND_KEYS = {'title', 'description', 'params', 'code', 'timeout'}
+PLAYGROUND_KEYS = {'title', 'description', 'params', 'python', 'timeout'}
+PLAYGROUND_JS = os.path.join(RUNTIME_DIR, 'playgrounds.js')
 
 # Runs a playground's code once with its default parameters.
 _PLAYGROUND_SCRIPT = """
@@ -306,10 +307,14 @@ def load_playgrounds():
         if not ID_PATTERN.match(pg_id):
             errors.append(f'{where}: name must be lowercase words joined by "-"')
             continue
-        if set(meta) - PLAYGROUND_KEYS or not {'title', 'code', 'params'} <= set(meta):
-            errors.append(f'{where}: needs title, params and code (allowed: '
+        if set(meta) - PLAYGROUND_KEYS or not {'title', 'params'} <= set(meta):
+            errors.append(f'{where}: needs title and params (allowed: '
                           f'{", ".join(sorted(PLAYGROUND_KEYS))})')
             continue
+        with open(PLAYGROUND_JS, encoding='utf-8') as f:
+            if f"registry['{pg_id}']" not in f.read():
+                errors.append(f"{where}: no drawing code registry['{pg_id}'] in static/exercises/playgrounds.js")
+                continue
         params, defaults = [], {}
         for p in meta['params']:
             if not {'name', 'min', 'max', 'step', 'value'} <= set(p):
@@ -323,43 +328,64 @@ def load_playgrounds():
                            'min': p['min'], 'max': p['max'], 'step': p['step'],
                            'value': p['value']})
             defaults[p['name']] = p['value']
-        try:
-            proc = subprocess.run(
-                [sys.executable, '-I', '-c', _PLAYGROUND_SCRIPT, RUNTIME_DIR],
-                input=json.dumps([meta['code'], defaults]), capture_output=True,
-                text=True, timeout=120)
-            result = json.loads(proc.stdout.strip().splitlines()[-1])
-        except Exception as e:
-            errors.append(f'{where}: could not run: {e}')
-            continue
-        if result['status'] != 'ok':
-            errors.append(f'{where}: code fails with default values:\n{result["error"]}')
-        elif not result['outputs']:
-            errors.append(f'{where}: code produces no output (plot, print, or value)')
+        if meta.get('python'):  # the optional Python version must run
+            try:
+                proc = subprocess.run(
+                    [sys.executable, '-I', '-c', _PLAYGROUND_SCRIPT, RUNTIME_DIR],
+                    input=json.dumps([meta['python'], defaults]), capture_output=True,
+                    text=True, timeout=120)
+                result = json.loads(proc.stdout.strip().splitlines()[-1])
+            except Exception as e:
+                errors.append(f'{where}: could not run the Python version: {e}')
+                continue
+            if result['status'] != 'ok':
+                errors.append(f'{where}: Python version fails with default values:\n{result["error"]}')
+            elif not result['outputs']:
+                errors.append(f'{where}: Python version produces no output')
         found[pg_id] = {'id': pg_id, 'title': str(meta['title']),
                         'description_html': render_markdown(meta.get('description', '')),
-                        'params': params, 'code': meta['code'],
+                        'params': params, 'python': meta.get('python', ''),
                         'timeout': meta.get('timeout', 20)}
     return found, errors
 
 
+def md_headings(md_path):
+    """Normalized text of every '##'+ heading in a Markdown file."""
+    with open(md_path, encoding='utf-8') as f:
+        return {' '.join(m.split()) for m in re.findall(r'^#{2,}\s+(.+?)\s*$', f.read(), re.M)}
+
+
 def load_notes():
-    """notes/<chapter>/<section>.yml: a list of Markdown items."""
+    """notes/<chapter>/<section>.yml: [{after: <heading>, notes: [Markdown, ...]}].
+    Each entry is shown at the end of the section with that heading."""
     pages, errors = {}, []
     for path in sorted(glob.glob(os.path.join(NOTES_DIR, '**', '*.yml'), recursive=True)):
         rel = os.path.relpath(path, NOTES_DIR)
         page = rel[:-len('.yml')].replace(os.sep, '/')
-        if not os.path.isfile(os.path.join(ROOT, page + '.md')):
+        md = os.path.join(ROOT, page + '.md')
+        if not os.path.isfile(md):
             errors.append(f'notes/{rel}: no matching {page}.md')
             continue
         with open(path, encoding='utf-8') as f:
-            items = yaml.safe_load(f) or []
-        if not isinstance(items, list) or not all(isinstance(i, str) for i in items):
-            errors.append(f'notes/{rel}: must be a list of Markdown strings')
-            continue
-        html_items = ''.join(f'<li>{render_markdown(i).strip()}</li>' for i in items)
-        pages[page] = {'html': f'<ul>{html_items}</ul>',
-                       'text': '\n'.join('- ' + ' '.join(i.split()) for i in items)}
+            entries = yaml.safe_load(f) or []
+        headings = md_headings(md)
+        sections = []
+        for i, entry in enumerate(entries if isinstance(entries, list) else [None], 1):
+            if (not isinstance(entry, dict) or set(entry) != {'after', 'notes'}
+                    or not isinstance(entry['notes'], list)):
+                errors.append(f'notes/{rel}: entry {i} must have "after" (a heading) and "notes" (a list)')
+                continue
+            heading = ' '.join(str(entry['after']).split())
+            if heading not in headings:
+                errors.append(f'notes/{rel}: entry {i}: no section "{heading}" in {page}.md')
+                continue
+            items = [str(n) for n in entry['notes']]
+            sections.append({
+                'heading': heading,
+                'html': '<ul>' + ''.join(f'<li>{render_markdown(n).strip()}</li>' for n in items) + '</ul>',
+                'text': '\n'.join('- ' + ' '.join(n.split()) for n in items),
+            })
+        pages[page] = {'sections': sections}
     return pages, errors
 
 
