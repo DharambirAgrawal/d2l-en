@@ -36,7 +36,6 @@ rm -rf _build
 # merges these, it does not create them. eval_notebook = False in config.ini,
 # so no code is run.
 d2lbook build eval --tab pytorch
-d2lbook build eval --tab mxnet
 d2lbook build eval --tab jax
 d2lbook build eval --tab tensorflow
 
