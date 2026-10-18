@@ -471,6 +471,13 @@ X = jnp.arange(24).reshape(2, 3, 4)
 a + X, (a * X).shape
 ```
 
+**Try it yourself.** Elementwise operations are the bread and butter of
+tensor code. Implement the simplest one, vector addition, in plain Python:
+
+```{=html}
+<div class="d2l-exercise" data-exercise="vector-add"></div>
+```
+
 ## Reduction
 :label:`subsec_lin-alg-reduction`
 
@@ -820,6 +827,13 @@ A.shape, x.shape, tf.linalg.matvec(A, x)
 ```{.python .input}
 %%tab jax
 A.shape, x.shape, jnp.matmul(A, x)
+```
+
+**Try it yourself.** Implement the matrix--vector product with NumPy,
+using only elementwise operations and sums:
+
+```{=html}
+<div class="d2l-exercise" data-exercise="matvec-numpy"></div>
 ```
 
 ## Matrix--Matrix Multiplication

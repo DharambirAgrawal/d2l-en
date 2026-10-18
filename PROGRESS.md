@@ -81,6 +81,119 @@ The script edits `config.ini` while it runs. Don't commit that change
 - Code outputs (plots, printed results) are missing because
   `eval_notebook = False`.
 
+## Interactive coding exercises
+
+Write Python inside the book pages and run/grade it, LeetCode-style.
+**Phase 1 built and tested on 2026-10-18** (awaiting deploy).
+
+### Decision: Pyodide (Python in the browser) in a Web Worker
+
+| Option | Verdict |
+|---|---|
+| **Pyodide + Web Worker** | ✅ Chosen. Free, no backend, works on Render static hosting. Has NumPy, SciPy, pandas, scikit-learn, matplotlib. |
+| Backend runner (Judge0 / own server on Render) | ❌ Costs money or sleeps on free tier, 512 MB RAM, sandboxing is hard. |
+| JupyterLite (full notebook in browser) | ❌ for graded exercises (heavy, no grading UI); maybe later for a "scratchpad". |
+| Binder / Thebe (real Jupyter kernel) | ❌ 1–2 min cold starts, unreliable. |
+| PyTorch in the browser | ❌ Not possible in Pyodide. PyTorch exercises → "Open in Colab" (phase 3). |
+
+### How it fits together
+
+| File | Role |
+|---|---|
+| `exercises/<id>/` | One folder per exercise (see below). |
+| `static/exercises/exercise.js` | Page UI: editor, buttons, results, auto-save. Added to every page via `include_js` in `config.ini`; does nothing on pages without exercises. |
+| `static/exercises/exercise.css` | Styling, via `include_css`. |
+| `static/exercises/worker.js` | Web Worker that loads Pyodide and runs code. |
+| `static/exercises/grader.py` | Runs code and tests. **Shared** by the browser and the build check, so both grade identically. Includes the test helpers. |
+| `tools/build_exercises.py` | Validates every exercise, then writes `_build/html/_static/exercises/<id>.json` plus the worker and grader. Run twice by `render-build.sh` (check early, write at the end). |
+
+Pinned versions: Pyodide **314.0.7** (Python 3.14 in the browser) from
+jsDelivr, CodeMirror **5.65.18** from cdnjs. Both are set at the top of
+`exercise.js`. Pyodide 314+ must be loaded as a module worker (`import()`);
+the old `importScripts()` method fails.
+
+### How to add an exercise
+
+1. Create `exercises/<id>/` (`id` = lowercase words joined by `-`) with:
+   - `exercise.yml`:
+     ```yaml
+     title: Implement Vector Addition
+     difficulty: easy            # easy | medium | hard
+     timeout: 5                  # seconds of run time (default 10)
+     packages: []                # optional; imports are detected automatically
+     description: |              # Markdown; $math$ and $$math$$ work
+       Write `vector_add(a, b)` ...
+     explanation: |              # shown with the solution
+       ...
+     ```
+   - `starter.py`: what you start from (must NOT pass all tests).
+   - `solution.py`: reference solution (must pass all tests).
+   - `tests.py`: plain Python. Every `test_*` function is a test, and its
+     docstring is the description shown:
+     ```python
+     from submission import vector_add        # the code being graded
+     from grader import expect_equal, expect_close, expect_raises
+
+     def test_example():
+         """[1, 2] + [3, 4] = [4, 6]"""
+         expect_equal(vector_add([1, 2], [3, 4]), [4, 6])
+     ```
+     Helpers in `grader.py`: `expect_equal`, `expect_close` (tolerance; lists,
+     numbers, NumPy arrays), `expect_raises`, `expect_type`, `expect_shape`,
+     `expect_true`, and `uses_any(...)` (for "don't use `np.dot`" rules).
+2. Embed it in a chapter's `.md` (must be this raw-HTML fence; a plain `<div>`
+   loses its `data-exercise` attribute during the book build):
+   ````
+   ```{=html}
+   <div class="d2l-exercise" data-exercise="<id>"></div>
+   ```
+   ````
+3. Check it: `python tools/build_exercises.py` (needs `numpy`, `pyyaml`,
+   `mistune`). The deploy fails if a solution fails its tests, a starter
+   already passes, or a chapter embeds an unknown id.
+
+### Exercises so far
+
+| Id | Chapter | Tests |
+|---|---|---|
+| `vector-add` | 2.3 Linear Algebra (after "Basic Properties of Tensor Arithmetic") | 8 |
+| `matvec-numpy` | 2.3 Linear Algebra (after "Matrix–Vector Products") | 6 |
+
+### Phases
+- [x] **Phase 1: Runner + first exercises.** Lazy Pyodide load in a worker,
+      stdout/traceback capture, fresh module per run, timeout + Stop button
+      (kills and restarts the worker), one run at a time per page, Run /
+      Submit / Reset / Show solution, auto-save + "Solved" badge in
+      `localStorage`, plain-textarea fallback if CodeMirror's CDN fails.
+- [x] **Phase 1 test (2026-10-18):** clean full build (exit 0, no new Sphinx
+      warnings) + 27/27 headless-Chromium checks on the generated page: run,
+      print, syntax error, traceback, unsupported import, failing and passing
+      submissions, NumPy, banned-`@` rule, infinite-loop timeout + recovery,
+      Stop, Reset, show solution, reload persistence, two independent
+      exercises, math/tabs intact, phone width, no new JS errors. Build check
+      verified to fail on a broken solution and on an unknown embedded id.
+- [ ] **Deploy** and try it on the live site.
+- [ ] **Phase 2: Content.** Add exercises chapter by chapter as I study.
+      Ideas: hints, per-page progress.
+- [ ] **Phase 3: PyTorch exercises.** Generate a Colab notebook per exercise
+      (starter + tests) from the same exercise folder.
+
+### Known limits (by design)
+- Tests/solutions ship to the browser, so "Show solution" is honor-system.
+- First run downloads Pyodide (~10 MB; NumPy another ~8 MB), cached after.
+- Not a security sandbox; it only runs my own code in my own browser.
+- Browser Python is 3.14 while the build check uses Render's 3.10, so keep
+  exercise code to features both support.
+
+## Pre-existing site issues (found while testing, not fixed yet)
+- **Discussions** box at the end of each section is broken: discuss.d2l.ai
+  refuses to be embedded on other domains.
+- **Google Analytics** with the original D2L tracking IDs is still on every
+  page, so visits are reported to D2L's analytics.
+- An empty `<script src="">` in the theme causes a harmless
+  "Refused to execute script" console error.
+
 ## To-do
 
-- [ ] _(add next tasks here)_
+- [ ] Deploy Phase 1 and try both exercises on the live site.
+- [ ] Decide on the pre-existing issues above (likely remove Discussions + analytics).

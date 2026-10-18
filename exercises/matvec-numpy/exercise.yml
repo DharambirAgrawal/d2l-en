@@ -1,0 +1,30 @@
+title: Matrix–Vector Product with NumPy
+difficulty: medium
+timeout: 10
+description: |
+  Write `matvec(A, x)`, which computes the matrix–vector product
+  $\mathbf{A}\mathbf{x}$ for a NumPy matrix `A` of shape $(m, n)$ and a vector
+  `x` of shape $(n,)$. Entry $i$ of the result is the dot product of row $i$
+  of $\mathbf{A}$ with $\mathbf{x}$:
+
+  $$[\mathbf{A}\mathbf{x}]_i = \sum_{j=1}^{n} a_{ij} x_j$$
+
+  - Return a NumPy array of shape $(m,)$.
+  - **Don't** use `@`, `np.dot`, `np.matmul`, `np.inner`, `np.einsum` or
+    `np.tensordot`. Build it from element-wise operations instead.
+    Broadcasting `A * x` is a good start.
+  - If the number of columns of `A` doesn't match the length of `x`, raise a
+    `ValueError`.
+
+  ```python
+  A = np.array([[1, 2], [3, 4], [5, 6]])
+  matvec(A, np.array([1, 1]))   # array([ 3,  7, 11])
+  ```
+explanation: |
+  Broadcasting stretches `x` (shape $(n,)$) across every row of `A`
+  (shape $(m, n)$), so `A * x` multiplies $a_{ij} x_j$ for all $i, j$ at once.
+  Summing over the columns (`axis=1`) adds up each row, which is exactly
+  $\sum_j a_{ij} x_j$.
+
+  This is the "rows dotted with $\mathbf{x}$" view of $\mathbf{A}\mathbf{x}$.
+  In real code, use `A @ x`, which calls an optimized BLAS routine.

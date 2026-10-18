@@ -1,0 +1,162 @@
+/* Interactive coding exercises (see static/exercises/exercise.js).
+ * Appended to _static/d2l.css through `include_css` in config.ini. */
+.d2l-ex {
+  --ex-border: #d0d7de;
+  --ex-bg: #ffffff;
+  --ex-subtle: #f6f8fa;
+  --ex-text: rgba(0, 0, 0, .87);
+  --ex-muted: #57606a;
+  --ex-accent: #1565c0;
+  --ex-good: #1a7f37;
+  --ex-good-bg: #e6f4ea;
+  --ex-bad: #c62828;
+  --ex-bad-bg: #fdecea;
+  --ex-mono: Menlo, "DejaVu Sans Mono", Consolas, "Courier New", monospace;
+  margin: 1.5em 0;
+  border: 1px solid var(--ex-border);
+  border-left: 4px solid var(--ex-accent);
+  border-radius: 6px;
+  background: var(--ex-bg);
+  color: var(--ex-text);
+  overflow: hidden;
+}
+.d2l-ex-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5em .75em;
+  padding: .75em 1em;
+  background: var(--ex-subtle);
+  border-bottom: 1px solid var(--ex-border);
+}
+.d2l-ex-kicker {
+  font-size: .75em;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--ex-accent);
+}
+.d2l-ex-title { font-size: 1.1em; font-weight: 600; }
+.d2l-ex-badge, .d2l-ex-solved {
+  font-size: .75em;
+  font-weight: 600;
+  padding: .1em .6em;
+  border-radius: 999px;
+}
+.d2l-ex-easy { background: var(--ex-good-bg); color: var(--ex-good); }
+.d2l-ex-medium { background: #fff4e5; color: #9a5b00; }
+.d2l-ex-hard { background: var(--ex-bad-bg); color: var(--ex-bad); }
+.d2l-ex-solved { margin-left: auto; background: var(--ex-good); color: #fff; }
+.d2l-ex-desc { padding: .25em 1em; }
+.d2l-ex-desc pre, .d2l-ex-explanation pre { font-size: .9em; }
+
+.d2l-ex-editor { border-top: 1px solid var(--ex-border); border-bottom: 1px solid var(--ex-border); }
+.d2l-ex-editor .CodeMirror {
+  height: auto;
+  min-height: 6em;
+  font-family: var(--ex-mono);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.d2l-ex-editor .CodeMirror-gutters { background: var(--ex-subtle); border-right-color: var(--ex-border); }
+.d2l-ex-readonly .CodeMirror { background: var(--ex-subtle); }
+.d2l-ex-readonly .CodeMirror-cursor { display: none; }
+.d2l-ex-textarea {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 12em;
+  border: 0;
+  padding: .75em;
+  font-family: var(--ex-mono);
+  font-size: 14px;
+  tab-size: 4;
+  resize: vertical;
+}
+
+.d2l-ex-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5em;
+  padding: .6em 1em;
+}
+.d2l-ex-spacer { flex: 1; }
+.d2l-ex-btn {
+  font: inherit;
+  font-size: .9em;
+  font-weight: 500;
+  padding: .35em .9em;
+  border: 1px solid var(--ex-border);
+  border-radius: 4px;
+  background: var(--ex-bg);
+  color: var(--ex-text);
+  cursor: pointer;
+}
+.d2l-ex-btn:hover:not(:disabled) { background: var(--ex-subtle); }
+.d2l-ex-btn:disabled { opacity: .5; cursor: not-allowed; }
+.d2l-ex-btn:focus-visible { outline: 2px solid var(--ex-accent); outline-offset: 1px; }
+.d2l-ex-primary { background: var(--ex-accent); border-color: var(--ex-accent); color: #fff; }
+.d2l-ex-primary:hover:not(:disabled) { background: #0d47a1; }
+.d2l-ex-submit { border-color: var(--ex-good); color: var(--ex-good); }
+.d2l-ex-status { font-size: .9em; color: var(--ex-muted); }
+.d2l-ex-status.d2l-ex-good { color: var(--ex-good); font-weight: 600; }
+.d2l-ex-status.d2l-ex-bad { color: var(--ex-bad); font-weight: 600; }
+
+.d2l-ex-panel, .d2l-ex-solution { padding: 0 1em .75em; }
+.d2l-ex-solution { border-top: 1px dashed var(--ex-border); padding-top: .75em; }
+.d2l-ex-solution .d2l-ex-editor { border: 1px solid var(--ex-border); }
+.d2l-ex-label {
+  margin: .75em 0 .35em;
+  font-size: .75em;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--ex-muted);
+}
+.d2l-ex-panel pre {
+  margin: 0;
+  max-height: 24em;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 13px;
+  border: 1px solid var(--ex-border);
+  border-radius: 4px;
+}
+.d2l-ex-stdout { background: var(--ex-subtle); }
+pre.d2l-ex-error { margin-top: .5em; background: var(--ex-bad-bg); color: #7f1d1d; border-color: #f5c2c0; }
+.d2l-ex-muted { color: var(--ex-muted); font-size: .9em; margin-top: .25em; }
+
+.d2l-ex-summary { margin: .5em 0; padding: .5em .75em; border-radius: 4px; font-weight: 600; }
+.d2l-ex-summary.d2l-ex-good { background: var(--ex-good-bg); color: var(--ex-good); }
+.d2l-ex-summary.d2l-ex-bad { background: var(--ex-bad-bg); color: var(--ex-bad); }
+ul.d2l-ex-tests { list-style: none; margin: 0; padding: 0; }
+ul.d2l-ex-tests > li {
+  padding: .4em .25em;
+  border-bottom: 1px solid var(--ex-subtle);
+  margin: 0;
+}
+.d2l-ex-mark { display: inline-block; width: 1.4em; font-weight: 700; }
+.d2l-ex-pass .d2l-ex-mark { color: var(--ex-good); }
+.d2l-ex-fail .d2l-ex-mark { color: var(--ex-bad); }
+.d2l-ex-tname { font-weight: 500; }
+.d2l-ex-tdesc { margin-left: .5em; color: var(--ex-muted); font-size: .9em; }
+.d2l-ex-detail { margin: .35em 0 .25em 1.4em; font-size: .9em; }
+.d2l-ex-kv { display: flex; gap: .5em; margin-top: .2em; }
+.d2l-ex-kv > span { min-width: 4.5em; color: var(--ex-muted); }
+.d2l-ex-kv code { white-space: pre-wrap; word-break: break-word; }
+
+.d2l-ex-foot {
+  padding: .4em 1em;
+  font-size: .78em;
+  color: var(--ex-muted);
+  background: var(--ex-subtle);
+  border-top: 1px solid var(--ex-border);
+}
+.d2l-exercise.d2l-ex-broken { color: #c62828; padding: .75em 1em; border: 1px solid #f5c2c0; border-radius: 6px; }
+
+@media (max-width: 600px) {
+  .d2l-ex-spacer { display: none; }
+  .d2l-ex-head, .d2l-ex-bar, .d2l-ex-desc { padding-left: .75em; padding-right: .75em; }
+}

@@ -15,7 +15,11 @@ python -m pip install --use-pep517 pandoc-attributes
 python -m pip install \
   "git+https://github.com/d2l-ai/d2l-book.git" \
   pypandoc_binary \
-  "pybtex==0.24.0"
+  "pybtex==0.24.0" \
+  numpy
+
+# Check the interactive exercises first (fails fast if one is broken)
+python tools/build_exercises.py
 
 # Make Pandoc available to the book builder
 PANDOC_PATH="$(python -c 'import pypandoc; print(pypandoc.get_pandoc_path())')"
@@ -51,3 +55,6 @@ d2lbook build html --tab all
 # Include homepage images
 mkdir -p _build/html/_images
 cp -r static/frontpage/_images/. _build/html/_images/
+
+# Add the interactive exercises (JSON + Python runner files)
+python tools/build_exercises.py --out _build/html/_static/exercises

@@ -1,0 +1,27 @@
+title: Implement Vector Addition
+difficulty: easy
+timeout: 5
+description: |
+  Write `vector_add(a, b)`, which returns the **element-wise sum** of two
+  vectors given as Python lists of numbers: $\mathbf{c} = \mathbf{a} + \mathbf{b}$,
+  where $c_i = a_i + b_i$.
+
+  - Return a **new** list. Don't modify `a` or `b`.
+  - Two empty vectors add up to an empty vector.
+  - Vector addition is only defined for vectors of the same length. If the
+    lengths differ, raise a `ValueError`.
+
+  ```python
+  vector_add([1, 2], [3, 4])   # [4, 6]
+  vector_add([], [])           # []
+  vector_add([1, 2], [1])      # raises ValueError
+  ```
+explanation: |
+  Vector addition works component by component, so we walk over both vectors
+  in step with `zip` and add each pair. `zip` silently stops at the shorter
+  input, so we check the lengths first. Otherwise mismatched vectors would
+  quietly produce a too-short answer instead of an error.
+
+  Tensor libraries do exactly this for `a + b`, just in fast compiled code.
+  They raise an error for incompatible shapes too, unless broadcasting
+  applies.
