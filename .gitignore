@@ -33,3 +33,7 @@ static/latex_style/PT1*
 /chapter_hyperparameter_optimization/std.out
 latex_style/*
 static/latex_style/*
+
+# Data files the site needs (the *.csv rule above would drop them)
+!exercises/*/files/*.csv
+!static/projects/*.csv

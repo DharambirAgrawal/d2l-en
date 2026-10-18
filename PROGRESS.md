@@ -89,6 +89,19 @@ pypandoc at a native pandoc:
 PYPANDOC_PANDOC=/path/to/arm64/pandoc bash render-build.sh
 ```
 
+Test from **exactly what git will commit** (tracked + new, non-ignored
+files), because `.gitignore` ignores patterns such as `*.csv` and `*.json`
+that a plain folder copy would include:
+
+```bash
+git ls-files --cached --others --exclude-standard > /tmp/files.txt
+rsync -a --files-from=/tmp/files.txt ./ /tmp/d2l-test/   # then build there
+```
+
+Data files are kept by exceptions at the end of `.gitignore`
+(`!exercises/*/files/*.csv`, `!static/projects/*.csv`); add one if you add a
+new kind of data file.
+
 The script edits `config.ini` while it runs. Don't commit that change
 (`git checkout config.ini` afterwards).
 

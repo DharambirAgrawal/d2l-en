@@ -1,0 +1,9 @@
+NumRooms,RoofType,Lot,Neighborhood,Price
+3,Slate,0.25,Oak Park,178100
+NA,NA,0.18,Oak Park,140000
+2,NA,NA,Elmwood,127500
+4,Slate,0.31,NA,212000
+NA,Tile,0.22,Elmwood,106000
+5,Tile,0.40,Riverside,265000
+3,NA,0.20,Riverside,NA
+2,Slate,0.15,Oak Park,118000
