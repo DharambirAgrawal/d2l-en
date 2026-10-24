@@ -1,0 +1,16 @@
+title: How Big Must the Test Set Be?
+difficulty: easy
+timeout: 10
+description: |
+  Hoeffding's inequality says the test error $\epsilon_\mathcal{D}$ of a
+  fixed model on $n$ fresh examples is within $t$ of the true error
+  $\epsilon$ except with probability at most $\delta = 2e^{-2nt^2}$.
+
+  Write `samples_needed(t, delta)`: the smallest integer $n$ with
+  $2e^{-2nt^2} \leq \delta$. And `error_bar(n, delta)`: the $t$ you can
+  guarantee with $n$ examples at that $\delta$.
+explanation: |
+  Solving gives $n = \lceil \ln(2/\delta) / (2t^2) \rceil$ and
+  $t = \sqrt{\ln(2/\delta)/(2n)}$. Halving the error bar costs 4× the data.
+  Exercise 1's $t = 0.0001$, $\delta = 0.001$ needs about 380 million
+  examples, while 10,000 test images give about $\pm 0.019$ at 99.9%.

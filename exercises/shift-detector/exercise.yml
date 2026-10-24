@@ -1,0 +1,27 @@
+title: A Covariate Shift Detector
+difficulty: hard
+timeout: 20
+description: |
+  Exercises 2 and 3. You have inputs from training time, `Xs` (source), and
+  from production, `Xt` (target). Detect whether their distributions differ
+  by training a classifier to tell them apart.
+
+  1. `detect(Xs, Xt, seed=0)`: label source 0 and target 1, shuffle (with
+     `np.random.default_rng(seed)`), use the first 70% to train a
+     **logistic regression** (sigmoid of $\mathbf{x}^\top\mathbf{w} + b$,
+     trained by gradient descent on the mean cross-entropy; about 500 steps
+     with learning rate 0.5 works) and return its **accuracy on the other
+     30%**, plus the weights: `(accuracy, w, b)`.
+  2. `importance_weights(Xs, w, b)`: the weights
+     $\beta_i = e^{\mathbf{x}_i^\top\mathbf{w} + b}$ for the source examples,
+     **normalized to mean 1** (this absorbs unequal sample sizes).
+
+  Accuracy near 0.5 means no detectable shift; clearly above means shift.
+explanation: |
+  If source and target come from the same distribution, no classifier can
+  beat a coin flip on held-out data. If they differ, the classifier finds
+  where, and its logit estimates $\log\frac{q(\mathbf{x})}{p(\mathbf{x})}$
+  (up to a constant from the sample sizes), so $e^{\textrm{logit}}$ is the
+  importance weight that makes the source data look like the target. The
+  weights say which features moved. This is the standard
+  "domain classifier" check in production monitoring.

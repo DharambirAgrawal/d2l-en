@@ -35,7 +35,7 @@ def _install_shims(needs_plotting):
 
 def _uninstall_shims():
     for name in list(sys.modules):
-        if name in ('torch', 'd2l') or name.startswith(('torch.', 'd2l.')):
+        if name in ('torch', 'torchvision', 'd2l') or name.startswith(('torch.', 'torchvision.', 'd2l.')):
             del sys.modules[name]
 
 

@@ -1,0 +1,16 @@
+title: The Exact Validation Loss
+difficulty: easy
+timeout: 10
+description: |
+  Exercise 1: averaging minibatch losses is slightly off when the last
+  minibatch is smaller. Write `exact_loss(batch_means, batch_size, n)`:
+  `batch_means` is the list of mean losses of the minibatches in order (all
+  full, of size `batch_size`, except possibly the last), and `n` is the
+  number of examples. Return the true mean loss over all `n` examples.
+  Also write `quick_loss(batch_means)`, the "quick and dirty" average of the
+  minibatch means.
+explanation: |
+  Each full batch contributes `batch_size` examples and the last one only
+  $r = n - (m-1)b$, so $L_\textrm{v} = (b\sum_{k<m}\bar{l}_k + r\bar{l}_m)/n$.
+  The quick average gives the $r$ last examples the same weight as a full
+  batch. Equivalent: weight each mean by its batch's size.

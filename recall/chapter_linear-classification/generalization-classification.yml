@@ -1,0 +1,8 @@
+# Quick recall for chapter_linear-classification/generalization-classification.md: retrieval practice on earlier material,
+# shown at the top of the section with hidden answers.
+- q: '*(4.5)* What is the LogSumExp trick?'
+  a: '$\log\sum_j \exp(o_j) = \bar{o} + \log\sum_j \exp(o_j - \bar{o})$ with $\bar{o} = \max_j o_j$: no overflow, and the sum is at least 1.'
+- q: '*(4.5)* Why should the model output logits and the loss take logits, rather than probabilities?'
+  a: 'Then softmax and log are fused stably: $\log \hat{y}_j = o_j - \textrm{LogSumExp}(\mathbf{o})$, avoiding $\log 0$ and overflow.'
+- q: '*(3.6)* What''s the difference between a validation set and a test set?'
+  a: Validation data is used to make decisions (model selection, hyperparameters); the test set is touched once, at the end, to report an unbiased estimate.

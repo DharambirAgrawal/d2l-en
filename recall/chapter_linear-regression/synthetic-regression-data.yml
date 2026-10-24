@@ -1,0 +1,8 @@
+# Quick recall for chapter_linear-regression/synthetic-regression-data.md: retrieval practice on earlier material,
+# shown at the top of the section with hidden answers.
+- q: '*(3.2)* Which four methods does a `d2l.Module` subclass usually define?'
+  a: '`__init__` (parameters), `forward`, `loss`, and `configure_optimizers`.'
+- q: '*(3.1)* What are hyperparameters? Name three for SGD.'
+  a: 'Settings chosen by you, not learned: learning rate, batch size, number of epochs.'
+- q: '*(2.6)* Why does the error of an average shrink like $1/\sqrt{n}$?'
+  a: The variance of a mean of $n$ independent samples is $\sigma^2/n$, so its standard deviation is $\sigma/\sqrt{n}$.

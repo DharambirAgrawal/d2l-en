@@ -67,6 +67,21 @@ site should respect them.
     interesting (like using minimax to solve tic-tac-toe), and later more
     ambitious ones that companies such as Google or Anthropic would value.
     Brand names, one-line pitch, why it matters, tasks, "done when".
+17. **Three kinds of projects:** (a) **Quill**, the book-long capstone;
+    (b) **one chapter project per chapter**, built **step by step inside the
+    chapter**: a short step at the end of each section where it fits (not
+    every section has to have one); (c) optional side projects at the end of
+    the chapter.
+18. **Steps must revisit earlier topics (spacing + interleaving).** A step
+    doesn't use a topic once and drop it: each step has a *Revisit* part that
+    brings back earlier sections/chapters, and the last step uses the whole
+    chapter, so nothing is forgotten by the end.
+19. **Quick recall at the top of every section:** 2--3 retrieval questions on
+    earlier material (previous section, older sections, previous chapters),
+    answers hidden. Based on the strongest evidence in learning science:
+    practice testing and distributed practice (Dunlosky et al., 2013;
+    Donoghue & Hattie, 2021). I forget fast and want to truly learn the
+    whole book.
 
 ---
 
@@ -118,6 +133,26 @@ rsync -a --files-from=/tmp/files.txt ./ /tmp/d2l-test/   # then build there
 Data files are kept by exceptions at the end of `.gitignore`
 (`!exercises/*/files/*.csv`, `!static/projects/*.csv`); add one if you add a
 new kind of data file.
+
+**One command does all of this plus every test** (needs `uv`):
+
+```bash
+PANDOC=/path/to/arm64/pandoc bash tools/site_tests/run_all.sh
+SKIP_BUILD=1 bash tools/site_tests/run_all.sh   # re-test the last build
+```
+
+It builds from the files git would commit in a clean Python 3.10 env, runs
+every PyTorch book cell of the covered chapters through the browser runtime
+(`run_book_cells.py`), serves the site, and runs the Playwright suites in
+`tools/site_tests/`: `test_exercises.py` (coding exercises),
+`test_features.py` (runnable cells, playgrounds, notes, answers, progress,
+removed distractions), `test_chapter3.py` (training in the browser, Ch 3
+pages), `test_chapter4.py` (Fashion-MNIST download and training in the
+browser, Ch 4 playgrounds and pages), `test_steps_recall.py` (project steps, Quick recall),
+`test_sync_notes.py` (sync link, mocked GitHub gist, My Notes). Logs land in
+`$WORK` (default `$TMPDIR/d2l-site-test`); set `SHOTS_DIR` for screenshots.
+When adding a chapter, add its pages to `PAGES` in `run_all.sh` and a test
+file for its features.
 
 
 
@@ -243,6 +278,50 @@ new kind of data file.
   - Ch 3 (on Tempo): *Scout* (hyperparameter search), *Drift* (online
     learning under concept drift), *Watt* (energy demand forecasting).
 
+
+### 2026-10-24: Projects built step by step, Quick recall, test suite
+- **Chapter projects are now built inside the chapter.** `projects/<name>.yml`
+  lists steps (`page`, `title`, `build`, `revisit`); each section page shows
+  its step (e.g. "Tempo · Step 3 of 7") just before the Exercises, and the
+  project page lists all steps with where each belongs. Hush: 6 steps;
+  Tempo: 7. Every step after the first has a *Revisit* part, and the last
+  step uses the whole chapter.
+- **Quick recall** at the top of every Ch 2--3 section: 2--3 questions on
+  earlier material (previous sections, older sections, the Introduction),
+  answers hidden. Content in `recall/<chapter>/<section>.yml`.
+- **Permanent test suite** in `tools/site_tests/` (see "Testing a build
+  locally").
+
+
+### 2026-10-24: Chapter 4 (Linear Neural Networks for Classification)
+- **Original text kept**; 7 sections of hidden answers, inline notes, and
+  Quick recall (questions from Ch 4, 3 and 2).
+- **7 new coding exercises:** `stable-softmax`, `soft-cross-entropy`,
+  `exact-validation-loss`, `bayes-decision`, `exp-safe-range`,
+  `hoeffding-samples`, `shift-detector`.
+- **4 playgrounds:** softmax + temperature, softmax regression learning
+  decision regions live, test-set size vs. Hoeffding band, covariate shift
+  and reweighting (effective sample size).
+- **Fashion-MNIST in the browser:** torchlite gained `softmax`,
+  `log_softmax`, `F.cross_entropy`, `nn.CrossEntropyLoss`, `nn.Flatten`,
+  `nn.ReLU`, any-dataset `DataLoader`, and a `torchvision` subset
+  (`datasets.FashionMNIST`, `transforms.Compose/Resize/ToTensor/Normalize`).
+  The full dataset (60k + 10k images, MIT license) is
+  `static/datasets/fashion-mnist.npz` (31 MB, uint8), downloaded by the page
+  once when a cell mentions `FashionMNIST`. Book cells may now run 180 s.
+  The book's training cells reach about 83% validation accuracy, as in the
+  book.
+- **Project: Relay** (route support tickets; `static/projects/tickets.csv`,
+  8,000 tickets, a June product launch causes covariate + label shift),
+  7 steps in `projects/relay.yml`. Side projects: *Sieve* (spam filter),
+  *Gauge* (calibration, temperature scaling), *Sentinel* (drift alarm).
+  Reference results: baseline 25%, softmax regression 96.7% (May), 88%
+  (June), 93% after labeling 50 June tickets.
+- **Quill Part 3:** softmax regression over the previous $k$ characters
+  (measured: perplexity 8.4 at $k = 5$; count trigram 7.3 and 4-gram 5.8 do
+  better, motivating the MLP); *The War of the Worlds* shift test (9.2).
+  Roadmap renumbered: Part 4 = MLP (Ch 5), 5 = RNN, 6 = Transformer.
+
 ---
 
 ## Still on the site (possible next cleanups)
@@ -267,6 +346,8 @@ by `tools/build_exercises.py` (the deploy fails if something is broken).
 | Runnable book cells | nothing to add: every `pytorch`-tab / shared cell | automatic |
 | Progress, sync, My Notes | nothing to add | automatic (`static/progress/`) |
 | Project data | `static/projects/` → `_static/projects/` | link from a project page |
+| Chapter project steps | `projects/<name>.yml`: `project`, `subtitle`, `page` (project page), `steps:` list of `page`, `title`, `build`, `revisit` (Markdown) | automatic: a step box before the section's Exercises; all steps where the project page has `<div class="d2l-project-steps"></div>` |
+| Quick recall | `recall/<chapter>/<section>.yml`: list of `q`, `a` (Markdown) | automatic, before the section's first subsection |
 
 Runtime files (`static/exercises/`): `exercise.js` (all UI), `exercise.css`,
 `worker.js` (Pyodide in a Web Worker), `grader.py` (tests; shared with the
@@ -341,7 +422,7 @@ Pyodide 314+ must be loaded as a module worker (`import()`).
 3. Check: `python tools/build_exercises.py` (needs `numpy`, `pandas`,
    `matplotlib`, `pyyaml`, `mistune`).
 
-### Exercises so far (14)
+### Exercises so far (27)
 
 | Section | Exercises |
 |---|---|
@@ -351,6 +432,8 @@ Pyodide 314+ must be loaded as a module worker (`import()`).
 | 2.4 Calculus | `tangent-line`, `numerical-gradient` |
 | 2.5 Automatic Differentiation | `chain-rule-by-hand` |
 | 2.6 Probability and Statistics | `coin-estimator-variance`, `coupled-tests-bayes`, `portfolio-stats` |
+| Chapter 3 | `mean-vs-median`, `poisson-loss`, `reproducible-batches`, `linreg-sgd-numpy`, `huber-loss`, `weight-decay-updates` |
+| Chapter 4 | `stable-softmax`, `soft-cross-entropy`, `exact-validation-loss`, `bayes-decision`, `exp-safe-range`, `hoeffding-samples`, `shift-detector` |
 
 ### Testing record
 - 2026-10-18 Phase 1: clean full build + 27/27 browser checks (exercises).
@@ -362,13 +445,19 @@ Pyodide 314+ must be loaded as a module worker (`import()`).
   (mark, persist, sidebar), project page + CSV download, no Discussions or
   analytics requests, no new JS errors.
 
+- 2026-10-24 Chapter 4 + test suite: `tools/site_tests/run_all.sh` clean
+  build OK, 170/170 book cells (Ch 2--4), browser suites 27 + 38 + 25 + 29
+  + 20 + 24 = 163/163 checks. Fashion-MNIST training (10 epochs) takes about
+  9 s in headless Chromium.
+
 ### Known limits (by design)
 - Tests/solutions ship to the browser, so "Show solution"/answers are
   honor-system.
 - First run downloads Pyodide (~10 MB; NumPy ~8 MB; matplotlib more for
   plots), cached after.
-- torchlite is a teaching subset: no `nn`, `optim`, GPU, or data loaders.
-  Later chapters that use them need torchlite extended or Colab.
+- torchlite is a teaching subset (tensors, autograd, the parts of `nn`,
+  `optim` and `utils.data` the book has used so far; no GPU). Each new
+  chapter extends it as needed.
 - Progress and saved code live in this browser's localStorage (use Export /
   Import in the sidebar to back up or move progress).
 - Browser Python is 3.14 while the build check uses Render's 3.10.
@@ -378,5 +467,8 @@ Pyodide 314+ must be loaded as a module worker (`import()`).
 - [ ] Deploy the study-course update and try it on the live site.
 - [x] Chapter 3: answers, notes, exercises, playgrounds, runnable training
       loops, Tempo project, Quill Part 2.
-- [ ] Chapter 4 (classification): same treatment, Quill Part 3; torchlite
-      needs cross-entropy, softmax, `nn.Flatten`, image data (Fashion-MNIST).
+- [x] Chapter 4 (classification): same treatment, Relay, Quill Part 3,
+      Fashion-MNIST in the browser.
+- [ ] Chapter 5 (MLPs): same treatment, Quill Part 4 (MLP; goal: beat the
+      count 4-gram's 5.8); torchlite needs activations (`ReLU` exists),
+      dropout, and `nn.init` extras.

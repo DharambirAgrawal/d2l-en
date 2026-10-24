@@ -326,6 +326,12 @@ trainer = d2l.Trainer(max_epochs=10)
 trainer.fit(model, data)
 ```
 
+To see what training does geometrically, here is softmax regression on a small two-feature problem, trained live:
+
+```{=html}
+<div class="d2l-playground" data-playground="softmax-regions"></div>
+```
+
 ## Prediction
 
 Now that training is complete,

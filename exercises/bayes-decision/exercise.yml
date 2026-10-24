@@ -1,0 +1,19 @@
+title: The Best Decision Under Unequal Costs
+difficulty: medium
+timeout: 10
+description: |
+  Exercise 3: with probabilities $p(y \mid x)$ and a cost matrix
+  `C[y, y']` (the cost of predicting $y'$ when the truth is $y$), the best
+  prediction minimizes the **expected cost**
+  $\sum_y C[y, y']\, p(y \mid x)$.
+
+  Write `decide(P, C)`: `P` is an $n \times q$ array of class probabilities
+  (one row per example), `C` a $q \times q$ cost matrix. Return an integer
+  array of the $n$ best predictions. No loops needed.
+explanation: |
+  `P @ C` gives, for every example, the expected cost of each possible
+  prediction; take the argmin per row. With the 0--1 cost (`1 - eye(q)`)
+  the expected cost is $1 - p(y' \mid x)$, so this is the usual argmax. With
+  asymmetric costs (a missed disease costs 50, a false alarm 1) the
+  decision flips to "disease" well below 50% probability: here at
+  $p > 1/51$.

@@ -48,35 +48,15 @@ missing, restaurants differ in ways no column captures directly, rush hours
 and weekends are slower, noise grows with distance, and about 1% of orders
 are disasters (a courier got lost) that took 35--90 extra minutes.
 
-## Milestones
+## Steps
 
-1. **Split by time, not at random.** Train on days 0--71 and test on days
-   72--89, the way the model would actually be used (predicting the future
-   from the past). Why would a random split give an overly optimistic test
-   error here? (Hint: :numref:`sec_generalization_basics` and IID data.)
-2. **Baseline.** Predict the training-set average for everyone and report
-   the **mean absolute error (MAE)** in minutes on the test set. This is the
-   number to beat.
-3. **Linear model from scratch.** Impute missing values (training means
-   only!), standardize features, and train linear regression with your own
-   `Module`, `DataModule`, and `Trainer` classes (the pattern from
-   :numref:`sec_oo-design`) and minibatch SGD. Start with the numeric
-   features. Plot training and validation loss per epoch.
-4. **Feature engineering.** Add rush-hour (11--13, 18--20) and weekend
-   indicators, then one-hot encode `restaurant_id`. Report test MAE after each
-   step. Which restaurants are slowest to hand off orders?
-5. **Robust loss.** The lost-courier orders have huge squared errors. Replace
-   squared loss with **Huber** loss (:numref:`sec_linear_concise` exercises)
-   and compare test MAE and the learned coefficients.
-6. **Regularization when data is scarce.** Retrain using only the first week
-   (about 300 orders) with all features. Show the gap between training and
-   test error, then sweep the weight decay $\lambda$ on a log scale and pick it
-   with a validation split taken *from the first week*. Explain what you
-   observe (it may not be a big win; say why).
-7. **An honest promise.** Using the residuals on the validation set, quote a
-   range such as "28--36 min" that contains the actual time for about 80% of
-   orders. Check the coverage on the test set. (Hint: the noise grows with
-   distance; does one fixed width work for short and long trips?)
+Tempo is built **step by step while you read the chapter**: each step appears
+at the end of its section, right after you learn what it needs, and
+**revisits** earlier topics so nothing fades. All steps are listed here too.
+
+```{=html}
+<div class="d2l-project-steps"></div>
+```
 
 ## Acceptance Criteria
 
@@ -93,7 +73,7 @@ are disasters (a courier got lost) that took 35--90 extra minutes.
 
 - A coefficient table in minutes per unit (e.g., minutes per km, minutes per
   rainy order) with a one-line interpretation of each.
-- The interval in milestone 7 covers 75--85% of test orders.
+- The range from Step 7 covers 75--85% of test orders.
 - Loss curves for at least one model, and the train/test gap for the
   one-week model.
 

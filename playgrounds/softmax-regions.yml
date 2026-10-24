@@ -1,0 +1,13 @@
+title: Softmax Regression Learning to Separate Three Classes
+description: |
+  Softmax regression with two input features and three classes, trained by
+  gradient descent on the cross-entropy loss (starting from all-zero
+  weights). The background shows the predicted class; stronger color means
+  higher confidence. Watch the regions form as you add steps, see a too
+  large learning rate overshoot, and make the classes overlap: the
+  boundaries are always **straight lines**, so overlapping classes can't be
+  separated perfectly.
+params:
+  - {name: steps, label: "gradient steps", min: 0, max: 300, step: 1, value: 40}
+  - {name: log_lr, label: "$\\log_{10}$ learning rate", min: -2, max: 1.5, step: 0.05, value: -0.5}
+  - {name: spread, label: "class spread (overlap)", min: 0.3, max: 2.5, step: 0.05, value: 0.8}

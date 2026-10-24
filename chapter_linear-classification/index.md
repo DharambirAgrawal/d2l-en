@@ -24,5 +24,7 @@ softmax-regression-scratch
 softmax-regression-concise
 generalization-classification
 environment-and-distribution-shift
+project-relay
+capstone-quill-3
 ```
 

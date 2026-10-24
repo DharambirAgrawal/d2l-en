@@ -1,0 +1,43 @@
+# Answers for chapter_linear-classification/environment-and-distribution-shift.md "Exercises", in order.
+- answer: |
+    The model changes the data it later learns from. **Users** adapt:
+    they phrase queries differently, click different results (and clicks on
+    whatever is ranked first go up just because of position), or move to a
+    competitor. **Website owners** re-optimize their pages for the new
+    ranking (SEO), sometimes gaming it. **Advertisers** change bids and
+    keywords as traffic and prices shift. All of this is distribution shift
+    caused by the deployment itself (a feedback loop), so offline metrics
+    from before the change can mislead; A/B tests and monitoring are needed.
+- answer: |
+    Mix the training inputs (label 0, "source") with the new inputs
+    (label 1, "target") and train a classifier, such as logistic regression,
+    to tell them apart; measure its accuracy (or AUC) on held-out data. If
+    the two distributions are the same, nothing beats guessing: accuracy
+    stays near 50% (AUC near 0.5). Accuracy clearly above that means the
+    inputs have shifted, and the classifier's weights show which features
+    changed. Use a validation split (or a permutation test) to make sure
+    the difference isn't noise.
+  exercise: shift-detector
+- answer: |
+    Train the source-vs-target classifier from Exercise 2 with logits
+    $h(\mathbf{x})$ (target = 1). With equal numbers of source and target
+    examples, $\frac{q(\mathbf{x})}{p(\mathbf{x})} =
+    \frac{P(\textrm{target} \mid \mathbf{x})}{P(\textrm{source} \mid
+    \mathbf{x})} = e^{h(\mathbf{x})}$ (multiply by $n_s/n_t$ otherwise).
+    Weight each training example by $\beta_i = e^{h(\mathbf{x}_i)}$ and
+    minimize $\frac{1}{n}\sum_i \beta_i\, l(f(\mathbf{x}_i), y_i)$:
+    examples that look like the new data count more. In practice clip very
+    large weights (they make the estimate high-variance) and check on a
+    small labeled target sample if you have one.
+- answer: |
+    - **Too little data**: the empirical risk is a noisy estimate (variance),
+      especially for rare classes.
+    - **Non-independent samples**: duplicates, many examples from the same
+      user or time period, or leaks between train and test.
+    - **Biased collection**: who or what got recorded isn't representative
+      (selection bias), even without a shift over time.
+    - **Label noise** or inconsistent labeling.
+    - **Overfitting through reuse**: tuning many models on the same
+      validation set makes its error optimistic.
+    - **Adversaries and feedback loops**: people react to the model.
+    - **Non-stationarity**: the world keeps changing, a slow shift.

@@ -236,6 +236,12 @@ Energy-based models :cite:`Ranzato.Boureau.Chopra.ea.2007`
 use this point of view when describing
 problems in deep learning.
 
+Try the softmax yourself:
+
+```{=html}
+<div class="d2l-playground" data-playground="softmax-temperature"></div>
+```
+
 ### Vectorization
 :label:`subsec_softmax_vectorization`
 

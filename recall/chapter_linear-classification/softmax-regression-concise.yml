@@ -1,0 +1,8 @@
+# Quick recall for chapter_linear-classification/softmax-regression-concise.md: retrieval practice on earlier material,
+# shown at the top of the section with hidden answers.
+- q: '*(4.4)* Why can `exp(X) / exp(X).sum(1, keepdims=True)` return `nan`?'
+  a: Large logits overflow to `inf` (`inf / inf = nan`); very negative ones underflow to 0 (`0 / 0`).
+- q: '*(4.4)* What does `y_hat[range(len(y_hat)), y]` select?'
+  a: For each row $i$, the predicted probability of its true class $y_i$, without building a one-hot matrix.
+- q: '*(3.5)* What does `nn.LazyLinear(1)` do differently from `nn.Linear(2, 1)`?'
+  a: It infers the input size from the first batch it sees, so you only specify the output size.

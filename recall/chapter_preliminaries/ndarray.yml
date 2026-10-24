@@ -1,0 +1,8 @@
+# Quick recall for chapter_preliminaries/ndarray.md: retrieval practice on earlier material,
+# shown at the top of the section with hidden answers.
+- q: '*(1. Introduction)* Name the four components every machine learning problem has.'
+  a: '**Data**, a **model**, an **objective (loss) function**, and an **optimization algorithm** that adjusts the model''s parameters to reduce the loss.'
+- q: '*(1. Introduction)* What''s the difference between regression and classification? Give one example of each.'
+  a: '**Regression** predicts a number (*how much?*): a house price. **Classification** predicts a category (*which one?*): cat vs. dog.'
+- q: '*(1. Introduction)* What is overfitting, and how do you detect it?'
+  a: 'Doing well on the training data but badly on unseen data. Detect it by evaluating on a **held-out** test/validation set: a large gap between training and held-out error.'

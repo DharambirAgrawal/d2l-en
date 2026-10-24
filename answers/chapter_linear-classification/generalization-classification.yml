@@ -1,0 +1,36 @@
+# Answers for chapter_linear-classification/generalization-classification.md "Exercises", in order.
+- answer: |
+    Hoeffding's inequality gives $P(|\epsilon_\mathcal{D}(f) - \epsilon(f)|
+    \geq t) \leq 2e^{-2nt^2}$. Setting this to $0.001$ with $t = 0.0001$:
+
+    $$n \geq \frac{\ln(2/0.001)}{2t^2} = \frac{\ln 2000}{2 \times 10^{-8}}
+    \approx 3.8 \times 10^{8}.$$
+
+    About **380 million** test examples (345 million with the one-sided
+    bound). Precision is expensive: the needed $n$ grows as $1/t^2$.
+  exercise: hoeffding-samples
+- answer: |
+    For binary labels, $n + 1$ evaluations suffice for a test set of $n$
+    points. Submit any model $f_0$ and record its error. Then, for each
+    $i$, submit $f_0$ with only its prediction on point $i$ flipped: the
+    error goes down by $1/n$ if the flip fixed point $i$, up by $1/n$ if it
+    broke it. That reveals every label, after which a model that outputs
+    exactly those labels scores error 0. With clever adaptive or coded
+    queries you can do it with fewer, roughly $O(n / \log n)$; with $k$
+    classes you need up to $k - 1$ probes per point in the simple scheme.
+    This is why benchmarks limit the number of test submissions.
+- answer: |
+    6 for classifiers $\mathrm{sign}(p(x))$ with $p$ a polynomial of degree
+    5 in one variable: it has 6 coefficients, a linear model in the features
+    $(1, x, \ldots, x^5)$, and in general a linear classifier in $d$
+    features has VC dimension $d$ (here $d = 6$, with the bias included).
+    You can shatter any 6 distinct points: a degree-5 polynomial can change
+    sign between each pair of neighbors, but 7 points with alternating
+    labels need 6 sign changes, which degree 5 can't do.
+- answer: |
+    4. Four points in a diamond (top, bottom, left, right) can be shattered:
+    for every subset there's an axis-aligned rectangle containing exactly
+    those points. With 5 points, take the topmost, bottommost, leftmost and
+    rightmost ones (at most 4 points); any rectangle containing them
+    contains the whole bounding box, hence the fifth point, so the labeling
+    "those 4 in, fifth out" is impossible.

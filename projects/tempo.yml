@@ -1,0 +1,94 @@
+# Tempo: the Chapter 3 project, built step by step inside the chapter.
+# Each step appears at the end of its section (before the Exercises) and on
+# the project page. "revisit" deliberately brings back earlier topics.
+project: Tempo
+subtitle: Honest delivery-time estimates
+page: chapter_linear-regression/project-tempo
+steps:
+  - page: chapter_linear-regression/linear-regression
+    title: First look, baseline, and the exact answer
+    build: |
+      Download `deliveries.csv` (see the Tempo page). **Split by time**:
+      train on days 0--71, test on days 72--89. Compute the **baseline**:
+      predict the training average for every order and report the test MAE
+      in minutes (about 9.4). Then fit linear regression on the numeric
+      features (`distance_km`, `prep_min`, `items`, `raining`) with the
+      **analytic solution** $\mathbf{w}^* = (\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{y}$
+      (append a column of ones for the bias). Test MAE should drop to about 6.3.
+    revisit: |
+      *Chapter 2:* fill missing `prep_min` and `distance_km` with **training**
+      means only (2.2), and standardize the features with broadcasting and
+      `keepdims` (2.1, 2.3). Why must test data use the training means?
+  - page: chapter_linear-regression/oo-design
+    title: Give Tempo a proper structure
+    build: |
+      Create your repository `tempo` with three classes following this
+      section's design: `TempoData` (a `DataModule` that loads the CSV,
+      makes the time split, and yields minibatches), `LinearETA` (a
+      `Module` with `forward` and `loss`), and a `Trainer` with `fit`. Use
+      `save_hyperparameters` (or your own version of it).
+    revisit: |
+      *3.1:* print the residuals of your Step 1 model on the training set.
+      Plot their histogram. Do they look Gaussian, the assumption behind
+      squared loss? Note what you see in the right tail (keep it for Step 5).
+  - page: chapter_linear-regression/synthetic-regression-data
+    title: Test the pipeline on data you control
+    build: |
+      Add a `SyntheticTempo` data module that generates fake orders with
+      **known** coefficients (say 3 minutes per km, 0.9 per prep minute,
+      7 minutes for rain) plus Gaussian noise. Your pipeline must recover
+      them. This is how real teams catch bugs before trusting a model on
+      real data.
+    revisit: |
+      *3.2:* your synthetic module should reuse `TempoData`'s minibatching
+      (inheritance or `add_to_class`). *3.1:* check the recovered
+      coefficients against the analytic solution on the same synthetic
+      data.
+  - page: chapter_linear-regression/linear-regression-scratch
+    title: Train Tempo from scratch with SGD
+    build: |
+      Train `LinearETA` with your own minibatch SGD (gradients by autograd
+      *or* by hand, as in this section's coding exercise) on the real data.
+      Plot training and validation loss per epoch. Sweep the learning rate
+      (0.001, 0.01, 0.1, 1): which ones are slow, which diverge?
+    revisit: |
+      *3.1:* compare your SGD weights with the Step 1 analytic weights.
+      How close are they, and why might they differ a little? *Chapter 2
+      (2.4):* gradient-check one SGD step numerically.
+  - page: chapter_linear-regression/linear-regression-concise
+    title: Real features and a robust loss
+    build: |
+      Re-implement the model with `nn.LazyLinear`, `nn.MSELoss`, and
+      `optim.SGD`, and confirm it matches Step 4. Then **engineer
+      features**: rush-hour (11--13, 18--20) and weekend indicators, then
+      one-hot `restaurant_id`. Finally swap squared loss for **Huber** loss.
+      Report test MAE after each change (about 6.3 → 5.4 → 4.2 → 4.0).
+    revisit: |
+      *Step 2's histogram:* look at which orders Huber loss stops
+      overweighting: are they the right-tail "lost courier" orders?
+      *Chapter 2 (2.2):* one-hot encoding with `get_dummies`.
+  - page: chapter_linear-regression/generalization
+    title: Validate like a professional
+    build: |
+      Hold out the last two weeks of the training period as a **validation**
+      set and pick your learning rate and feature set with it, never with
+      the test set. Draw a **learning curve**: validation MAE when training
+      on 1, 2, 4, 8 weeks. Would more data still help?
+    revisit: |
+      *3.3/3.4:* only the training loader shuffles; explain why shuffling
+      *across* the time split would leak the future. *Step 1:* why was a
+      time-based split the right call?
+  - page: chapter_linear-regression/weight-decay
+    title: Scarce data, regularization, and an honest promise
+    build: |
+      Retrain on only the **first week** with all features: show the
+      train/test gap, then sweep weight decay $\lambda$ (log scale) using a
+      validation split from that week. Then produce Tempo's final model
+      (all data, your best settings) and an **honest range** ("28--36 min")
+      that covers about 80% of test orders. Write the README results table.
+    revisit: |
+      **Everything comes back:** analytic vs. SGD (3.1, 3.4), your
+      Module/Trainer (3.2), synthetic tests (3.3), features and Huber
+      (3.5), validation (3.6), plus Chapter 2's quantiles/probability for
+      the range. In your README, write one sentence per section on how
+      Tempo used it.

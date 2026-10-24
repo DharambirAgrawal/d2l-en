@@ -1,0 +1,16 @@
+# Notes for chapter_linear-classification/generalization-classification.md: each entry is shown at the end of the
+# section whose heading matches "after".
+- after: The Test Set
+  notes:
+  - 'Test error $\epsilon_\mathcal{D}(f)$ is an unbiased estimate of the population error $\epsilon(f)$ **only if $f$ was chosen without looking at the test set**.'
+  - 'Its standard deviation is $\sqrt{\epsilon(1 - \epsilon)/n} \leq 0.5/\sqrt{n}$: 4× the data for 2× the precision (about 10,000 examples for $\pm 0.01$).'
+  - 'Hoeffding: $P(|\epsilon_\mathcal{D}(f) - \epsilon(f)| \geq t) \leq 2\exp(-2nt^2)$, a guarantee for any $n$.'
+- after: Test Set Reuse
+  notes:
+  - 'Evaluating $k$ models on one test set: the chance that *some* estimate is badly off grows with $k$ (multiple comparisons).'
+  - 'Worse, **adaptive overfitting**: choosing the next model after seeing test scores leaks test information. Use a validation set for decisions; keep the test set for the final report.'
+- after: Statistical Learning Theory
+  notes:
+  - 'Uniform convergence bounds the gap between training and population error for **every** model in a class at once; the price depends on the class''s complexity.'
+  - '**VC dimension**: the largest number of points the class can label in every possible way. Linear classifiers in $d$ dimensions: $d + 1$.'
+  - 'These bounds are far too loose for deep networks, which generalize well despite huge capacity: theory and practice still disagree.'

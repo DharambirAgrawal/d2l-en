@@ -1,0 +1,12 @@
+# Notes for chapter_linear-classification/softmax-regression-concise.md: each entry is shown at the end of the
+# section whose heading matches "after".
+- after: Defining the Model
+  notes:
+  - '`nn.Sequential(nn.Flatten(), nn.LazyLinear(10))`: flatten the image, then one fully connected layer; the model returns **logits**, not probabilities.'
+- after: Softmax Revisited
+  notes:
+  - '**LogSumExp trick:** $\log \hat{y}_j = o_j - \bar{o} - \log\sum_k \exp(o_k - \bar{o})$ with $\bar{o} = \max_k o_k$: no overflow, no $\log 0$.'
+  - 'So pass logits straight to `F.cross_entropy`, which fuses softmax and log. Compute probabilities with softmax only when you need them.'
+- after: Training
+  notes:
+  - Same accuracy as the scratch version, with fewer lines and numerically safe code.

@@ -42,34 +42,15 @@ Like real telemetry it is messy: about 4% of values are missing (`NA`),
 some rows have no region, incidents are rare (about 3%), and there are
 harmless traffic spikes that look alarming but aren't incidents.
 
-## Milestones
+## Steps
 
-1. **Clean the data.** Load it with pandas. Impute missing numeric values
-   with the column mean, and one-hot encode `region` with a separate column
-   for missing regions. Report the fraction of missing values per column and
-   the incident base rate.
-2. **Score each window.** Standardize each metric with broadcasting,
-   $z_{ij} = (x_{ij} - \mu_j)/\sigma_j$, and score each window by the
-   $\ell_2$ norm of its $z$-vector. Explain why standardizing matters: what
-   happens to raw-distance scores if latency is measured in seconds instead
-   of milliseconds?
-3. **Measure the false-alarm problem.** For a threshold $t$, compute alerts,
-   precision $P(\textrm{incident} \mid \textrm{alert})$, recall, and missed
-   incidents. Then, with Bayes' theorem, show analytically why a detector
-   with 90% recall and a 5% false-positive rate still produces mostly false
-   pages at a 3% base rate (the same effect as the HIV test in
-   :numref:`subsec_probability_hiv_app`).
-4. **Choose the threshold by cost.** With `page_cost` per page and
-   `miss_cost` per missed incident, find the threshold minimizing
-   `page_cost * alerts + miss_cost * missed` by searching over candidate
-   thresholds. Plot total cost against threshold.
-5. **Compare against a naive rule.** Compare your threshold with "page on
-   the top 10% of scores". Report pages, precision, recall, and cost for both.
-6. **Combine detectors.** Build a second, simpler detector (e.g., only
-   `error_rate` above its 95th percentile). Using conditional independence
-   and Bayes' theorem, estimate the precision when *both* detectors must
-   fire, then measure it on the data. When does the independence assumption
-   break down?
+Hush is built **step by step while you read the chapter**: each step appears
+at the end of its section, right after you learn what it needs, and
+**revisits** earlier topics so nothing fades. All steps are listed here too.
+
+```{=html}
+<div class="d2l-project-steps"></div>
+```
 
 ## Acceptance Criteria
 
@@ -79,7 +60,7 @@ harmless traffic spikes that look alarming but aren't incidents.
   about 47 of the 52 incidents with about 115 pages, versus 200 pages for
   the naive top-10% rule (exact numbers depend on details such as how you
   impute).
-- Your Bayes calculation in milestone 3 gives about 36% precision.
+- Your Bayes calculation in Step 6 gives about 36% precision.
 - A plot of cost vs. threshold with the chosen threshold marked.
 
 ## Stretch Goals

@@ -1,0 +1,8 @@
+# Quick recall for chapter_linear-classification/environment-and-distribution-shift.md: retrieval practice on earlier material,
+# shown at the top of the section with hidden answers.
+- q: '*(4.6)* How many test examples give a standard error of about 0.01 on accuracy, and why?'
+  a: 'About 2,500--10,000: the standard deviation is $\sqrt{\epsilon(1 - \epsilon)/n} \leq 0.5/\sqrt{n}$, so $n = 2500$ gives $\leq 0.01$ in the worst case.'
+- q: '*(4.6)* Why is it dangerous to evaluate many models on the same test set?'
+  a: 'Some estimates will be off by chance (multiple comparisons), and choosing based on test scores leaks information (adaptive overfitting): the reported score becomes optimistic.'
+- q: '*(2.6)* Write Bayes'' theorem. Which term is the *prior*?'
+  a: $P(A \mid B) = P(B \mid A)P(A)/P(B)$; the prior is $P(A)$, the belief before seeing $B$.

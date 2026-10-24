@@ -56,5 +56,9 @@ cp -r static/frontpage/_images/. _build/html/_images/
 mkdir -p _build/html/_static/projects
 cp -r static/projects/. _build/html/_static/projects/
 
+# Datasets the in-browser book code loads (Fashion-MNIST, MIT license)
+mkdir -p _build/html/_static/datasets
+cp -r static/datasets/. _build/html/_static/datasets/
+
 # Add the interactive exercises (JSON + Python runner files)
 python tools/build_exercises.py --out _build/html/_static/exercises

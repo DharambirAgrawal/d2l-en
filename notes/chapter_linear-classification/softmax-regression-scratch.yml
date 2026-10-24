@@ -1,0 +1,19 @@
+# Notes for chapter_linear-classification/softmax-regression-scratch.md: each entry is shown at the end of the
+# section whose heading matches "after".
+- after: The Softmax
+  notes:
+  - 'Softmax = exponentiate, sum each row (`keepdims=True`), divide (broadcasting).'
+  - 'The naive version **overflows** for large logits (`exp(100)` is `inf` in float32) and underflows for very negative ones; subtract the row max first.'
+- after: The Model
+  notes:
+  - 'Flatten each $28 \times 28$ image to a 784-vector: $\mathbf{W}$ is $784 \times 10$, $\mathbf{b}$ has 10 entries. Pixels'' spatial layout is ignored (CNNs fix this later).'
+- after: The Cross-Entropy Loss
+  notes:
+  - '`y_hat[range(n), y]` picks each row''s probability of its true class in one indexing step: no one-hot matrix needed.'
+  - 'Loss = mean of $-\log$ of those probabilities.'
+- after: Training
+  notes:
+  - 'Same `Trainer` as linear regression: only the model and loss changed. About **83%** validation accuracy after 10 epochs.'
+- after: Prediction
+  notes:
+  - 'Predict with `argmax` over the outputs. Look at the **mistakes**: shirts vs. T-shirts vs. pullovers are hard even for people.'

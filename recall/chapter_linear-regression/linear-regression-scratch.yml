@@ -1,0 +1,8 @@
+# Quick recall for chapter_linear-regression/linear-regression-scratch.md: retrieval practice on earlier material,
+# shown at the top of the section with hidden answers.
+- q: '*(3.3)* Why shuffle training data each epoch, but not validation data?'
+  a: Shuffling gives unbiased, varied minibatches for SGD; validation is only evaluated, so order doesn't matter.
+- q: '*(3.2)* What does `Trainer.fit` do, in order?'
+  a: 'Prepares data and model, configures the optimizer, then for each epoch runs `fit_epoch`: training batches (forward, loss, zero_grad, backward, step), then validation batches.'
+- q: '*(2.5)* What does `detach()` do?'
+  a: Returns the same values with gradient tracking cut, so gradients don't flow back through it.

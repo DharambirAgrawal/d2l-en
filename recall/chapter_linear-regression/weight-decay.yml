@@ -1,0 +1,8 @@
+# Quick recall for chapter_linear-regression/weight-decay.md: retrieval practice on earlier material,
+# shown at the top of the section with hidden answers.
+- q: '*(3.6)* How do you tell underfitting from overfitting?'
+  a: 'Underfitting: training **and** validation errors are high. Overfitting: training error is low but validation error is much higher.'
+- q: '*(3.6)* Why never tune on the test set?'
+  a: 'Choosing based on it makes the test error optimistic: it no longer measures performance on truly unseen data. Use a validation set (or cross-validation).'
+- q: '*(3.1, 2.3)* Write the $\ell_2$ norm and say what large weights mean for a linear model.'
+  a: $\|\mathbf{w}\|_2 = \sqrt{\sum_i w_i^2}$; large weights make predictions very sensitive to small input changes, a sign of a complex (possibly overfitting) model.

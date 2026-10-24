@@ -1,0 +1,66 @@
+# Answers for chapter_linear-classification/softmax-regression-scratch.md "Exercises", in order.
+- answer: |
+    1. In float32, $e^{100} \approx 2.7 \times 10^{43}$ is above the largest
+       float32 ($3.4 \times 10^{38}$), so it becomes `inf`, and `inf / inf`
+       gives `nan`. The row is ruined. (In float64 it would still work;
+       overflow there starts above about 709.)
+    2. With a largest input of $-100$, $e^{-100} \approx 3.7 \times 10^{-44}$
+       is a tiny *subnormal* float32, so it still works, with lost
+       precision. A little lower (below about $-103$) every term underflows
+       to 0 and you get `0 / 0 = nan`, although the right answer is
+       perfectly ordinary.
+    3. Subtract each row's maximum first: $\mathrm{softmax}(\mathbf{o}) =
+       \mathrm{softmax}(\mathbf{o} - \max_j o_j)$, since the factor
+       $e^{-\max}$ cancels in the ratio. Now every exponent is $\leq 0$ (no
+       overflow) and the largest term is exactly 1 (the denominator is at
+       least 1, so no division by 0).
+  exercise: stable-softmax
+- answer: |
+    `def cross_entropy_full(y_hat, y): return -(one_hot(y) * log(y_hat)).sum(1).mean()`
+    with `one_hot(y)` an $n \times q$ matrix.
+    1. It gives the same numbers as the indexing version on hard labels.
+    2. It's slower because it builds an $n \times q$ one-hot matrix and
+       computes $q$ logarithms and products per example, when only one of
+       them is nonzero; the indexing version touches one entry per row.
+    3. Use it when labels are **soft**: probability vectors rather than one
+       class, as in label smoothing, knowledge distillation (matching a
+       teacher's probabilities), or annotators who disagree. For hard labels
+       the indexing version is better.
+    4. $\log 0 = -\infty$, and $0 \times (-\infty) = $ `nan` in floating
+       point, so a single predicted probability of exactly 0 poisons the
+       loss even where its label weight is 0. Clip $\hat{y}$ away from 0,
+       or better, compute $\log\hat{y}$ directly from the logits with a
+       stable log-softmax (Section 4.5).
+  exercise: soft-cross-entropy
+- answer: |
+    No. Returning the single most likely label is optimal only when every
+    mistake costs the same (Exercise 3 of Section 4.3). In medical
+    diagnosis a missed disease (false negative) can cost far more than a
+    false alarm, so you should pick the decision with the lowest *expected
+    cost*, which may flag "disease" even at, say, 20% probability. Also:
+    report calibrated probabilities instead of a bare label, let the model
+    **abstain** and refer uncertain cases to a doctor, and set thresholds
+    with clinicians based on the actual costs.
+- answer: |
+    With $V$ words and $d$ features, the output layer has $d \times V$
+    weights (for $V = 100{,}000$ and $d = 1000$: 100 million parameters),
+    and every prediction computes $V$ scores and a sum over all $V$
+    exponentials for the softmax; the gradient touches every word too.
+    That's slow and memory hungry. Most words are rare, so their weights get
+    very few training examples and are poorly estimated. Remedies used in
+    practice: subword vocabularies (byte-pair encoding), sampled softmax or
+    negative sampling, hierarchical softmax, and adaptive softmax.
+- answer: |
+    Typical results on Fashion-MNIST with batch size 256 and 10 epochs:
+    1. Learning rate: very small (0.001--0.01) leaves the validation loss
+       high because training is too slow; around 0.1--0.5 it drops fastest;
+       very large (above about 1--2) makes the loss jump around or blow up
+       to `nan`. The curve of final validation loss vs. learning rate is
+       U-shaped (plot it on a log $x$ axis).
+    2. Batch size: with a fixed learning rate and number of epochs, smaller
+       batches mean more updates per epoch (lower loss after 10 epochs, but
+       noisier curves and slower per epoch); larger batches mean fewer
+       updates (higher loss after the same epochs). The effect is small
+       between 128 and 512 and obvious once you change it by $8\times$ or
+       more (e.g., 16 or 4096). Training and validation loss move together
+       here: this linear model barely overfits.

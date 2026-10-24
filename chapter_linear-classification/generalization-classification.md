@@ -226,6 +226,12 @@ of asymptotic analysis for giving
 us ballpark figures even if they are not
 guarantees we can take to court.
 
+See how the precision of a test set grows with its size:
+
+```{=html}
+<div class="d2l-playground" data-playground="test-set-size"></div>
+```
+
 ## Test Set Reuse
 
 In some sense, you are now set up to succeed

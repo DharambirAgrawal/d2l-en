@@ -1,0 +1,26 @@
+title: Softmax and Temperature
+description: |
+  Three logits $o_1, o_2, o_3$ (scores for cat, dog, chicken) become
+  probabilities $\hat{y}_i = \exp(o_i / T) / \sum_j \exp(o_j / T)$. Move a
+  logit and watch all three probabilities change: only *differences*
+  between logits matter (add 5 to all three and nothing moves). Lower the
+  **temperature** $T$ toward 0 and the largest logit takes everything (like
+  argmax); raise it and the distribution flattens toward uniform.
+params:
+  - {name: o1, label: "$o_1$ (cat)", min: -5, max: 5, step: 0.1, value: 2.0}
+  - {name: o2, label: "$o_2$ (dog)", min: -5, max: 5, step: 0.1, value: 1.0}
+  - {name: o3, label: "$o_3$ (chicken)", min: -5, max: 5, step: 0.1, value: -1.0}
+  - {name: T, label: "temperature $T$", min: 0.05, max: 5, step: 0.05, value: 1.0}
+python: |
+  import numpy as np
+  import matplotlib.pyplot as plt
+
+  o = np.array([o1, o2, o3])
+  z = o / T
+  p = np.exp(z - z.max())      # subtract the max for stability
+  p /= p.sum()
+  plt.figure(figsize=(5, 3))
+  plt.bar(['cat', 'dog', 'chicken'], p, color=['tab:blue', 'tab:orange', 'tab:green'])
+  plt.ylim(0, 1.05)
+  print('probabilities:', np.round(p, 3), ' sum:', p.sum())
+  print('loss if the truth is cat:', -np.log(p[0]))

@@ -1,0 +1,8 @@
+# Quick recall for chapter_linear-regression/linear-regression.md: retrieval practice on earlier material,
+# shown at the top of the section with hidden answers.
+- q: '*(2.6)* State Bayes'' theorem.'
+  a: '$P(A \mid B) = \frac{P(B \mid A) P(A)}{P(B)}$: posterior ∝ likelihood × prior.'
+- q: '*(2.6)* Define expectation and variance.'
+  a: $E[X] = \sum_x x P(X = x)$; $\textrm{Var}[X] = E[(X - E[X])^2] = E[X^2] - E[X]^2$.
+- q: '*(2.4, 2.5)* What is a gradient, and which way does gradient descent move?'
+  a: The vector of partial derivatives (direction of steepest **increase**). Gradient descent moves **against** it to decrease the loss.

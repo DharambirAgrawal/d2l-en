@@ -1,0 +1,21 @@
+title: Cross-Entropy for Soft Labels
+difficulty: medium
+timeout: 10
+description: |
+  Sometimes labels are probability vectors, not single classes (label
+  smoothing, distillation, annotators who disagree). Then the loss is the
+  full cross-entropy $-\sum_j y_j \log \hat{y}_j$.
+
+  Write `cross_entropy(logits, Y)`: `logits` is an $n \times q$ array of
+  scores (before softmax), `Y` an $n \times q$ array of label
+  distributions (rows sum to 1). Return the **mean** loss over the $n$
+  examples. Compute $\log \hat{y}$ directly from the logits with a stable
+  **log-softmax**, $\log\hat{y}_j = o_j - \max_k o_k - \log\sum_k
+  e^{o_k - \max_k o_k}$, so that a probability that rounds to 0 can't produce
+  `log(0) = -inf` and `0 * -inf = nan`.
+explanation: |
+  Working in log space avoids ever forming tiny probabilities: the
+  log-softmax is just a subtraction and a stable log-sum-exp. That's what
+  `F.cross_entropy` does (it also accepts probability targets). For one-hot
+  labels this reduces to picking one entry per row, which is the fast
+  version in the section.

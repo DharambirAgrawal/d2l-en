@@ -289,3 +289,34 @@ ul.d2l-ex-tests > li:last-child { border-bottom: 0; }
 /* Long display formulas scroll instead of being cut off. */
 .d2l-card mjx-container[display="true"], .d2l-ex mjx-container[display="true"],
 .d2l-answer-body mjx-container[display="true"] { overflow-x: auto; overflow-y: hidden; max-width: 100%; }
+
+/* Chapter project steps (inside sections and on the project page). */
+.d2l-step .d2l-card-kicker { color: var(--d-text); }
+.d2l-step-label {
+  margin: .8em 0 .2em;
+  font-size: .7em;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--d-muted);
+}
+.d2l-step-text > :first-child { margin-top: 0; }
+.d2l-step-text > :last-child { margin-bottom: 0; }
+.d2l-step-foot { margin-top: .9em; font-size: .9em; }
+.d2l-step-where { display: block; margin: .6em 0 0; font-size: .85em; }
+.d2l-project-steps .d2l-card { margin: 1.1em 0; }
+
+/* Quick recall at the top of a section. */
+.d2l-recall {
+  margin: 1.2em 0 1.6em;
+  padding: .7em 1.1em .4em;
+  border: 1px solid var(--d-border-soft);
+  border-radius: 8px;
+  background: #fff;
+}
+.d2l-recall .d2l-notes-head { flex-wrap: wrap; gap: .25em .75em; }
+.d2l-recall-hint { font-size: .8em; color: var(--d-muted); }
+.d2l-recall-list { margin: .5em 0 .3em; padding-left: 1.3em; }
+.d2l-recall-list > li { margin: .4em 0 .2em; }
+.d2l-recall-q > p { margin: 0; }
+.d2l-recall .d2l-answer { margin: .15em 0 .5em; }

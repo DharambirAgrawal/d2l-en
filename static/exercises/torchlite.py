@@ -5,7 +5,9 @@ It covers what the early chapters use: tensor creation, shapes, indexing,
 elementwise math, reductions, linear algebra, a small reverse-mode autograd,
 `torch.distributions.multinomial.Multinomial`, and (Chapter 3) `nn.Module`,
 `nn.Linear`/`LazyLinear`, `nn.MSELoss`, `nn.init`, `optim.SGD` and
-`utils.data.TensorDataset`/`DataLoader`. It is for learning and
+`utils.data.TensorDataset`/`DataLoader`, and (Chapter 4) softmax,
+cross-entropy, `nn.Flatten` and a `torchvision` subset with the real
+Fashion-MNIST dataset. It is for learning and
 experimenting, not a full PyTorch: anything missing raises a clear error.
 
 Loaded as the module `torch` only for the runnable book cells
@@ -13,6 +15,7 @@ Loaded as the module `torch` only for the runnable book cells
 """
 import builtins
 import math
+import os
 import sys
 import types
 
@@ -542,8 +545,16 @@ class Tensor:
     def min(self, dim=None):
         return Tensor._wrap(self._data.min() if dim is None else self._data.min(axis=dim))
 
-    def argmax(self, dim=None):
-        return Tensor._wrap(np.argmax(self._data, axis=dim))
+    def argmax(self, dim=None, keepdim=False, axis=None):
+        d = dim if dim is not None else axis
+        out = np.argmax(self._data, axis=d)
+        return Tensor._wrap(np.expand_dims(out, d) if keepdim and d is not None else out)
+
+    def softmax(self, dim):
+        return softmax(self, dim)
+
+    def log_softmax(self, dim):
+        return log_softmax(self, dim)
 
     def dot(self, other):
         return dot(self, other)
@@ -627,6 +638,58 @@ def sigmoid(x):
 
 def relu(x):
     return _unary(x, lambda a: np.maximum(a, 0), lambda a, out: (a > 0).astype(a.dtype))
+
+
+def log_softmax(x, dim=-1):
+    """Stable log-softmax: x - max - log(sum(exp(x - max)))."""
+    x = _as_tensor(x)
+    z = x._data - x._data.max(axis=dim, keepdims=True)
+    out = z - np.log(np.exp(z).sum(axis=dim, keepdims=True))
+    p = np.exp(out)
+    return _make(out, (x,), lambda g: (g - p * g.sum(axis=dim, keepdims=True),))
+
+
+def softmax(x, dim=-1):
+    x = _as_tensor(x)
+    z = np.exp(x._data - x._data.max(axis=dim, keepdims=True))
+    out = z / z.sum(axis=dim, keepdims=True)
+    return _make(out, (x,), lambda g: (out * (g - (g * out).sum(axis=dim, keepdims=True)),))
+
+
+def cross_entropy(input, target, reduction='mean', label_smoothing=0.0):
+    """torch.nn.functional.cross_entropy for (n, q) logits and class indices
+    (or (n, q) class probabilities), computed stably from the logits."""
+    x = _as_tensor(input)
+    if x._data.ndim != 2:
+        raise NotImplementedError('cross_entropy in the browser supports (batch, classes) inputs only')
+    logits = x._data
+    n, q = logits.shape
+    t = _unwrap(target)
+    t = np.asarray(t)
+    if t.dtype.kind in 'iu':
+        if t.shape != (n,):
+            raise RuntimeError(f'expected target of shape ({n},), got {tuple(t.shape)}')
+        Y = np.zeros_like(logits)
+        Y[np.arange(n), t] = 1
+    else:
+        Y = t.astype(logits.dtype)
+    if label_smoothing:
+        Y = Y * (1 - label_smoothing) + label_smoothing / q
+    z = logits - logits.max(axis=1, keepdims=True)
+    logp = z - np.log(np.exp(z).sum(axis=1, keepdims=True))
+    per = -(Y * logp).sum(axis=1)
+    P = np.exp(logp)
+    if reduction == 'mean':
+        out, scale = np.asarray(per.mean(), dtype=logits.dtype), np.full(n, 1.0 / n, logits.dtype)
+    elif reduction == 'sum':
+        out, scale = np.asarray(per.sum(), dtype=logits.dtype), np.ones(n, logits.dtype)
+    else:
+        out, scale = per.astype(logits.dtype), None
+
+    def back(g):
+        w = g * scale if scale is not None else g
+        return ((P - Y) * np.reshape(w, (n, 1)),)
+    return _make(out, (x,), back)
 
 
 def abs(x):  # noqa: A001 (mirrors torch.abs)
@@ -1065,6 +1128,40 @@ class MSELoss(Module):
         return l
 
 
+class CrossEntropyLoss(Module):
+    def __init__(self, reduction='mean', label_smoothing=0.0):
+        super().__init__()
+        self.reduction, self.label_smoothing = reduction, label_smoothing
+
+    def forward(self, y_hat, y):
+        return cross_entropy(y_hat, y, self.reduction, self.label_smoothing)
+
+
+class Flatten(Module):
+    def __init__(self, start_dim=1, end_dim=-1):
+        super().__init__()
+        self.start_dim, self.end_dim = start_dim, end_dim
+
+    def forward(self, X):
+        shape = X.shape
+        end = self.end_dim % len(shape)
+        return X.reshape(*shape[:self.start_dim], -1, *shape[end + 1:])
+
+
+class ReLU(Module):
+    def forward(self, X):
+        return relu(X)
+
+
+class Softmax(Module):
+    def __init__(self, dim=None):
+        super().__init__()
+        self.dim = -1 if dim is None else dim
+
+    def forward(self, X):
+        return softmax(X, self.dim)
+
+
 class Sequential(Module):
     def __init__(self, *layers):
         super().__init__()
@@ -1135,9 +1232,16 @@ nn.Linear = Linear
 nn.LazyLinear = LazyLinear
 nn.MSELoss = MSELoss
 nn.Sequential = Sequential
+nn.CrossEntropyLoss = CrossEntropyLoss
+nn.Flatten = Flatten
+nn.ReLU = ReLU
+nn.Softmax = Softmax
 nn.init = _Init('torch.nn.init')
 nn.functional = types.ModuleType('torch.nn.functional')
 nn.functional.relu = relu
+nn.functional.softmax = softmax
+nn.functional.log_softmax = log_softmax
+nn.functional.cross_entropy = cross_entropy
 nn.functional.mse_loss = lambda y_hat, y, reduction='mean': MSELoss(reduction)(y_hat, y)
 
 
@@ -1191,7 +1295,8 @@ class TensorDataset:
 
 
 class DataLoader:
-    """Minibatches from a TensorDataset (optionally shuffled each epoch)."""
+    """Minibatches from a dataset (optionally shuffled each epoch): fast paths
+    for TensorDataset and datasets with a vectorized `_batch(indices)`."""
 
     def __init__(self, dataset, batch_size=1, shuffle=False, **kwargs):
         self.dataset, self.batch_size, self.shuffle = dataset, batch_size, shuffle
@@ -1202,10 +1307,16 @@ class DataLoader:
     def __iter__(self):
         n = len(self.dataset)
         order = _rng.permutation(n) if self.shuffle else np.arange(n)
-        tensors = self.dataset.tensors
         for i in range(0, n, self.batch_size):
             idx = order[i:i + self.batch_size]
-            yield tuple(Tensor._wrap(t._data[idx]) for t in tensors)
+            if hasattr(self.dataset, 'tensors'):
+                yield tuple(Tensor._wrap(t._data[idx]) for t in self.dataset.tensors)
+            elif hasattr(self.dataset, '_batch'):
+                yield self.dataset._batch(idx)
+            else:
+                items = [self.dataset[int(j)] for j in idx]
+                yield tuple(Tensor._wrap(np.stack([np.asarray(_unwrap(v)) for v in col]))
+                            for col in zip(*items))
 
 
 utils = types.ModuleType('torch.utils')
@@ -1215,6 +1326,137 @@ utils.data.DataLoader = DataLoader
 linalg = types.ModuleType('torch.linalg')
 linalg.norm = norm
 linalg.matmul = matmul
+
+
+# ------------------------------------------------------- torchvision (subset)
+
+# Datasets are .npz files fetched by the page (worker.js) into this folder.
+DATASETS_DIR = os.environ.get('D2L_DATASETS', '/d2l/datasets')
+_DATASET_CACHE = {}
+
+
+def _load_dataset(name):
+    if name not in _DATASET_CACHE:
+        path = os.path.join(DATASETS_DIR, name + '.npz')
+        if not os.path.exists(path):
+            raise RuntimeError(f'The {name} dataset could not be downloaded to the browser. '
+                               'Check your connection and run the cell again.')
+        with np.load(path) as f:
+            _DATASET_CACHE[name] = {k: f[k] for k in f.files}
+    return _DATASET_CACHE[name]
+
+
+def _resize_matrix(n_in, n_out):
+    """Bilinear interpolation weights (half-pixel centers, like PIL/torchvision)."""
+    src = np.clip((np.arange(n_out) + 0.5) * (n_in / n_out) - 0.5, 0, n_in - 1)
+    lo = np.floor(src).astype(np.int64)
+    hi = np.minimum(lo + 1, n_in - 1)
+    w = (src - lo).astype(np.float32)
+    M = np.zeros((n_out, n_in), np.float32)
+    np.add.at(M, (np.arange(n_out), lo), 1 - w)
+    np.add.at(M, (np.arange(n_out), hi), w)
+    return M
+
+
+class _Transform:
+    def __call__(self, img):
+        out = self._batch(np.asarray(_unwrap(img))[None])[0]
+        return Tensor._wrap(out) if out.dtype.kind == 'f' else out
+
+    def __repr__(self):
+        return type(self).__name__ + '()'
+
+
+class Compose(_Transform):
+    def __init__(self, transforms):
+        self.transforms = list(transforms)
+
+    def _batch(self, a):
+        for t in self.transforms:
+            a = t._batch(a)
+        return a
+
+
+class Resize(_Transform):
+    def __init__(self, size, antialias=True):
+        self.size = (size, size) if isinstance(size, builtins.int) else tuple(size)
+
+    def _batch(self, a):
+        h, w = a.shape[-2:]
+        if (h, w) == self.size:
+            return a
+        out = _resize_matrix(h, self.size[0]) @ a.astype(np.float32) @ _resize_matrix(w, self.size[1]).T
+        if a.dtype == np.uint8:  # like resizing a PIL image
+            out = np.clip(np.rint(out), 0, 255).astype(np.uint8)
+        return out
+
+
+class ToTensor(_Transform):
+    """uint8 images (H, W) -> float32 tensors (1, H, W) in [0, 1]."""
+
+    def _batch(self, a):
+        if a.dtype == np.uint8:
+            a = a.astype(np.float32) / 255
+        return a[:, None] if a.ndim == 3 else a
+
+    def __call__(self, img):
+        return Tensor._wrap(self._batch(np.asarray(_unwrap(img))[None])[0])
+
+
+class Normalize(_Transform):
+    def __init__(self, mean, std):
+        self.mean = np.asarray(mean, np.float32).reshape(-1, 1, 1)
+        self.std = np.asarray(std, np.float32).reshape(-1, 1, 1)
+
+    def _batch(self, a):
+        return (a - self.mean) / self.std
+
+
+class FashionMNIST:
+    """torchvision.datasets.FashionMNIST: the full dataset (60,000 training
+    and 10,000 test images), stored as uint8 and transformed per minibatch."""
+    classes = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat',
+               'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle boot']
+
+    def __init__(self, root=None, train=True, transform=None, target_transform=None, download=False):
+        d = _load_dataset('fashion-mnist')
+        self.train, self.transform = train, transform
+        self._x = d['train_x' if train else 'test_x']
+        self._y = d['train_y' if train else 'test_y'].astype(np.int64)
+
+    @property
+    def data(self):
+        return Tensor._wrap(self._x)
+
+    @property
+    def targets(self):
+        return Tensor._wrap(self._y)
+
+    def __len__(self):
+        return len(self._y)
+
+    def _batch(self, idx):
+        X = self._x[idx]
+        if self.transform is not None:
+            X = self.transform._batch(X)
+        return Tensor._wrap(X), Tensor._wrap(self._y[idx])
+
+    def __getitem__(self, i):
+        X, y = self._batch(np.array([i]))
+        return Tensor._wrap(X._data[0]), builtins.int(y._data[0])
+
+    def __repr__(self):
+        return (f'Dataset FashionMNIST\n    Number of datapoints: {len(self)}\n'
+                f'    Split: {"Train" if self.train else "Test"}')
+
+
+torchvision = types.ModuleType('torchvision')
+torchvision.__version__ = __version__
+torchvision.transforms = types.ModuleType('torchvision.transforms')
+for _t in (Compose, Resize, ToTensor, Normalize):
+    setattr(torchvision.transforms, _t.__name__, _t)
+torchvision.datasets = types.ModuleType('torchvision.datasets')
+torchvision.datasets.FashionMNIST = FashionMNIST
 
 
 def install():
@@ -1230,9 +1472,12 @@ def install():
     sys.modules['torch.utils'] = utils
     sys.modules['torch.utils.data'] = utils.data
     sys.modules['torch.linalg'] = linalg
+    sys.modules['torchvision'] = torchvision
+    sys.modules['torchvision.transforms'] = torchvision.transforms
+    sys.modules['torchvision.datasets'] = torchvision.datasets
 
 
 def uninstall():
     for name in list(sys.modules):
-        if name == 'torch' or name.startswith('torch.'):
+        if name in ('torch', 'torchvision') or name.startswith(('torch.', 'torchvision.')):
             del sys.modules[name]

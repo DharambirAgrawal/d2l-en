@@ -1,0 +1,17 @@
+title: A Softmax That Never Breaks
+difficulty: easy
+timeout: 10
+description: |
+  The textbook softmax, `exp(X) / exp(X).sum(1, keepdims=True)`, returns
+  `nan` when a score is large (overflow) or when all scores are very
+  negative (underflow). Write `softmax(X)` for a 2-D array of scores (one
+  row per example) that works for **any** finite scores, using
+
+  $$\mathrm{softmax}(\mathbf{o}) = \mathrm{softmax}(\mathbf{o} - \max_j o_j).$$
+
+  Return an array of the same shape whose rows sum to 1.
+explanation: |
+  Subtracting the row maximum doesn't change the result (the factor
+  $e^{-\max}$ cancels), but now every exponent is $\leq 0$, so nothing
+  overflows, and the largest term is exactly $e^0 = 1$, so the denominator
+  is at least 1. Every framework's softmax does this internally.

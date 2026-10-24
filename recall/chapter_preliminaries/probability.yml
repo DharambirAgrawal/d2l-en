@@ -1,0 +1,8 @@
+# Quick recall for chapter_preliminaries/probability.md: retrieval practice on earlier material,
+# shown at the top of the section with hidden answers.
+- q: '*(2.5)* The four-step recipe for computing a gradient with autograd.'
+  a: (1) Mark the variable (`requires_grad_(True)`), (2) compute the output, (3) call `backward()`, (4) read `.grad`.
+- q: '*(2.5)* Why do we call `x.grad.zero_()` in PyTorch?'
+  a: PyTorch **accumulates** gradients across `backward()` calls; zeroing prevents mixing old and new gradients.
+- q: '*(2.4)* What does $f''(x) = 0$ tell you?'
+  a: 'The tangent is horizontal: a stationary point (minimum, maximum, or saddle). Gradient descent stops moving there.'

@@ -53,6 +53,8 @@ EXERCISES_DIR = os.path.join(ROOT, 'exercises')
 ANSWERS_DIR = os.path.join(ROOT, 'answers')
 PLAYGROUNDS_DIR = os.path.join(ROOT, 'playgrounds')
 NOTES_DIR = os.path.join(ROOT, 'notes')
+STEPS_DIR = os.path.join(ROOT, 'projects')
+RECALL_DIR = os.path.join(ROOT, 'recall')
 RUNTIME_DIR = os.path.join(ROOT, 'static', 'exercises')
 RUNTIME_FILES = ['grader.py', 'worker.js', 'notebook.py', 'torchlite.py', 'd2llite.py']
 
@@ -394,6 +396,72 @@ def load_notes():
     return pages, errors
 
 
+def load_project_steps():
+    """projects/<name>.yml: a chapter project built step by step.
+
+        project: Tempo
+        subtitle: Honest delivery-time estimates
+        page: chapter_linear-regression/project-tempo   # full spec page
+        steps:
+          - page: chapter_linear-regression/linear-regression  # shown there
+            title: ...
+            build: |      Markdown: what to build now
+            revisit: |    Markdown (optional): earlier topics to bring back
+
+    Returns ({page: payload}, errors): each step page gets its step; the
+    project page gets all steps."""
+    out, errors = {}, []
+    for path in sorted(glob.glob(os.path.join(STEPS_DIR, '*.yml'))):
+        where = 'projects/' + os.path.basename(path)
+        with open(path, encoding='utf-8') as f:
+            meta = yaml.safe_load(f) or {}
+        if not {'project', 'page', 'steps'} <= set(meta):
+            errors.append(f'{where}: needs project, page and steps')
+            continue
+        if not os.path.isfile(os.path.join(ROOT, meta['page'] + '.md')):
+            errors.append(f'{where}: no page {meta["page"]}.md')
+            continue
+        steps = []
+        for i, st in enumerate(meta['steps'], 1):
+            if not {'page', 'title', 'build'} <= set(st) or set(st) - {'page', 'title', 'build', 'revisit'}:
+                errors.append(f'{where}: step {i} needs page, title, build (and optional revisit)')
+                continue
+            if not os.path.isfile(os.path.join(ROOT, st['page'] + '.md')):
+                errors.append(f'{where}: step {i}: no page {st["page"]}.md')
+                continue
+            steps.append({'n': i, 'page': st['page'], 'title': str(st['title']),
+                          'build_html': render_markdown(st['build']),
+                          'revisit_html': render_markdown(st.get('revisit', ''))})
+        info = {'project': str(meta['project']), 'subtitle': str(meta.get('subtitle', '')),
+                'project_page': meta['page'], 'total': len(steps)}
+        for st in steps:
+            if st['page'] in out:
+                errors.append(f'{where}: {st["page"]} already has a project step')
+            out[st['page']] = dict(info, step=st)
+        out[meta['page']] = dict(info, steps=steps)
+    return out, errors
+
+
+def load_recall():
+    """recall/<chapter>/<section>.yml: [{q: Markdown, a: Markdown}, ...],
+    shown as "Quick recall" at the top of that section."""
+    pages, errors = {}, []
+    for path in sorted(glob.glob(os.path.join(RECALL_DIR, '**', '*.yml'), recursive=True)):
+        rel = os.path.relpath(path, RECALL_DIR)
+        page = rel[:-len('.yml')].replace(os.sep, '/')
+        if not os.path.isfile(os.path.join(ROOT, page + '.md')):
+            errors.append(f'recall/{rel}: no matching {page}.md')
+            continue
+        with open(path, encoding='utf-8') as f:
+            items = yaml.safe_load(f) or []
+        if not isinstance(items, list) or not all(isinstance(i, dict) and set(i) == {'q', 'a'} for i in items):
+            errors.append(f'recall/{rel}: must be a list of {{q, a}}')
+            continue
+        pages[page] = {'items': [{'q_html': render_markdown(i['q']), 'a_html': render_markdown(i['a'])}
+                                 for i in items]}
+    return pages, errors
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     parser.add_argument('--out', help='directory to write the bundled exercises to')
@@ -426,12 +494,17 @@ def main():
             errors.append(f'{", ".join(files)}: embeds unknown playground "{pg_id}"')
     notes, note_errors = load_notes()
     errors += note_errors
+    steps, step_errors = load_project_steps()
+    errors += step_errors
+    recall, recall_errors = load_recall()
+    errors += recall_errors
 
     if errors:
         print('\nExercise check failed:\n\n' + '\n\n'.join(errors), file=sys.stderr)
         sys.exit(1)
     print(f'{len(exercises)} exercises, answers for {len(answers)} sections, '
-          f'{len(playgrounds)} playgrounds, notes for {len(notes)} sections: OK')
+          f'{len(playgrounds)} playgrounds, notes for {len(notes)} sections, '
+          f'{len(steps)} project-step pages, recall for {len(recall)} sections: OK')
 
     if args.out:
         os.makedirs(args.out, exist_ok=True)
@@ -459,6 +532,12 @@ def main():
             os.makedirs(os.path.dirname(path), exist_ok=True)
             with open(path, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False)
+        for kind, data in (('steps', steps), ('recall', recall)):
+            for page, payload in data.items():
+                path = os.path.join(static_out, kind, page + '.json')
+                os.makedirs(os.path.dirname(path), exist_ok=True)
+                with open(path, 'w', encoding='utf-8') as f:
+                    json.dump(payload, f, ensure_ascii=False)
         # Index for the "My Notes" review page: which pages have notes.
         os.makedirs(os.path.join(static_out, 'notes'), exist_ok=True)
         with open(os.path.join(static_out, 'notes', 'index.json'), 'w', encoding='utf-8') as f:

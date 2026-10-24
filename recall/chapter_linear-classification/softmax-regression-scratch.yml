@@ -1,0 +1,8 @@
+# Quick recall for chapter_linear-classification/softmax-regression-scratch.md: retrieval practice on earlier material,
+# shown at the top of the section with hidden answers.
+- q: '*(4.3)* Why do we train on cross-entropy but report accuracy?'
+  a: 'Accuracy is what we care about, but it''s piecewise constant (gradient zero almost everywhere), so we optimize a differentiable surrogate: cross-entropy.'
+- q: '*(4.3)* How does the `Classifier` compute accuracy from `Y_hat` and `Y`?'
+  a: Take `argmax` over classes, convert to `Y`'s dtype, compare with `Y`, and average the 0/1 results.
+- q: '*(3.4)* What are the steps of one training iteration in the scratch linear regression?'
+  a: Forward pass, compute the loss, `backward()` for gradients, update each parameter with `param -= lr * param.grad`, then zero the gradients.

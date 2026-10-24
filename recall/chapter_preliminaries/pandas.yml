@@ -1,0 +1,8 @@
+# Quick recall for chapter_preliminaries/pandas.md: retrieval practice on earlier material,
+# shown at the top of the section with hidden answers.
+- q: '*(2.1)* What shape does broadcasting give for tensors of shapes $(3, 1)$ and $(1, 2)$? State the rule.'
+  a: $(3, 2)$. Align shapes from the right; each pair must be equal or contain a 1, and the 1 is stretched (copied).
+- q: '*(2.1)* Why is `Y += X` sometimes preferable to `Y = Y + X`?'
+  a: '`Y += X` updates **in place** (same memory), avoiding a new allocation; `Y = Y + X` creates a new tensor and rebinds `Y`.'
+- q: '*(1. Introduction)* What does "garbage in, garbage out" warn about?'
+  a: Bad or unrepresentative data makes learning fail (or encodes bias), no matter how good the model is.

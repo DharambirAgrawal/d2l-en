@@ -1,0 +1,91 @@
+# Answers for chapter_linear-classification/softmax-regression.md "Exercises", in order.
+- answer: |
+    1. With $\hat{\mathbf{y}} = \mathrm{softmax}(\mathbf{o})$ and
+       $l = -\sum_j y_j \log \hat{y}_j$, the first derivative is
+       $\partial_{o_j} l = \hat{y}_j - y_j$. Differentiating again,
+       $\partial_{o_i}\partial_{o_j} l = \partial_{o_i} \hat{y}_j
+       = \hat{y}_j(\delta_{ij} - \hat{y}_i)$. In matrix form the Hessian is
+       $\mathrm{diag}(\hat{\mathbf{y}}) - \hat{\mathbf{y}}\hat{\mathbf{y}}^\top$;
+       on the diagonal, $\partial^2_{o_j} l = \hat{y}_j(1 - \hat{y}_j)$.
+       It doesn't depend on the label $\mathbf{y}$ at all.
+    2. Draw a class from $\mathrm{softmax}(\mathbf{o})$ and write it as a
+       one-hot vector $\mathbf{z}$. Then $E[z_j] = \hat{y}_j$,
+       $\mathrm{Var}[z_j] = \hat{y}_j(1 - \hat{y}_j)$ (a Bernoulli variable),
+       and $\mathrm{Cov}[z_i, z_j] = E[z_i z_j] - \hat{y}_i\hat{y}_j
+       = -\hat{y}_i\hat{y}_j$ for $i \neq j$ (two different coordinates
+       can't both be 1). So
+       $\mathrm{Cov}[\mathbf{z}] = \mathrm{diag}(\hat{\mathbf{y}}) -
+       \hat{\mathbf{y}}\hat{\mathbf{y}}^\top$: exactly the Hessian above.
+- answer: |
+    1. Three outcomes need 2 bits with a plain binary code (00, 01, 10), but
+       the information is only $\log_2 3 \approx 1.585$ bits: one of the
+       four codewords is never used, so we waste about 0.415 bits per symbol.
+    2. Encode several outcomes **jointly**. Two outcomes have $9$
+       combinations, which fit in 4 bits (2 bits each, no gain yet); five
+       outcomes have $3^5 = 243 \leq 256$ combinations, so 8 bits carry
+       them: 1.6 bits per symbol. In general $n$ symbols need
+       $\lceil n \log_2 3 \rceil$ bits, so the cost per symbol approaches
+       the entropy $\log_2 3$ as $n$ grows.
+- answer: |
+    $8$ values need $\lceil \log_3 8 \rceil = 2$ ternary units ($3^2 = 9
+    \geq 8$), versus 3 bits. Fewer symbols per value means a lower symbol
+    rate (less bandwidth, lower frequency on the wire) for the same data.
+    With levels $\{-1, 0, 1\}$ the signal is symmetric around zero, so
+    there's no DC offset, and the 0 level draws no current. The price is a
+    smaller gap between levels, so less margin against noise.
+- answer: |
+    1. With two items, $P(\textrm{apple}) = \frac{\exp(o_\textrm{apple})}
+       {\exp(o_\textrm{apple}) + \exp(o_\textrm{orange})} =
+       \sigma(o_\textrm{apple} - o_\textrm{orange})$, which increases
+       strictly with $o_\textrm{apple}$ (and decreases with
+       $o_\textrm{orange}$). Since $\exp$ is increasing, the item with the
+       larger score has the larger numerator, so it's the most likely
+       choice (probability above $1/2$).
+    2. Add a third option, "neither", with its own score
+       $o_\textrm{none}$ (often fixed at 0 as a reference) and take the
+       softmax over all three. The same argument shows larger scores still
+       mean more likely, and "neither" wins when both fruits score low.
+- answer: |
+    1. $\log(e^a + e^b) > \log(e^{\max(a, b)}) = \max(a, b)$, since both
+       exponentials are positive and $\log$ is increasing.
+    2. Take $b = 0 \leq a$. The difference is $\log(e^a + 1) - a =
+       \log(1 + e^{-a})$. It is largest, $\log 2$, when $a = b$, and goes to
+       0 as $a - b \to \infty$; it never reaches 0.
+    3. $\lambda^{-1}\log(e^{\lambda a} + e^{\lambda b}) >
+       \lambda^{-1} \max(\lambda a, \lambda b) = \max(a, b)$ for
+       $\lambda > 0$, by part 1 applied to $\lambda a, \lambda b$.
+    4. By part 2 the gap is $\lambda^{-1}\log(1 + e^{-\lambda|a - b|})
+       \leq \lambda^{-1}\log 2 \to 0$.
+    5. $\textrm{softmin}_\lambda(a, b) = -\lambda^{-1}\log(e^{-\lambda a} +
+       e^{-\lambda b})$: it's below $\min(a, b)$ and tends to it as
+       $\lambda \to \infty$.
+    6. $\lambda^{-1}\log\sum_{i=1}^n e^{\lambda x_i}$ lies between
+       $\max_i x_i$ and $\max_i x_i + \lambda^{-1}\log n$, so it also tends
+       to the max.
+- answer: |
+    1. $\nabla g(\mathbf{x}) = \mathrm{softmax}(\mathbf{x}) = \mathbf{p}$
+       and the Hessian is $\mathrm{diag}(\mathbf{p}) -
+       \mathbf{p}\mathbf{p}^\top$ (Exercise 1). For any $\mathbf{v}$,
+       $\mathbf{v}^\top H \mathbf{v} = \sum_i p_i v_i^2 - (\sum_i p_i v_i)^2$,
+       the **variance** of $v_I$ when the index $I$ is drawn from
+       $\mathbf{p}$, so it's $\geq 0$. A positive semidefinite Hessian
+       means $g$ is convex.
+    2. As stated it's not quite true: $g(\mathbf{x} + b) = \log\sum_i
+       e^{x_i}e^b = g(\mathbf{x}) + b$. It **shifts** by $b$. What's
+       invariant is the softmax $\nabla g$, the probabilities.
+    3. A very large $x_i$ (say 1000) makes $e^{x_i}$ overflow to $\infty$,
+       so $g = \infty$. If all $x_i$ are very negative (say $-1000$), every
+       $e^{x_i}$ underflows to 0 and $g = \log 0 = -\infty$. The true
+       values are finite in both cases.
+    4. Use part 2: $g(\mathbf{x}) = b + \log\sum_i e^{x_i - b}$ with
+       $b = \max_i x_i$. Every exponent is $\leq 0$, so nothing overflows,
+       and the largest term is $e^0 = 1$, so the sum is in $[1, n]$ and the
+       log never sees 0.
+- answer: |
+    If $P = \mathrm{softmax}(\mathbf{o}/T)$ then $P^\alpha \propto
+    \exp(\alpha\mathbf{o}/T)$, i.e. $Q$ has temperature $T/\alpha$.
+    1. Doubling the temperature: $\alpha = 1/2$. Halving it: $\alpha = 2$.
+    2. $T \to 0$ ($\alpha \to \infty$): all the mass goes to the most likely
+       class (a one-hot vector; ties share it). This is greedy argmax.
+    3. $T \to \infty$ ($\alpha \to 0$): every class with $P(i) > 0$ gets the
+       same probability, the uniform distribution.

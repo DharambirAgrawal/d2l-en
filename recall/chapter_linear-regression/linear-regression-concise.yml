@@ -1,0 +1,8 @@
+# Quick recall for chapter_linear-regression/linear-regression-concise.md: retrieval practice on earlier material,
+# shown at the top of the section with hidden answers.
+- q: '*(3.4)* What happens if the learning rate is too large? Too small?'
+  a: 'Too large: updates overshoot and the loss **diverges**. Too small: training is very slow.'
+- q: '*(3.4)* Why reshape `y` before computing `y_hat - y`?'
+  a: If shapes are `(n, 1)` and `(n,)`, broadcasting would silently produce an $n \times n$ matrix.
+- q: '*(3.1)* What''s the analytic solution of linear regression, and when does it fail?'
+  a: $\mathbf{w}^* = (\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{y}$; it fails when $\mathbf{X}^\top\mathbf{X}$ isn't invertible (dependent features, too few examples).

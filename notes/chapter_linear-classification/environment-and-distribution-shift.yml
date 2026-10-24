@@ -1,0 +1,33 @@
+# Notes for chapter_linear-classification/environment-and-distribution-shift.md: each entry is shown at the end of the
+# section whose heading matches "after".
+- after: Covariate Shift
+  notes:
+  - '**Covariate shift:** the inputs'' distribution $p(\mathbf{x})$ changes, $P(y \mid \mathbf{x})$ stays (photos vs. cartoons of cats).'
+- after: Label Shift
+  notes:
+  - '**Label shift:** $P(y)$ changes, $P(\mathbf{x} \mid y)$ stays (a flu season changes how common the diagnosis is, not its symptoms).'
+- after: Concept Shift
+  notes:
+  - '**Concept shift:** the meaning of the label changes, $P(y \mid \mathbf{x})$ itself moves (what counts as "soda" by region; what users find relevant over time).'
+- after: Examples of Distribution Shift
+  notes:
+  - Classic failures come from a training set that differs from deployment in ways nobody checked (healthy students vs. older patients; simulator textures vs. real roads; tank photos taken on different days).
+- after: Empirical Risk and Risk
+  notes:
+  - 'We minimize **empirical risk** (average loss on the training data) as a proxy for the **risk** (expected loss on the true distribution); shift breaks that link.'
+- after: Covariate Shift Correction
+  notes:
+  - 'Reweight training examples by $\beta_i = q(\mathbf{x}_i)/p(\mathbf{x}_i)$ and minimize the weighted loss.'
+  - 'Estimate $\beta$ with a classifier that tells training ($-1$) from test ($+1$) inputs: $\beta_i = \exp(h(\mathbf{x}_i))$ with $h$ the logit. Needs the training data to cover where test data lives.'
+- after: Label Shift Correction
+  notes:
+  - 'Use the classifier''s **confusion matrix** $\mathbf{C}$ on validation data and its average prediction $\mu(\hat{\mathbf{y}})$ on test data: solve $\mathbf{C}\,p(\mathbf{y}) = \mu(\hat{\mathbf{y}})$ for the new label distribution, then reweight by $q(y_i)/p(y_i)$.'
+- after: Concept Shift Correction
+  notes:
+  - 'Usually no clever fix: keep training on fresh labeled data (warm-start from the current model) as the world changes.'
+- after: A Taxonomy of Learning Problems
+  notes:
+  - Batch → online → bandits → control → reinforcement learning: increasingly, the model's own actions shape the data it sees.
+- after: Fairness, Accountability, and Transparency in Machine Learning
+  notes:
+  - Deploying a model is a decision with consequences, not just a prediction. Ask who bears the errors, whether feedback loops amplify bias, and whether the metric captures what matters.

@@ -1,0 +1,8 @@
+# Quick recall for chapter_linear-regression/generalization.md: retrieval practice on earlier material,
+# shown at the top of the section with hidden answers.
+- q: '*(3.5)* Which loss would you pick for data with a few huge outliers, and why?'
+  a: '**Huber** (or absolute) loss: its gradient is bounded, so outliers can''t dominate training.'
+- q: '*(3.5)* What do `optim.zero_grad()` and `optim.step()` do?'
+  a: Reset the stored gradients; then update every parameter using its gradient.
+- q: '*(2.6)* What''s the difference between aleatoric and epistemic uncertainty?'
+  a: 'Aleatoric: inherent randomness, not reducible. Epistemic: uncertainty about the model/parameters, reducible with more data.'

@@ -1,0 +1,8 @@
+# Quick recall for chapter_linear-regression/oo-design.md: retrieval practice on earlier material,
+# shown at the top of the section with hidden answers.
+- q: '*(3.1)* Write the minibatch SGD update for linear regression''s $\mathbf{w}$.'
+  a: $\mathbf{w} \leftarrow \mathbf{w} - \frac{\eta}{|\mathcal{B}|}\sum_{i \in \mathcal{B}} \mathbf{x}^{(i)}(\mathbf{w}^\top\mathbf{x}^{(i)} + b - y^{(i)})$.
+- q: '*(3.1)* Why is minimizing squared error the same as maximum likelihood?'
+  a: If the noise is Gaussian, the negative log-likelihood is (up to constants) the sum of squared errors.
+- q: '*(2.3)* Write linear regression''s predictions for a whole dataset in matrix form.'
+  a: $\hat{\mathbf{y}} = \mathbf{X}\mathbf{w} + b$ (rows of $\mathbf{X}$ are examples; $b$ broadcasts).

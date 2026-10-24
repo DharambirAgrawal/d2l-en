@@ -13,7 +13,8 @@ language model that you understand line by line.
 |:--|:--|:--|
 | **1** | **2. Preliminaries** | **Tokenizer, bigram model from counts, sampling, perplexity, softmax gradient** |
 | 2 | 3. Linear regression | Train the bigram model as a neural network with minibatch SGD |
-| 3 | 4--5. Classification, MLPs | Longer context: an MLP over the previous few characters |
+| 3 | 4. Classification | Longer context: softmax regression over the previous few characters |
+| 4 | 5. Multilayer perceptrons | An MLP that combines the context characters |
 | ... | 9--10. RNNs | A recurrent language model |
 | ... | 11. Attention and Transformers | Self-attention, then a full GPT-style Transformer |
 
@@ -85,9 +86,10 @@ held-out text.
 | 0 | | random guessing (uniform over 70 characters) | 70.0 | starting point |
 | 1 | 2 | bigram from counts | **11.4** | done after this part |
 | 2 | 3 | bigram trained with minibatch SGD | **11.7** (→ 11.4) | Part 2 |
-| 3 | 4--5 | MLP over the previous few characters | goal: about 6--8 | next |
-| 4 | 9--10 | recurrent network (RNN/GRU) | goal: about 4--6 | later |
-| 5 | 11 | GPT-style Transformer | goal: below 4 | later |
+| 3 | 4 | softmax regression over the previous few characters | goal: about 8--9 | next |
+| 4 | 5 | MLP over the previous several characters | goal: below 6 | later |
+| 5 | 9--10 | recurrent network (RNN/GRU) | goal: about 4--5 | later |
+| 6 | 11 | GPT-style Transformer | goal: below 4 | later |
 
 Goals for future parts are rough targets; we'll replace them with the real
 numbers you measure. Lower perplexity means the model is less "surprised"

@@ -1,0 +1,8 @@
+# Quick recall for chapter_preliminaries/autograd.md: retrieval practice on earlier material,
+# shown at the top of the section with hidden answers.
+- q: '*(2.4)* State the chain rule for $y = f(g(x))$, and for many intermediate variables.'
+  a: '$\frac{dy}{dx} = \frac{dy}{du}\frac{du}{dx}$ with $u = g(x)$. With many intermediates, **sum over all paths**: $\nabla_{\mathbf{x}} y = \mathbf{A}\nabla_{\mathbf{u}} y$.'
+- q: '*(2.4)* What is $\nabla_{\mathbf{x}} \|\mathbf{x}\|^2$?'
+  a: $2\mathbf{x}$.
+- q: '*(2.3)* How many multiply-adds does an $(n \times k)(k \times m)$ matrix product take, and what is the result''s shape?'
+  a: About $nkm$; the result is $n \times m$.

@@ -1,0 +1,10 @@
+# Notes for chapter_linear-classification/classification.md: each entry is shown at the end of the
+# section whose heading matches "after".
+- after: The `Classifier` Class
+  notes:
+  - '`Classifier` extends `Module`: its `validation_step` reports validation **loss and accuracy**, averaged over minibatches.'
+  - 'Averaging minibatch means is slightly off when the last batch is smaller; fine for monitoring, but exact numbers weight by batch size.'
+- after: Accuracy
+  notes:
+  - 'Accuracy = fraction of examples where $\operatorname*{argmax}_j \hat{y}_j$ equals the label. It is what we care about but is **not differentiable**, so we train on cross-entropy instead.'
+  - Compare after converting to the same dtype (`preds == y`), then average the 0/1 results.

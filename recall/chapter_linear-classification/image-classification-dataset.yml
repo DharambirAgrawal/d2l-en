@@ -1,0 +1,8 @@
+# Quick recall for chapter_linear-classification/image-classification-dataset.md: retrieval practice on earlier material,
+# shown at the top of the section with hidden answers.
+- q: '*(4.1)* Write the softmax and say why we exponentiate instead of just normalizing the scores.'
+  a: $\hat{y}_i = \exp(o_i)/\sum_j \exp(o_j)$. Raw scores can be negative and don't sum to 1; exponentials are always positive and preserve the ordering.
+- q: '*(4.1)* What''s the gradient of the cross-entropy loss with respect to the logits?'
+  a: '$\mathrm{softmax}(\mathbf{o}) - \mathbf{y}$: predicted probabilities minus the one-hot label.'
+- q: '*(3.3)* What does a `DataModule`''s `get_dataloader(train)` return, and why shuffle only training data?'
+  a: An iterator over minibatches. Shuffling gives SGD varied, unbiased minibatches; validation just needs every example once.

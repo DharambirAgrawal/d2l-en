@@ -90,9 +90,10 @@ the same quantity you used for perplexity in Part 1.
 | 0 | | random guessing (uniform over 70 characters) | 70.0 | starting point |
 | 1 | 2 | bigram from counts | **11.4** | done |
 | 2 | 3 | bigram trained with minibatch SGD | **11.7** (→ 11.4) | done after this part |
-| 3 | 4--5 | MLP over the previous few characters | goal: about 6--8 | next |
-| 4 | 9--10 | recurrent network (RNN/GRU) | goal: about 4--6 | later |
-| 5 | 11 | GPT-style Transformer | goal: below 4 | later |
+| 3 | 4 | softmax regression over the previous few characters | goal: about 8--9 | next |
+| 4 | 5 | MLP over the previous several characters | goal: below 6 | later |
+| 5 | 9--10 | recurrent network (RNN/GRU) | goal: about 4--5 | later |
+| 6 | 11 | GPT-style Transformer | goal: below 4 | later |
 
 Goals for future parts are rough targets; we'll replace them with the real
 numbers you measure. Lower perplexity means the model is less "surprised"
@@ -121,6 +122,7 @@ more context, which Part 3 adds.
 ## Why This Matters
 
 Part 2 is the turning point of the capstone: the model is now *learned* by
-gradient descent rather than *calculated*. That's what lets Part 3 add more
-context (an MLP over the previous several characters), where counting
-becomes impossible because the table would need $V^k$ rows.
+gradient descent rather than *calculated*. That's what lets the next parts
+add more context (several previous characters in Part 3, an MLP that
+combines them in Part 4), where counting becomes impossible because the
+table would need $V^k$ rows.

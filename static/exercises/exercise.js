@@ -506,7 +506,7 @@
    * one session per page; `torch` there is torchlite, a NumPy-based subset
    * of PyTorch (see torchlite.py), since real PyTorch can't run in a browser.
    */
-  const CELL_TIMEOUT_S = 30;
+  const CELL_TIMEOUT_S = 180; // training on Fashion-MNIST takes a while in the browser
 
   function showCellResult(box, r) {
     box.replaceChildren();
@@ -755,7 +755,7 @@
    * (or before its first subsection). From _static/notes/<page>.json,
    * generated from notes/<chapter>/<section>.yml. */
   function normHeading(text) {
-    return text.replace(/^[\d.]+\s*/, '').replace(/¶/g, '').replace(/---/g, '—')
+    return text.replace(/^[\d.]+\s*/, '').replace(/[¶`]/g, '').replace(/---/g, '—')
       .replace(/--/g, '–').replace(/\s+/g, ' ').trim();
   }
 
@@ -802,6 +802,112 @@
       .catch(() => {});
   }
 
+  // ------------------------------------------- project steps and recall
+
+  function pageId() {
+    const opts = document.getElementById('documentation_options');
+    const rootUrl = new URL((opts && opts.getAttribute('data-url_root')) || './', window.location.href);
+    let page = window.location.pathname;
+    if (page.endsWith('/')) page += 'index.html';
+    if (!page.startsWith(rootUrl.pathname)) return null;
+    return {rootUrl, page: decodeURIComponent(page.slice(rootUrl.pathname.length)).replace(/\.html$/, '')};
+  }
+
+  function fetchPageData(kind) {
+    const id = pageId();
+    if (!id) return Promise.resolve(null);
+    return fetch(new URL(`_static/${kind}/${id.page}.json`, id.rootUrl).href, {cache: 'no-cache'})
+      .then((res) => (res.ok ? res.json() : null)).catch(() => null);
+  }
+
+  function projectHref(projectPage) {
+    const id = pageId();
+    return new URL(projectPage + '.html', id.rootUrl).href;
+  }
+
+  function stepCard(info, st, withLink) {
+    const parts = [
+      el('div', {class: 'd2l-card-head'}, [
+        el('span', {class: 'd2l-card-kicker'}, `${info.project} · Step ${st.n} of ${info.total}`),
+        el('span', {class: 'd2l-card-title'}, st.title),
+      ]),
+    ];
+    const body = el('div', {class: 'd2l-card-body'}, [
+      el('div', {class: 'd2l-step-label'}, 'Build'),
+      el('div', {class: 'd2l-step-text', html: st.build_html}),
+    ]);
+    if (st.revisit_html) {
+      body.append(el('div', {class: 'd2l-step-label'}, 'Revisit'),
+        el('div', {class: 'd2l-step-text', html: st.revisit_html}));
+    }
+    if (withLink) {
+      body.append(el('div', {class: 'd2l-step-foot'}, [
+        el('a', {href: projectHref(info.project_page)}, `${info.project}: the full project and all steps →`),
+      ]));
+    }
+    parts.push(body);
+    return el('div', {class: 'd2l-card d2l-step'}, parts);
+  }
+
+  function addProjectSteps() {
+    fetchPageData('steps').then((data) => {
+      if (!data) return;
+      if (data.step) {  // a section page: its one step, before the Exercises
+        const card = stepCard(data, data.step, true);
+        const exercises = document.querySelector('#exercises');
+        const main = document.querySelector('.document section, .document .section');
+        if (exercises) exercises.before(card);
+        else if (main) main.append(card);
+        typeset(card);
+      }
+      const holder = document.querySelector('.d2l-project-steps');
+      if (holder && data.steps) {  // the project page: every step, in order
+        const id = pageId();
+        holder.replaceChildren(...data.steps.map((st) => {
+          const card = stepCard(data, st, false);
+          const link = document.querySelector(`.globaltoc a[href$="${st.page.split('/').pop()}.html"]`);
+          const label = link ? Array.from(link.childNodes).filter((n) => n.nodeType === 3)
+            .map((n) => n.textContent).join('').trim() : st.page;
+          const where = el('a', {class: 'd2l-step-where', href: new URL(st.page + '.html', id.rootUrl).href},
+            'Do this after: ' + label);
+          card.querySelector('.d2l-card-body').prepend(where);
+          return card;
+        }));
+        typeset(holder);
+      }
+    });
+  }
+
+  function addRecall() {
+    fetchPageData('recall').then((data) => {
+      if (!data || !data.items.length) return;
+      const list = el('ol', {class: 'd2l-recall-list'}, data.items.map((it) => {
+        const answer = el('div', {class: 'd2l-answer-body', html: it.a_html, hidden: true});
+        const btn = el('button', {class: 'd2l-answer-btn', type: 'button', 'aria-expanded': 'false'}, 'Show answer');
+        btn.addEventListener('click', () => {
+          answer.hidden = !answer.hidden;
+          btn.textContent = answer.hidden ? 'Show answer' : 'Hide answer';
+          btn.setAttribute('aria-expanded', String(!answer.hidden));
+          if (!answer.hidden && !answer.dataset.typeset) { answer.dataset.typeset = '1'; typeset(answer); }
+        });
+        return el('li', {}, [el('div', {class: 'd2l-recall-q', html: it.q_html}), el('div', {class: 'd2l-answer'}, [btn, answer])]);
+      }));
+      const box = el('aside', {class: 'd2l-recall', 'aria-label': 'Quick recall'}, [
+        el('div', {class: 'd2l-notes-head'}, [
+          el('span', {class: 'd2l-notes-title'}, 'Quick recall'),
+          el('span', {class: 'd2l-recall-hint'}, 'Answer from memory first, then check. Recalling is what makes it stick.'),
+        ]),
+        list,
+      ]);
+      const main = document.querySelector('.document section, .document .section');
+      if (!main) return;
+      const firstSub = main.querySelector(':scope > section, :scope > div.section');
+      if (firstSub) firstSub.before(box);
+      else main.append(box);
+      typeset(box);
+    });
+  }
+
   // ------------------------------------------------------------------- init
 
   function init() {
@@ -809,6 +915,8 @@
     document.querySelectorAll('.d2l-playground[data-playground]').forEach(mountPlayground);
     addAnswers();
     addNotes();
+    addRecall();
+    addProjectSteps();
     setupBookCells();
   }
 

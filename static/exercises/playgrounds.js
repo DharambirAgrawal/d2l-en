@@ -100,6 +100,7 @@
         const s = niceStep(x1 - x0, Math.max(3, Math.floor(this.w / 80)));
         for (let v = Math.ceil(x0 / s) * s; v <= x1 + 1e-9; v += s) xticks.push(Math.abs(v) < 1e-12 ? 0 : v);
       }
+      if (this.o.xticks) xticks = this.o.xticks;
       const yticks = [];
       if (this.o.ylog) {
         for (let e = Math.ceil(Math.log10(y0)); e <= Math.floor(Math.log10(y1)); e++) yticks.push(Math.pow(10, e));
@@ -210,6 +211,27 @@
         c.textBaseline = 'bottom';
         c.fillText(label, X1 + 4, Y1 - 2);
       }
+      c.restore();
+    }
+
+    rect(x0, y0, x1, y1, {color = COLORS.blue, alpha = 1} = {}) {
+      const c = this.ctx;
+      c.save();
+      c.globalAlpha = alpha;
+      c.fillStyle = color;
+      const X0 = this.fx(x0), X1 = this.fx(x1), Y0 = this.fy(y0), Y1 = this.fy(y1);
+      c.fillRect(Math.min(X0, X1), Math.min(Y0, Y1), Math.abs(X1 - X0), Math.abs(Y1 - Y0));
+      c.restore();
+    }
+
+    text(x, y, str, {color = COLORS.text, align = 'center', baseline = 'bottom', size = 12} = {}) {
+      const c = this.ctx;
+      c.save();
+      c.font = `${size}px system-ui, -apple-system, Roboto, sans-serif`;
+      c.fillStyle = color;
+      c.textAlign = align;
+      c.textBaseline = baseline;
+      c.fillText(str, this.fx(x), this.fy(y));
       c.restore();
     }
 
@@ -528,6 +550,161 @@
       const r = drawPolyFit(canvas, polyTask(3, 15, 0.25), 12, lambda);
       return `λ = ${lambda.toExponential(1)}:   training error ${r.train.toFixed(4)}   ·   ` +
         `validation error ${r.val.toFixed(4)}   ·   ‖w‖ = ${r.norm.toFixed(2)}`;
+    },
+  };
+
+  // ------------------------------------------------- Chapter 4 playgrounds
+
+  function softmaxArr(o) {
+    const m = Math.max(...o);
+    const e = o.map((v) => Math.exp(v - m));
+    const z = e.reduce((a, b) => a + b, 0);
+    return e.map((v) => v / z);
+  }
+
+  registry['softmax-temperature'] = {
+    aspect: 0.55,
+    draw(canvas, {o1, o2, o3, T}) {
+      const o = [o1, o2, o3];
+      const p = softmaxArr(o.map((v) => v / T));
+      const P = new Plot(canvas, {xlim: [0.4, 3.6], ylim: [0, 1.08], xticks: [1, 2, 3], xlabel: 'class'});
+      const names = ['cat', 'dog', 'chicken'];
+      const colors = [COLORS.blue, COLORS.orange, COLORS.green];
+      p.forEach((v, i) => {
+        P.rect(i + 1 - 0.3, 0, i + 1 + 0.3, v, {color: colors[i], alpha: 0.8});
+        P.text(i + 1, v + 0.01, `${names[i]}  ${v.toFixed(3)}`);
+      });
+      const H = -p.reduce((a, v) => a + (v > 0 ? v * Math.log(v) : 0), 0);
+      P.legend();
+      return `probabilities sum to ${p.reduce((a, b) => a + b, 0).toFixed(3)}   ·   ` +
+        `loss if the truth is "cat": −log ŷ₁ = ${(-Math.log(p[0])).toFixed(3)}   ·   ` +
+        `entropy ${H.toFixed(3)} nats (max log 3 = 1.099)`;
+    },
+  };
+
+  // Three overlapping 2-D blobs, 50 points each.
+  function blobs(spread) {
+    const rand = rng(11);
+    const centers = [[-1.6, -0.6], [1.6, -0.6], [0, 1.6]];
+    const X = [], y = [];
+    centers.forEach((c, k) => {
+      for (let i = 0; i < 50; i++) {
+        X.push([c[0] + spread * gaussian(rand), c[1] + spread * gaussian(rand)]);
+        y.push(k);
+      }
+    });
+    return {X, y};
+  }
+
+  function softmaxRegression(X, y, q, lr, steps) {
+    let W = Array.from({length: q}, () => [0, 0]), b = new Array(q).fill(0);
+    const scores = (x) => W.map((w, k) => w[0] * x[0] + w[1] * x[1] + b[k]);
+    for (let s = 0; s < steps; s++) {
+      const gW = W.map(() => [0, 0]), gb = new Array(q).fill(0);
+      X.forEach((x, i) => {
+        const p = softmaxArr(scores(x));
+        p[y[i]] -= 1;
+        p.forEach((v, k) => { gW[k][0] += v * x[0]; gW[k][1] += v * x[1]; gb[k] += v; });
+      });
+      W = W.map((w, k) => [w[0] - lr * gW[k][0] / X.length, w[1] - lr * gW[k][1] / X.length]);
+      b = b.map((v, k) => v - lr * gb[k] / X.length);
+    }
+    let loss = 0, correct = 0;
+    X.forEach((x, i) => {
+      const p = softmaxArr(scores(x));
+      loss -= Math.log(Math.max(p[y[i]], 1e-12));
+      if (p.indexOf(Math.max(...p)) === y[i]) correct++;
+    });
+    return {scores, loss: loss / X.length, acc: correct / X.length};
+  }
+
+  registry['softmax-regions'] = {
+    aspect: 0.62,
+    draw(canvas, {log_lr, steps, spread}) {
+      const lr = Math.pow(10, log_lr);
+      const {X, y} = blobs(spread);
+      const m = softmaxRegression(X, y, 3, lr, steps);
+      const P = new Plot(canvas, {xlim: [-4, 4], ylim: [-3, 4], equal: true});
+      const colors = [COLORS.blue, COLORS.orange, COLORS.green];
+      const [x0, x1] = P.xlim, [y0, y1] = P.ylim;
+      const nx = 70, ny = Math.round(nx * (y1 - y0) / (x1 - x0));
+      const dx = (x1 - x0) / nx, dy = (y1 - y0) / ny;
+      for (let i = 0; i < nx; i++) {
+        for (let j = 0; j < ny; j++) {
+          const p = softmaxArr(m.scores([x0 + (i + 0.5) * dx, y0 + (j + 0.5) * dy]));
+          const k = p.indexOf(Math.max(...p));
+          P.rect(x0 + i * dx, y0 + j * dy, x0 + (i + 1) * dx, y0 + (j + 1) * dy,
+            {color: colors[k], alpha: 0.08 + 0.22 * (p[k] - 1 / 3) * 1.5});
+        }
+      }
+      X.forEach((x, i) => P.point(x[0], x[1], {color: colors[y[i]], r: 3.2}));
+      P.legend();
+      return `after ${steps} steps (η = ${lr.toPrecision(2)}): training cross-entropy ${m.loss.toFixed(3)}   ·   ` +
+        `accuracy ${(100 * m.acc).toFixed(1)}%   ·   the boundaries are straight lines: softmax regression is linear`;
+    },
+  };
+
+  registry['test-set-size'] = {
+    aspect: 0.55,
+    draw(canvas, {log_n, eps, delta}) {
+      const n = Math.round(Math.pow(10, log_n));
+      const rand = rng(5);
+      const trials = 2000;
+      const errs = [];
+      for (let t = 0; t < trials; t++) {
+        let e;
+        if (n <= 400) {  // exact: count mistakes
+          let k = 0;
+          for (let i = 0; i < n; i++) if (rand() < eps) k++;
+          e = k / n;
+        } else {  // normal approximation of the binomial
+          e = eps + Math.sqrt(eps * (1 - eps) / n) * gaussian(rand);
+        }
+        errs.push(e);
+      }
+      const hoeff = Math.sqrt(Math.log(2 / delta) / (2 * n));
+      const lo = Math.max(0, eps - Math.max(hoeff, 0.02) * 1.6), hi = Math.min(1, eps + Math.max(hoeff, 0.02) * 1.6);
+      const bins = 40, w = (hi - lo) / bins, counts = new Array(bins).fill(0);
+      errs.forEach((e) => { const b = Math.floor((e - lo) / w); if (b >= 0 && b < bins) counts[b]++; });
+      const top = Math.max(...counts) / trials;
+      const P = new Plot(canvas, {xlim: [lo, hi], ylim: [0, top * 1.15], xlabel: 'test error measured on n examples'});
+      counts.forEach((c, b) => P.rect(lo + b * w, 0, lo + (b + 1) * w, c / trials, {color: COLORS.blue, alpha: 0.55}));
+      P.line([eps, eps], [0, top * 1.15], {color: COLORS.text, width: 1.5, label: 'true error ε'});
+      P.line([eps - hoeff, eps - hoeff], [0, top * 1.15], {color: COLORS.red, dash: [6, 4], label: `Hoeffding ±${hoeff.toFixed(4)}`});
+      P.line([eps + hoeff, eps + hoeff], [0, top * 1.15], {color: COLORS.red, dash: [6, 4]});
+      P.legend();
+      const outside = errs.filter((e) => Math.abs(e - eps) >= hoeff).length / trials;
+      const clt = 1.96 * Math.sqrt(eps * (1 - eps) / n);
+      return `n = ${n.toLocaleString()} test examples: Hoeffding guarantees ±${hoeff.toFixed(4)} with probability ≥ ${1 - delta}   ·   ` +
+        `the normal approximation's 95% interval is ±${clt.toFixed(4)}   ·   ` +
+        `${(100 * outside).toFixed(1)}% of 2000 simulated test sets fell outside the Hoeffding band`;
+    },
+  };
+
+  registry['covariate-shift'] = {
+    aspect: 0.58,
+    draw(canvas, {shift, sd}) {
+      const pdf = (x, m, s) => Math.exp(-0.5 * ((x - m) / s) ** 2) / (s * Math.sqrt(2 * Math.PI));
+      const xs = linspace(-4, 6, 400);
+      const p = xs.map((x) => pdf(x, 0, 1)), q = xs.map((x) => pdf(x, shift, sd));
+      const P = new Plot(canvas, {xlim: [-4, 6], ylim: [0, Math.max(0.45, 1.1 * Math.max(...q))], xlabel: 'x', legend: 'upper left'});
+      // Reweighted source sample: histogram of N(0, 1) draws weighted by q/p.
+      const rand = rng(3);
+      const n = 2000, sample = Array.from({length: n}, () => gaussian(rand));
+      const beta = sample.map((x) => pdf(x, shift, sd) / pdf(x, 0, 1));
+      const total = beta.reduce((a, b) => a + b, 0);
+      const bins = 40, w = 10 / bins, h = new Array(bins).fill(0);
+      sample.forEach((x, i) => { const b = Math.floor((x + 4) / w); if (b >= 0 && b < bins) h[b] += beta[i]; });
+      h.forEach((v, b) => P.rect(-4 + b * w, 0, -4 + (b + 1) * w, v / (total * w), {color: COLORS.green, alpha: 0.35}));
+      P.line(xs, p, {color: COLORS.blue, label: 'training inputs p(x)'});
+      P.line(xs, q, {color: COLORS.orange, label: 'production inputs q(x)'});
+      P.line([], [], {color: COLORS.green, label: 'training sample reweighted by q/p'});
+      P.legend();
+      const tv = 0.5 * xs.reduce((a, x, i) => a + Math.abs(p[i] - q[i]), 0) * (xs[1] - xs[0]);
+      const ess = total ** 2 / beta.reduce((a, b) => a + b * b, 0);
+      return `best possible source-vs-production classifier accuracy: ${(50 * (1 + tv)).toFixed(1)}% (50% = no shift)   ·   ` +
+        `effective sample size after reweighting: ${Math.round(ess)} of ${n}` +
+        (ess < 200 ? '  ·  a few huge weights dominate: reweighting alone can’t fix a shift this big' : '');
     },
   };
 

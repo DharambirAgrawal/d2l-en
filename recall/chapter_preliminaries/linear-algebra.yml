@@ -1,0 +1,8 @@
+# Quick recall for chapter_preliminaries/linear-algebra.md: retrieval practice on earlier material,
+# shown at the top of the section with hidden answers.
+- q: '*(2.2)* Two ways to handle missing values, and how pandas one-hot encodes a categorical column with missing entries.'
+  a: '**Imputation** (fill in estimates, e.g. the column mean) or **deletion** (drop rows/columns). `pd.get_dummies(df, dummy_na=True)` adds a separate column for `NaN`.'
+- q: '*(2.1)* What does `x.reshape(-1, 4)` mean?'
+  a: Reshape to 4 columns and **infer** the number of rows from the total size.
+- q: '*(1. Introduction)* Squared error is the usual loss for which kind of problem?'
+  a: '**Regression** (predicting numbers).'

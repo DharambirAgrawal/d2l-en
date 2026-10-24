@@ -460,6 +460,12 @@ then the corresponding importance weight should be infinity.
 
 
 
+Experiment with covariate shift and reweighting:
+
+```{=html}
+<div class="d2l-playground" data-playground="covariate-shift"></div>
+```
+
 ### Label Shift Correction
 
 Assume that we are dealing with a

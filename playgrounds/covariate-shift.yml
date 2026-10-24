@@ -1,0 +1,13 @@
+title: Covariate Shift and Reweighting
+description: |
+  Training inputs come from $p(x) = \mathcal{N}(0, 1)$ (blue); in
+  production they come from $q(x) = \mathcal{N}(\mu, s^2)$ (orange). Giving
+  each training example the weight $\beta(x) = q(x)/p(x)$ makes the training
+  sample look like production data (green histogram). The readout shows how
+  well *any* classifier could tell the two apart (the shift detector) and
+  the **effective sample size**: when the shift is large, a handful of
+  examples get enormous weights and the reweighted estimate becomes very
+  noisy.
+params:
+  - {name: shift, label: "production mean $\\mu$", min: 0, max: 3, step: 0.05, value: 1.0}
+  - {name: sd, label: "production spread $s$", min: 0.5, max: 2, step: 0.05, value: 1.0}

@@ -1,0 +1,49 @@
+# Answers for chapter_linear-classification/softmax-regression-concise.md "Exercises", in order.
+- answer: |
+    $e^x$ overflows when $x > \ln(\textrm{largest number})$ and underflows
+    (to a subnormal, then 0) when $x < \ln(\textrm{smallest positive normal
+    number})$:
+
+    | Format | Largest | $x$ max | Smallest normal | $x$ min |
+    |---|---|---|---|---|
+    | FP64 | $1.8 \times 10^{308}$ | 709.8 | $2.2 \times 10^{-308}$ | $-708.4$ |
+    | FP32 | $3.4 \times 10^{38}$ | 88.7 | $1.2 \times 10^{-38}$ | $-87.3$ |
+    | TF32 | $3.4 \times 10^{38}$ | 88.7 | $1.2 \times 10^{-38}$ | $-87.3$ |
+    | BF16 | $3.4 \times 10^{38}$ | 88.7 | $1.2 \times 10^{-38}$ | $-87.3$ |
+    | FP16 | $65504$ | 11.1 | $6.1 \times 10^{-5}$ | $-9.7$ |
+    | INT8 (1--255) | 255 | 5.5 | 1 | about $-0.7$ (rounds to 1) |
+
+    Subnormals stretch the lower limit a bit (FP32 to about $-103$, FP16 to
+    $-16.6$, FP64 to $-744$). BF16 and TF32 keep FP32's exponent range and
+    give up precision instead, which is why they're safer than FP16 for
+    training. FP16 overflows already at $e^{11.1}$: hence loss scaling and
+    the max-subtraction trick.
+  exercise: exp-safe-range
+- answer: |
+    Interpret the 8 bits through a **scale**: store $q$ and mean
+    $s \cdot q$ (often with a zero point, $s(q - z)$, as in INT8
+    quantization), with one $s$ per tensor or per channel. Or use a
+    **logarithmic** code where $q$ stands for $2^{q/k}$, which covers a huge
+    range with constant relative precision. Arithmetic no longer works
+    as-is: products of scaled numbers carry the product of scales and must
+    be rescaled (and need a wider accumulator, e.g. INT32, to avoid
+    overflow); sums need both numbers on the same scale first. In the log
+    code multiplication is just integer addition, but addition becomes
+    hard (needs a lookup table or conversion).
+- answer: |
+    After a while the model starts fitting quirks and label noise of the
+    training set: training loss keeps falling while validation accuracy
+    plateaus and may drop (overfitting; for this small linear model the
+    drop is mild and mostly noise, with a deeper model it's clear). A
+    learning rate that's too high also makes the validation accuracy bounce.
+    Fixes: **early stopping** (keep the epoch with the best validation
+    accuracy), weight decay (Section 3.7), more data or augmentation, and a
+    learning rate that decreases over time.
+- answer: |
+    Larger rates drop the loss faster at first, but beyond a point the
+    curves get noisy, plateau higher, and eventually diverge (loss goes to
+    `nan`). Small rates give smooth but slow curves. A rate in the middle
+    (about 0.1--0.5 here) works best for a fixed short budget; a larger
+    rate helps early and a smaller one late, which is why learning rate
+    schedules (start large, decay) are standard. The best value also
+    depends on the batch size: larger batches tolerate larger rates.

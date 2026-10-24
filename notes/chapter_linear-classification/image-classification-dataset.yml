@@ -1,0 +1,14 @@
+# Notes for chapter_linear-classification/image-classification-dataset.md: each entry is shown at the end of the
+# section whose heading matches "after".
+- after: Loading the Dataset
+  notes:
+  - 'Fashion-MNIST: 10 clothing classes, **60,000** training and **10,000** test images, grayscale $28 \times 28$ (MNIST got too easy).'
+  - 'Images are stored as $c \times h \times w$ tensors (channels, height, width): here $1 \times 28 \times 28$, or $1 \times 32 \times 32$ after `Resize`.'
+  - '`ToTensor` turns pixel values 0--255 into floats in $[0, 1]$.'
+- after: Reading a Minibatch
+  notes:
+  - 'A minibatch `X` has shape (batch, channel, height, width) = (64, 1, 32, 32); labels `y` are class indices 0--9 (int64), not one-hot.'
+  - Reading data can be a real bottleneck; it should be much faster than training a step, or the processor waits.
+- after: Visualization
+  notes:
+  - Always look at your data (and later, at the model's mistakes) before trusting numbers.

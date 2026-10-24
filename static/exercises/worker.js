@@ -16,17 +16,40 @@
  *   {type: 'result', id, result} see grader.run_code / grader.run_tests
  */
 let pyodideReady = null;
+let datasetsBase = '';
+
+// Datasets the book's code can load (torchlite's torchvision shim reads them
+// from /d2l/datasets). Downloaded the first time a cell mentions them.
+const DATASETS = [
+  {name: 'fashion-mnist', pattern: /FashionMNIST/, label: 'Fashion-MNIST (31 MB, only once)'},
+];
+
+async function ensureDatasets(pyodide, code, post) {
+  for (const d of DATASETS) {
+    const path = `/d2l/datasets/${d.name}.npz`;
+    if (!d.pattern.test(code) || pyodide.FS.analyzePath(path).exists) continue;
+    post({type: 'status', text: `Downloading ${d.label}…`});
+    try {
+      const r = await fetch(`${datasetsBase}${d.name}.npz`);
+      if (!r.ok) throw new Error(String(r.status));
+      pyodide.FS.writeFile(path, new Uint8Array(await r.arrayBuffer()));
+    } catch (e) {
+      // torchlite raises a clear error when the file is missing.
+    }
+  }
+}
 
 async function init(pyodideUrl, graderUrl) {
   const {loadPyodide} = await import(pyodideUrl + 'pyodide.mjs');
   const pyodide = await loadPyodide({indexURL: pyodideUrl});
   const response = await fetch(graderUrl);
   if (!response.ok) throw new Error(`Could not load ${graderUrl} (${response.status})`);
-  pyodide.FS.mkdirTree('/d2l');
+  pyodide.FS.mkdirTree('/d2l/datasets');
   pyodide.FS.writeFile('/d2l/grader.py', await response.text());
   // Runtime for the book's runnable cells and playgrounds, fetched next to
   // grader.py. Loaded lazily by the first cell run.
   const base = graderUrl.slice(0, graderUrl.lastIndexOf('/') + 1);
+  datasetsBase = new URL('../datasets/', base).href;
   for (const name of ['notebook.py', 'torchlite.py', 'd2llite.py', 'd2l_book.py']) {
     const r = await fetch(base + name);
     if (r.ok) pyodide.FS.writeFile('/d2l/' + name, await r.text());
@@ -56,6 +79,7 @@ async function run(msg) {
       // Unknown or broken imports are reported by Python when the code runs.
     }
     if (msg.packages && msg.packages.length) await pyodide.loadPackage(msg.packages);
+    if (msg.mode === 'cell') await ensureDatasets(pyodide, msg.code, post);
     // Exercise data files (CSV, text, helper modules) go in the working
     // directory, which is also on sys.path.
     for (const [name, text] of Object.entries(msg.files || {})) {

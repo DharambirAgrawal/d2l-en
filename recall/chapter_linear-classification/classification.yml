@@ -1,0 +1,8 @@
+# Quick recall for chapter_linear-classification/classification.md: retrieval practice on earlier material,
+# shown at the top of the section with hidden answers.
+- q: '*(4.2)* What shape is a Fashion-MNIST minibatch `X` with batch size 64 and `resize=(32, 32)`, and what are the labels?'
+  a: '`(64, 1, 32, 32)`: batch, channel, height, width. Labels are class indices 0--9 (int64), shape `(64,)`.'
+- q: '*(4.1)* What is the entropy of a uniform distribution over $q$ classes?'
+  a: '$\log q$, the maximum possible: every outcome is equally surprising.'
+- q: '*(3.2)* What does `@d2l.add_to_class(C)` do and why does the book use it?'
+  a: It attaches the decorated function as a method of class `C` after the class was defined, so code can be explained piece by piece across cells.

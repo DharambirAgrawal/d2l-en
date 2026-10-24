@@ -1,0 +1,34 @@
+# Notes for chapter_linear-classification/softmax-regression.md: each entry is shown at the end of the
+# section whose heading matches "after".
+- after: Classification
+  notes:
+  - 'Classification asks *which category?* Encode labels as **one-hot** vectors: $(1, 0, 0)$, $(0, 1, 0)$, $(0, 0, 1)$; no fake order like 1, 2, 3.'
+  - '*Hard* assignment = one class; *soft* = a probability per class. Multi-label (several true at once) is a different problem.'
+- after: Linear Model
+  notes:
+  - 'One affine function per class: $\mathbf{o} = \mathbf{W}\mathbf{x} + \mathbf{b}$, with $\mathbf{W}$ of shape $q \times d$: $qd + q$ parameters. A fully connected layer.'
+- after: The Softmax
+  notes:
+  - '$\hat{y}_i = \frac{\exp(o_i)}{\sum_j \exp(o_j)}$: nonnegative, sums to 1, keeps the order, so $\operatorname*{argmax}_i \hat{y}_i = \operatorname*{argmax}_i o_i$.'
+  - 'Only differences between logits matter: $\mathrm{softmax}(\mathbf{o} + c) = \mathrm{softmax}(\mathbf{o})$. Dividing by a temperature $T$ sharpens ($T < 1$) or flattens ($T > 1$).'
+  - 'Why not just normalize scores? They can be negative; exponentiating guarantees positivity and comes from the Gibbs/Boltzmann distribution.'
+- after: Vectorization
+  notes:
+  - 'Minibatch form: $\mathbf{O} = \mathbf{X}\mathbf{W} + \mathbf{b}$ ($n \times q$), softmax applied **row-wise**.'
+- after: Log-Likelihood
+  notes:
+  - 'Maximize the probability of the observed labels ⇔ minimize the negative log-likelihood. For one-hot $\mathbf{y}$: $l = -\sum_j y_j \log \hat{y}_j = -\log \hat{y}_{\textrm{true}}$, the **cross-entropy loss**.'
+  - Loss is 0 only if the model is certain and right; a confident wrong answer ($\hat{y}_{\textrm{true}} \to 0$) costs $\to \infty$.
+- after: Softmax and Cross-Entropy Loss
+  notes:
+  - '**Key result:** $\partial l / \partial o_j = \mathrm{softmax}(\mathbf{o})_j - y_j$, prediction minus truth, exactly like squared loss in regression.'
+  - 'Works with soft labels too: then the loss is the expected log-likelihood under the label distribution.'
+- after: Entropy
+  notes:
+  - '$H[P] = -\sum_j P(j)\log P(j)$: the minimum average code length (nats with $\ln$, bits with $\log_2$). Uniform over $q$ classes has the max, $\log q$.'
+- after: Surprisal
+  notes:
+  - 'Surprisal of an event: $\log \frac{1}{P(j)}$. Entropy = expected surprisal. Rare events are surprising and expensive to encode.'
+- after: Cross-Entropy Revisited
+  notes:
+  - '$H(P, Q) = -\sum_j P(j)\log Q(j) \geq H(P)$, equal iff $Q = P$. Minimizing cross-entropy = maximizing likelihood = making the fewest bits to transmit the labels.'

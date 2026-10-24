@@ -1,0 +1,39 @@
+# Answers for chapter_linear-classification/classification.md "Exercises", in order.
+- answer: |
+    Say there are $n$ validation examples in $m$ minibatches: $m - 1$ full
+    ones of size $b$ and a last one of size $r = n - (m - 1)b$. The quick
+    estimate averages the minibatch means:
+    $L_\textrm{v}^\textrm{q} = \frac{1}{m}\left(\sum_{k=1}^{m-1} \bar{l}_k +
+    l_\textrm{v}^\textrm{b}\right)$, so the full batches' means sum to
+    $mL_\textrm{v}^\textrm{q} - l_\textrm{v}^\textrm{b}$. The true loss
+    weights each example equally:
+
+    $$L_\textrm{v} = \frac{1}{n}\left(b\sum_{k=1}^{m-1}\bar{l}_k +
+    r\,l_\textrm{v}^\textrm{b}\right) = \frac{b\,m\,L_\textrm{v}^\textrm{q}
+    - (b - r)\,l_\textrm{v}^\textrm{b}}{n}.$$
+
+    If the last batch is full ($r = b$, $n = mb$) the two agree.
+  exercise: exact-validation-loss
+- answer: |
+    Take the expectation over the random order in which examples land in
+    minibatches (a random shuffle). By symmetry every example is equally
+    likely to sit in any position, so the expected mean of every minibatch,
+    including the short last one, is the average loss over all examples,
+    $L_\textrm{v}$. Averaging those means, $E[L_\textrm{v}^\textrm{q}] =
+    L_\textrm{v}$, so the estimate is unbiased.
+
+    We still prefer $L_\textrm{v}$ because it's **exact** for the data we
+    have (no variance at all), while $L_\textrm{v}^\textrm{q}$ gives the
+    few examples in the last batch more weight, so it changes with the
+    shuffle. It's also just as cheap to compute correctly.
+- answer: |
+    The expected loss of predicting $y'$ is
+    $R(y' \mid x) = \sum_y l(y, y')\, p(y \mid x)$, so the optimal rule is
+
+    $$y^*(x) = \operatorname*{argmin}_{y'} \sum_y l(y, y')\, p(y \mid x).$$
+
+    With the 0--1 loss ($l = 0$ if $y = y'$, else 1) this becomes
+    $1 - p(y' \mid x)$, minimized by the most likely class, $\operatorname*{argmax}_y p(y \mid x)$.
+    With asymmetric costs (missing a disease costs more than a false
+    alarm) the best prediction can be a less likely class.
+  exercise: bayes-decision

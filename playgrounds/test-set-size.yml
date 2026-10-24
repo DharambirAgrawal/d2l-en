@@ -1,0 +1,27 @@
+title: How Precise Is a Test Set?
+description: |
+  A model with true error $\epsilon$ is evaluated on 2000 different random
+  test sets of $n$ examples each. The histogram shows the measured test
+  errors; the red lines are Hoeffding's guarantee $\epsilon \pm t$ with
+  $t = \sqrt{\log(2/\delta) / (2n)}$. Make $n$ ten times larger and the
+  spread shrinks only about $\sqrt{10} \approx 3.2$ times. Hoeffding is
+  conservative: far fewer test sets than $\delta$ fall outside its band.
+params:
+  - {name: log_n, label: "$\\log_{10} n$ (test set size)", min: 1, max: 5, step: 0.05, value: 3}
+  - {name: eps, label: "true error $\\epsilon$", min: 0.01, max: 0.5, step: 0.01, value: 0.15}
+  - {name: delta, label: "$\\delta$ (allowed failure probability)", min: 0.001, max: 0.2, step: 0.001, value: 0.05}
+python: |
+  import numpy as np
+  import matplotlib.pyplot as plt
+
+  n = int(round(10 ** log_n))
+  rng = np.random.default_rng(5)
+  errors = rng.binomial(n, eps, size=2000) / n      # 2000 test sets of size n
+  t = np.sqrt(np.log(2 / delta) / (2 * n))           # Hoeffding half-width
+  plt.figure(figsize=(5.5, 3))
+  plt.hist(errors, bins=40, color='tab:blue', alpha=0.6)
+  for v in (eps - t, eps + t):
+      plt.axvline(v, color='tab:red', linestyle='--')
+  plt.axvline(eps, color='black')
+  print(f'n = {n}: Hoeffding ±{t:.4f}, observed std {errors.std():.4f}, '
+        f'outside the band: {np.mean(abs(errors - eps) >= t):.3%}')

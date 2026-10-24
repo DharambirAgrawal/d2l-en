@@ -1,0 +1,8 @@
+# Quick recall for chapter_linear-classification/softmax-regression.md: retrieval practice on earlier material,
+# shown at the top of the section with hidden answers.
+- q: '*(3.7)* What does weight decay add to the loss, and what does it do to each SGD update?'
+  a: It adds $\frac{\lambda}{2}\|\mathbf{w}\|^2$. Each update first shrinks the weights, $\mathbf{w} \leftarrow (1 - \eta\lambda)\mathbf{w} - \eta\nabla l$, pulling them toward zero (smaller, simpler models).
+- q: '*(3.1)* Under which noise assumption is squared loss the maximum likelihood choice?'
+  a: 'Gaussian noise: $y = \mathbf{w}^\top\mathbf{x} + b + \epsilon$ with $\epsilon \sim \mathcal{N}(0, \sigma^2)$. The negative log-likelihood is then the squared error up to constants.'
+- q: '*(2.6)* Compute $E[X]$ for the roll of a fair die.'
+  a: $E[X] = \sum_x x P(X = x) = \frac{1 + 2 + \cdots + 6}{6} = 3.5$.

@@ -1,0 +1,30 @@
+# Answers for chapter_linear-classification/image-classification-dataset.md "Exercises", in order.
+- answer: |
+    Yes, a lot. Reading one epoch with `batch_size=1` means 60,000 trips
+    through the loader instead of about 235 with 256, and each trip has a
+    fixed Python cost (fetching, applying the transforms, collating into a
+    tensor) that doesn't shrink with the batch. Expect roughly 10--50×
+    slower reading per epoch. Per *example* the work is the same; it's the
+    per-batch overhead that dominates.
+- answer: |
+    For this small model it's borderline: reading takes seconds per epoch,
+    comparable to the training itself, and the GPU would sit idle waiting.
+    The bottleneck is per-image Python work: decoding, PIL `Resize`, and
+    `ToTensor` for every image, every epoch. Options:
+    - **Preprocess once**: resize the whole dataset a single time and keep
+      it as one tensor in memory; then a batch is just a slice.
+    - Use `num_workers > 0` so loading runs in parallel processes, and
+      `pin_memory=True` to speed up copies to the GPU.
+    - Keep images as `uint8` and convert/normalize on the GPU in bulk.
+    - Larger batches amortize per-batch overhead.
+
+    To find the bottleneck, profile one epoch of the loader with
+    `python -m cProfile` (or `py-spy`, or `torch.profiler`) and look at
+    where the time goes: you'll see the transforms near the top.
+- answer: |
+    `torchvision.datasets` includes, among others: MNIST, KMNIST, EMNIST,
+    QMNIST, CIFAR-10/100, SVHN, STL-10, Caltech-101/256, Places365,
+    ImageNet (you supply the files), CelebA, COCO (detection and captions),
+    VOC, Cityscapes, Flowers-102, Food-101, Oxford-IIIT Pets and more.
+    `torchtext` and `torchaudio` have text and audio datasets; the Hugging
+    Face `datasets` library has thousands.

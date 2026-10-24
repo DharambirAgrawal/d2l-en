@@ -1,0 +1,8 @@
+# Quick recall for chapter_preliminaries/calculus.md: retrieval practice on earlier material,
+# shown at the top of the section with hidden answers.
+- q: '*(2.3)* What does `A.sum(axis=1, keepdims=True)` return for a $3 \times 4$ matrix, and why use `keepdims`?'
+  a: A $3 \times 1$ matrix of row sums. Keeping the axis lets you broadcast, e.g. `A / A.sum(axis=1, keepdims=True)` makes each row sum to 1.
+- q: '*(2.3)* Write the $\ell_1$ and $\ell_2$ norms of a vector. Which is less sensitive to outliers?'
+  a: $\|\mathbf{x}\|_1 = \sum_i |x_i|$, $\|\mathbf{x}\|_2 = \sqrt{\sum_i x_i^2}$. The $\ell_1$ norm is less sensitive to outliers.
+- q: '*(2.2)* Why split columns into inputs and a target before modeling?'
+  a: Supervised learning predicts the **target** from the **inputs**; the target must not be fed to the model as an input.

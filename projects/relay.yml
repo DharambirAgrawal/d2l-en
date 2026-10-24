@@ -1,0 +1,114 @@
+# Relay: the Chapter 4 project, built step by step inside the chapter.
+# Each step appears at the end of its section (before the Exercises) and on
+# the project page. "revisit" deliberately brings back earlier topics.
+project: Relay
+subtitle: Route support tickets to the right team
+page: chapter_linear-classification/project-relay
+steps:
+  - page: chapter_linear-classification/softmax-regression
+    title: Tickets become vectors, scores become probabilities
+    build: |
+      Create your repository `relay` and download `tickets.csv` (see the
+      Relay page). Write a tokenizer (lowercase, split into words) and build
+      a **bag-of-words** vocabulary from January--April tickets only. Turn
+      each ticket (subject + body) into a count vector $\mathbf{x}$ and each
+      team into a **one-hot** label. Then, with a small hand-set weight
+      matrix (give "invoice" and "charged" weight 2 for billing, "tracking"
+      and "delivered" for shipping, and so on), compute logits
+      $\mathbf{o} = \mathbf{W}\mathbf{x} + \mathbf{b}$, the **softmax**
+      probabilities, and the **cross-entropy** loss for 5 tickets by hand.
+    revisit: |
+      *2.3:* compute the logits for all tickets at once as one matrix
+      product, $\mathbf{X}\mathbf{W}^\top + \mathbf{b}$ (broadcasting the
+      bias, 2.1). *2.6:* what loss would a model get that always says "each
+      team with probability 1/5"? (Answer: $\log 5 \approx 1.61$; every
+      model you train must beat it.)
+  - page: chapter_linear-classification/image-classification-dataset
+    title: A data module for tickets
+    build: |
+      Write `TicketData`, a `DataModule` like `FashionMNIST`: it loads the
+      CSV, splits **by time** (train: January--April, validation: May,
+      production: June, which you won't touch until Step 7), builds the
+      vocabulary on the training split, and yields shuffled minibatches
+      `(X, y)` with `X` of shape (batch, vocabulary) and `y` the team index.
+      Add `text_labels(indices)` and a `visualize` that prints a few tickets
+      with their teams. Time one pass over the training data.
+    revisit: |
+      *2.2:* 3% of subjects are missing; handle them (an empty string is
+      fine) and say why you didn't drop those rows. *3.6:* why split by time
+      instead of at random for a system that will run on *future* tickets?
+  - page: chapter_linear-classification/classification
+    title: Accuracy, baselines, and the cost of a wrong route
+    build: |
+      Subclass your `Classifier`-style base class with an `accuracy` method
+      and report two **baselines** on May: always predicting the most
+      common training team (about 25%), and a keyword rule you write by hand
+      (e.g., "refund" → billing). Then define a **cost matrix** $C[y, y']$:
+      misrouting a **billing** ticket costs 5 (money is at stake and the
+      customer is already upset), any other misroute costs 1, and a correct
+      route costs 0. Write `decide(P, C)` that picks the team with the lowest
+      expected cost (Section 4.3, Exercise 3).
+    revisit: |
+      *4.1:* your hand-set model from Step 1: what is its accuracy and
+      cross-entropy on May? *3.6:* which number would you report to your
+      manager, and which one would you optimize, and why are they different?
+  - page: chapter_linear-classification/softmax-regression-scratch
+    title: Train Relay from scratch
+    build: |
+      Implement softmax regression from scratch (your own `softmax` and
+      `cross_entropy`, parameters $\mathbf{W}$ of shape vocabulary × 5) and
+      train it with your `Trainer` and minibatch SGD. Plot training and
+      validation loss and accuracy per epoch. Expect about **96--97%** May
+      accuracy. Print the 6 words with the largest weight for each team: do
+      they make sense?
+    revisit: |
+      *2.5:* check one minibatch gradient against autograd (or a numerical
+      gradient): it should equal $(\mathrm{softmax}(\mathbf{O}) -
+      \mathbf{Y})/n$ as derived in 4.1. *3.4:* try learning rates 0.05, 0.5,
+      5: which diverges, and what does that look like for cross-entropy?
+  - page: chapter_linear-classification/softmax-regression-concise
+    title: Make it robust and look at the mistakes
+    build: |
+      Rebuild the model with `nn.Linear` and `F.cross_entropy` on **logits**.
+      Feed it a ticket that repeats "charged" 500 times: show your scratch
+      softmax returns `nan` and the concise one doesn't. Then compute the
+      **confusion matrix** on May and read the 10 most confident mistakes:
+      how many are mislabeled tickets (about 4% of labels are noise) rather
+      than model errors?
+    revisit: |
+      *3.7:* add weight decay ($\lambda$ = 0, 0.001, 0.01) and compare May
+      accuracy *and* cross-entropy: which one does weight decay change more,
+      and why? *4.3:* apply `decide` with your cost matrix; how much does the
+      expected cost drop compared with plain argmax?
+  - page: chapter_linear-classification/generalization-classification
+    title: How sure are you of 96.7%?
+    build: |
+      Put an error bar on your May accuracy two ways: Hoeffding's bound and
+      the normal approximation (about ±0.01 at 95% for 1,300 tickets). Train
+      two variants (with and without the subject line) and decide whether
+      their difference is real or noise. Keep a log of every model you
+      evaluated on May; explain why choosing among many models with May
+      makes May's number optimistic.
+    revisit: |
+      *2.6:* the variance of an average of $n$ independent 0/1 results is
+      $\epsilon(1 - \epsilon)/n$; derive the normal interval from it.
+      *3.6:* how big would a *test* set need to be to tell 96.7% from 97.2%?
+  - page: chapter_linear-classification/environment-and-distribution-shift
+    title: Launch day, and Relay's final report
+    build: |
+      Now open June. A "pay in installments" feature launched: accuracy
+      drops (to about 88%). Diagnose it: (1) **covariate shift**: train a
+      May-vs-June domain classifier and report its accuracy, and the share
+      of June words not in your vocabulary (about 6% vs. 0.6% in May);
+      (2) **label shift**: estimate June's team distribution with the
+      confusion-matrix method (BBSE) and correct the predictions. It barely
+      helps and the estimated priors are wrong: explain why the method's
+      assumption, $P(\mathbf{x} \mid y)$ unchanged, is violated here.
+      (3) Fix it the practical way: label the first 50 June tickets, retrain,
+      and measure the rest of June (about 93%).
+    revisit: |
+      **Everything comes back:** the bag-of-words vectors (4.1), your data
+      module (4.2), accuracy and costs (4.3), training (4.4, 4.5), error
+      bars (4.6). Finish the README with a results table (baseline, keyword
+      rule, softmax regression on May, June before/after the fix, with error
+      bars) and a short "what to monitor in production" section.

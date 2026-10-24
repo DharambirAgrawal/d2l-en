@@ -1,0 +1,18 @@
+title: When Does exp() Overflow?
+difficulty: easy
+timeout: 10
+description: |
+  Exercise 1: write `exp_range(dtype)` returning a pair `(lo, hi)`: the
+  natural logs of the smallest positive **normal** number and of the
+  largest finite number of a NumPy float type, i.e. the range of $x$ where
+  $e^x$ neither overflows nor underflows into subnormals. Use
+  `np.finfo(dtype)` (`.tiny` is the smallest normal, `.max` the largest).
+  Return Python floats.
+
+  Then write `fits(x, dtype)`: `True` if $e^x$ is a normal, finite number
+  of that type.
+explanation: |
+  For float32 the safe range is about $[-87.3, 88.7]$, for float16 only
+  $[-9.7, 11.1]$, for float64 $[-708.4, 709.8]$. Logits beyond these
+  break a naive softmax, which is why frameworks subtract the max and why
+  FP16 training needs loss scaling (BF16 keeps FP32's range).
