@@ -1,0 +1,130 @@
+# Shield: the Chapter 4 project, built step by step inside the chapter.
+# Each step appears at the end of its section (before the Exercises) and on
+# the project page. "revisit" deliberately brings back earlier topics.
+# Data: static/projects/agent_inbox.csv, made by projects/generators/make_messages.py.
+project: Shield
+subtitle: Catch prompt-injection attacks on an AI agent
+page: chapter_linear-classification/project-shield
+steps:
+  - page: chapter_linear-classification/softmax-regression
+    title: Messages become vectors, scores become probabilities
+    build: |
+      Create your repository `shield` and download `agent_inbox.csv` (see
+      the Shield page). Write a tokenizer (lowercase, split into words) and
+      build a **bag-of-words** vocabulary from January--April messages only.
+      Turn each message into a count vector $\mathbf{x}$ and each label into
+      a **one-hot** vector. Then hand-set a small weight matrix: for
+      example, weight 2 for "ignore" and "instructions" → injection,
+      "forward" and "send" → exfiltration, "pretend" and "rules" →
+      jailbreak, "verify" and "invoice" → phishing. Compute logits
+      $\mathbf{o} = \mathbf{W}\mathbf{x} + \mathbf{b}$, the **softmax**
+      probabilities, and the **cross-entropy** loss for 5 messages by hand.
+    revisit: |
+      *2.3:* compute the logits for all messages at once as one matrix
+      product, $\mathbf{X}\mathbf{W}^\top + \mathbf{b}$ (broadcasting the
+      bias, 2.1). *2.6:* what loss would a model get that always says "each
+      class with probability 1/5"? (Answer: $\log 5 \approx 1.61$; every
+      model you train must beat it.)
+  - page: chapter_linear-classification/image-classification-dataset
+    title: A data module for messages
+    build: |
+      Write `InboxData`, a `DataModule` like `FashionMNIST`. It loads the
+      CSV and splits **by time** (train: January--April, validation: May,
+      production: June, which you won't touch until Step 7). It builds the
+      vocabulary on the training split and yields shuffled minibatches
+      `(X, y)`, with `X` of shape (batch, vocabulary) and `y` the class
+      index. Add `text_labels(indices)` and a `visualize` that prints a few
+      messages with their labels. Time one pass over the training data.
+    revisit: |
+      *2.2:* `sender_domain` is missing for most rows. Is that a data
+      error? Count missing values per `source` and explain. *3.6:* why
+      split by time instead of at random for a filter that will run on
+      *future* messages, written by attackers who adapt?
+  - page: chapter_linear-classification/classification
+    title: Accuracy, baselines, and the cost of a missed attack
+    build: |
+      Subclass your `Classifier`-style base class with an `accuracy` method
+      and report two **baselines** on May. The first always predicts
+      "benign" (about 59%, yet it catches 0% of attacks). The second is a
+      keyword rule you write by hand, such as "ignore" → injection. Then
+      define a **cost matrix** $C[y, y']$: letting an attack through
+      (predicting benign for an attack) costs 10, a false alarm on a
+      benign message costs 1, calling one attack type another costs 0.2,
+      and a correct label costs 0. Write `decide(P, C)`, which picks the
+      label with the lowest expected cost (Section 4.3, Exercise 3).
+    revisit: |
+      *4.1:* your hand-set model from Step 1: what are its accuracy and
+      cross-entropy on May? *3.6:* accuracy, cross-entropy, attacks
+      caught: which would you report to a security team, which would you
+      optimize, and why are they different?
+  - page: chapter_linear-classification/softmax-regression-scratch
+    title: Train Shield from scratch
+    build: |
+      Implement softmax regression from scratch (your own `softmax` and
+      `cross_entropy`, parameters $\mathbf{W}$ of shape vocabulary × 5) and
+      train it with your `Trainer` and minibatch SGD. Plot training and
+      validation loss and accuracy per epoch. Expect about **97--98%** May
+      accuracy. Print the 6 words with the largest weight for each class.
+      Which make sense, and which are just common words like "so" or "it"?
+    revisit: |
+      *2.5:* check one minibatch gradient against autograd (or a numerical
+      gradient). It should equal $(\mathrm{softmax}(\mathbf{O}) -
+      \mathbf{Y})/n$, as derived in 4.1. *3.4:* try learning rates 0.05,
+      0.5, 5. Which diverges, and what does that look like for
+      cross-entropy?
+  - page: chapter_linear-classification/softmax-regression-concise
+    title: Make it robust and look at the mistakes
+    build: |
+      Rebuild the model with `nn.Linear` and `F.cross_entropy` on
+      **logits**. Attackers like repetition, so feed it a message that
+      repeats "instructions" 500 times. Show that your scratch softmax
+      returns `nan` and the concise one doesn't. Then compute the
+      **confusion matrix** on May and read the 10 most confident mistakes.
+      How many are mislabeled messages (about 3% of labels are noise), and
+      how many are security-themed benign messages?
+    revisit: |
+      *3.7:* add weight decay ($\lambda$ = 0, 0.001, 0.01) and compare May
+      accuracy *and* cross-entropy. Which one does weight decay change
+      more, and why? *4.3:* apply `decide` with your cost matrix. On May
+      it changes almost nothing. Why? (Look at how confident the model
+      is.)
+  - page: chapter_linear-classification/generalization-classification
+    title: How sure are you of 97.8%?
+    build: |
+      Put an error bar on your May accuracy two ways: Hoeffding's bound
+      (about ±0.04) and the normal approximation (about ±0.008 at 95% for
+      1,300 messages). Do the same for **attacks caught**, which has only
+      about 540 attacks behind it. Train two variants (with and without
+      `source` as a one-hot feature) and decide whether their difference
+      is real or noise. Keep a log of every model you evaluated on May;
+      explain why choosing among many models with May makes May's number
+      optimistic.
+    revisit: |
+      *2.6:* the variance of an average of $n$ independent 0/1 results is
+      $\epsilon(1 - \epsilon)/n$; derive the normal interval from it.
+      *3.6:* how big would a *test* set need to be to tell 97.8% from 98.3%?
+  - page: chapter_linear-classification/environment-and-distribution-shift
+    title: Attackers adapt, and Shield's final report
+    build: |
+      Now open June. A new injection style has spread. Accuracy drops to
+      about 89% and attacks caught falls from 97% to about 81%: over a
+      hundred injections reach the agent. Diagnose it:
+      (1) **covariate shift**: the share of June words not in your
+      vocabulary (about 4% vs. 0% in May). Train a May-vs-June **domain
+      classifier** on a vocabulary built from both months. Its accuracy is
+      barely above 50%, because most June messages look like May's, but its
+      top words (`tool`, `override`, `admin`, ...) show exactly what's new.
+      (2) **label shift**: estimate June's class distribution with the
+      confusion-matrix method (BBSE) and correct the predictions. It
+      doesn't help, and the estimated priors are far off: explain why its
+      assumption, $P(\mathbf{x} \mid y)$ unchanged, is broken here.
+      (3) Use `decide` from Step 3: on June it raises attacks caught to
+      about 89%. Why does it matter now when it didn't in May?
+      (4) Fix it the practical way: label the first 50 June messages,
+      retrain, and measure the rest of June (about 93%).
+    revisit: |
+      **Everything comes back:** the bag-of-words vectors (4.1), your data
+      module (4.2), accuracy and costs (4.3), training (4.4, 4.5), error
+      bars (4.6). Finish the README with a results table (baseline, keyword
+      rule, softmax regression on May, June before and after each fix, with
+      error bars) and a short "what to monitor in production" section.

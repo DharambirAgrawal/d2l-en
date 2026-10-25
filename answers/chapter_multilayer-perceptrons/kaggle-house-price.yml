@@ -1,0 +1,55 @@
+# Answers for chapter_multilayer-perceptrons/kaggle-house-price.md "Exercises", in order.
+- answer: |
+    The section's linear model (5-fold average validation log MSE about
+    0.17, so log RMSE about 0.41) should score around 0.4 on the Kaggle
+    leaderboard, far behind strong entries (about 0.12). The model is clearly
+    **undertrained**: see Exercises 3 and 4, where simply training longer
+    brings the validation log RMSE to about 0.22, and a small MLP to about
+    0.15.
+- answer: |
+    No. Mean imputation assumes values are *missing at random*. Example:
+    `PoolQC` (pool quality) is missing because the house **has no pool**.
+    Filling it with an average quality invents a pool. Or suppose rich
+    owners decline to report income in a survey: filling in the mean
+    biases incomes down exactly where they are highest. Better options are
+    a "missing" indicator (`dummy_na=True` does this for categories; add an
+    `is_missing` column for numbers), a meaningful constant (0 square feet
+    of pool), or imputation from related features.
+- answer: |
+    Measured with PyTorch, 5-fold average validation log MSE of the linear
+    model:
+
+    | Learning rate, epochs | 0.003, 10 | 0.01, 10 (book) | 0.03, 10 | 0.1, 10 | 0.01, 50 | 0.03, 50 |
+    |:--|--:|--:|--:|--:|--:|--:|
+    | Validation log MSE | 0.33 | 0.18 | 0.12 | diverges | 0.074 | **0.050** |
+
+    The book's setting stops long before convergence. A higher learning
+    rate and more epochs improve the score more than threefold. Choose the
+    settings by $K$-fold validation, never by the Kaggle leaderboard.
+  exercise: kfold-split
+- answer: |
+    Measured (5 folds, 50 epochs, validation log MSE):
+
+    | Model | Validation log MSE |
+    |:--|--:|
+    | Linear, SGD 0.03 | 0.050 |
+    | MLP (64 hidden units), SGD 0.01 | 0.22 (SGD struggles) |
+    | MLP (64), Adam $10^{-3}$ | **0.022** |
+    | MLP (64), Adam, weight decay $10^{-2}$ | 0.035 |
+    | MLP (64), Adam, dropout 0.3 | 0.093 |
+
+    A small MLP more than halves the error of the best linear model, but
+    only with a better optimizer (Adam, Chapter 12). Plain SGD with the same
+    learning rate makes slow progress on these 330 features. With only
+    1,168 training houses per fold, dropout 0.3 hurts: it adds too much
+    noise for so little data. A log MSE of 0.022 is a log RMSE of about
+    0.15.
+- answer: |
+    Without standardization, features live on wildly different scales
+    (`LotArea` is in the tens of thousands, while the one-hot columns are
+    0/1). Gradients for large-scale features are enormous: with learning
+    rate 0.01, or even $10^{-8}$, training diverges to `nan`. At
+    $10^{-10}$ it no longer diverges but barely learns (validation log MSE
+    about 8,000). No single learning rate suits every feature: the loss
+    surface is badly conditioned. Standardizing puts all features on the
+    same scale so one learning rate works.

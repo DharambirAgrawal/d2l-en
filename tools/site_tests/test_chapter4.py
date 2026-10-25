@@ -1,5 +1,5 @@
 """Chapter 4: Fashion-MNIST and softmax regression trained in the browser,
-playgrounds, notes, answers, exercises, Relay and Quill Part 3."""
+playgrounds, notes, answers, exercises, Shield and Quill Part 3."""
 import os
 import time
 import urllib.request
@@ -45,7 +45,8 @@ with sync_playwright() as p:
     page.goto(BASE + 'softmax-regression-scratch.html')
     page.wait_for_selector('.d2l-cell-bar')
     out, _ = run_cell(page, 'X_prob, X_prob.sum(1)')
-    check('scratch softmax rows sum to 1', out.count('1.') >= 2, out)
+    sums = [float(v) for v in out.rsplit('tensor(', 1)[1].strip('[]() \n').split(',') if v.strip()]
+    check('scratch softmax rows sum to 1', len(sums) == 2 and all(abs(v - 1) < 1e-5 for v in sums), out)
     t0 = time.time()
     out, imgs = run_cell(page, 'trainer.fit(model, data)', timeout=300000)
     print(f'     (10 epochs of softmax regression on Fashion-MNIST: {time.time() - t0:.1f}s)')
@@ -118,7 +119,7 @@ with sync_playwright() as p:
     page.wait_for_selector('.d2l-recall')
     check('4.1: quick recall box', page.locator('.d2l-recall li').count() == 3)
     page.wait_for_selector('.d2l-step')
-    check('4.1: Relay step 1', 'Relay · Step 1 of 7' in page.locator('.d2l-step .d2l-card-kicker').text_content())
+    check('4.1: Shield step 1', 'Shield · Step 1 of 7' in page.locator('.d2l-step .d2l-card-kicker').text_content())
     page.goto(BASE + 'classification.html')
     page.wait_for_selector('.d2l-notes')
     page.wait_for_timeout(500)
@@ -138,15 +139,15 @@ with sync_playwright() as p:
           'All tests passed' in ex.locator('.d2l-ex-status').inner_text(), ex.locator('.d2l-ex-status').inner_text())
 
     # ------------- project pages
-    page.goto(BASE + 'project-relay.html')
-    check('Relay page renders with its name', 'Project: Relay' in page.title(), page.title())
+    page.goto(BASE + 'project-shield.html')
+    check('Shield page renders with its name', 'Project: Shield' in page.title(), page.title())
     page.wait_for_selector('.d2l-project-steps .d2l-step')
-    check('Relay page lists 7 steps', page.locator('.d2l-project-steps .d2l-step').count() == 7)
-    for name in ('Sieve', 'Gauge', 'Sentinel'):
-        check(f'Relay lists optional side project {name}', page.locator('h3', has_text=name).count() == 1)
-    href = page.locator('a', has_text='tickets.csv').first.get_attribute('href')
+    check('Shield page lists 7 steps', page.locator('.d2l-project-steps .d2l-step').count() == 7)
+    for name in ('Router', 'Gauge', 'Sentinel'):
+        check(f'Shield lists optional side project {name}', page.locator('h3', has_text=name).count() == 1)
+    href = page.locator('a', has_text='agent_inbox.csv').first.get_attribute('href')
     data = urllib.request.urlopen(BASE + href).read().decode()
-    check('tickets.csv downloads', data.startswith('ticket_id,created') and data.count('\n') >= 8001)
+    check('agent_inbox.csv downloads', data.startswith('msg_id,received,source') and data.count('\n') >= 8001)
     page.goto(BASE + 'capstone-quill-3.html')
     check('Quill Part 3 page renders', 'Quill, Part 3' in page.title(), page.title())
     progress = page.locator('section', has_text='How Far Quill Has Come').last.inner_text()

@@ -1,0 +1,8 @@
+# Quick recall for chapter_multilayer-perceptrons/generalization-deep.md: retrieval practice on earlier material,
+# shown at the top of the section with hidden answers.
+- q: '*(5.4)* What variance does Xavier initialization use, and why?'
+  a: '$\sigma^2 = 2/(n_\textrm{in} + n_\textrm{out})$: a compromise between keeping the forward variance ($n_\textrm{in}\sigma^2 = 1$) and the backward variance ($n_\textrm{out}\sigma^2 = 1$) constant.'
+- q: '*(3.6)* What is the difference between training error and generalization error?'
+  a: 'Training error is measured on the data used for fitting; generalization error is the expected error on new data from the same distribution (estimated with a held-out set).'
+- q: '*(3.6)* What does $K$-fold cross-validation do?'
+  a: 'Splits the data into $K$ parts, trains $K$ times, each time validating on a different part, and averages the validation errors.'

@@ -1,0 +1,31 @@
+title: Backpropagation by Hand
+difficulty: medium
+timeout: 20
+description: |
+  Implement the forward **and backward** pass of the section's network,
+  with biases added (Exercise 2):
+
+  $$\mathbf{Z} = \mathbf{X}\mathbf{W}_1 + \mathbf{b}_1,\quad
+  \mathbf{H} = \mathrm{ReLU}(\mathbf{Z}),\quad
+  \mathbf{O} = \mathbf{H}\mathbf{W}_2 + \mathbf{b}_2,$$
+
+  $$J = \frac{1}{n}\sum_{i=1}^n -\log \mathrm{softmax}(\mathbf{o}_i)_{y_i}
+  + \frac{\lambda}{2}\left(\|\mathbf{W}_1\|_F^2 + \|\mathbf{W}_2\|_F^2\right).$$
+
+  Rows of `X` are examples, `y` holds class indices, and the biases are not
+  regularized. `forward_backward(X, y, W1, b1, W2, b2, lam)` returns
+  `(J, grads)`, where `grads` is a dict with keys `'W1', 'b1', 'W2', 'b2'`
+  and each gradient has the same shape as its parameter. No autograd:
+  NumPy only. Compute $\log\mathrm{softmax}$ stably (subtract each row's
+  maximum), so large logits don't give `inf`.
+explanation: |
+  Go backward and reuse the values stored on the way forward:
+  $\partial J/\partial\mathbf{O} = (\mathrm{softmax}(\mathbf{O}) - \mathbf{Y})/n$
+  (with $\mathbf{Y}$ one-hot);
+  $\partial J/\partial\mathbf{W}_2 = \mathbf{H}^\top \partial J/\partial\mathbf{O} + \lambda\mathbf{W}_2$
+  and $\partial J/\partial\mathbf{b}_2$ is its column sum;
+  $\partial J/\partial\mathbf{H} = \partial J/\partial\mathbf{O}\,\mathbf{W}_2^\top$;
+  $\partial J/\partial\mathbf{Z} = \partial J/\partial\mathbf{H} \odot [\mathbf{Z} > 0]$;
+  $\partial J/\partial\mathbf{W}_1 = \mathbf{X}^\top \partial J/\partial\mathbf{Z} + \lambda\mathbf{W}_1$.
+  Checking against numerical gradients, as the tests do, is how you debug
+  a hand-written backward pass.

@@ -1,0 +1,8 @@
+# Quick recall for chapter_multilayer-perceptrons/mlp.md: retrieval practice on earlier material,
+# shown at the top of the section with hidden answers.
+- q: '*(4.1)* Softmax regression on Fashion-MNIST is a linear model. What does "linear" mean for its decision boundaries?'
+  a: 'The logits are affine functions of the input, so the boundary between any two classes is a hyperplane (a straight line in 2-D).'
+- q: '*(4.4)* About what validation accuracy did softmax regression reach on Fashion-MNIST?'
+  a: 'About 83% after 10 epochs.'
+- q: '*(2.4)* State the chain rule for $y = f(g(x))$.'
+  a: '$\frac{dy}{dx} = f''(g(x))\, g''(x)$: multiply the derivatives along the path.'

@@ -1,0 +1,17 @@
+# Notes for chapter_multilayer-perceptrons/backprop.md: each entry is shown at the end of the
+# section whose heading matches "after".
+- after: Forward Propagation
+  notes:
+  - 'Forward propagation = compute and **store** intermediate values from input to output: $\mathbf{z} = \mathbf{W}^{(1)}\mathbf{x}$, $\mathbf{h} = \phi(\mathbf{z})$, $\mathbf{o} = \mathbf{W}^{(2)}\mathbf{h}$, loss $L = l(\mathbf{o}, y)$, plus $\ell_2$ term $s$; objective $J = L + s$.'
+- after: Computational Graph of Forward Propagation
+  notes:
+  - 'Squares are variables, circles are operators; arrows show which values each one needs. Backprop walks this graph in reverse.'
+- after: Backpropagation
+  notes:
+  - 'Backpropagation = the **chain rule**, applied from the output back, reusing stored values. Each gradient has the same shape as its variable.'
+  - '$\partial J/\partial\mathbf{o}$ → $\partial J/\partial\mathbf{W}^{(2)} = (\partial J/\partial\mathbf{o})\,\mathbf{h}^\top + \lambda\mathbf{W}^{(2)}$ → $\partial J/\partial\mathbf{h} = \mathbf{W}^{(2)\top}\partial J/\partial\mathbf{o}$ → $\partial J/\partial\mathbf{z} = \partial J/\partial\mathbf{h} \odot \phi''(\mathbf{z})$ → $\partial J/\partial\mathbf{W}^{(1)} = (\partial J/\partial\mathbf{z})\,\mathbf{x}^\top + \lambda\mathbf{W}^{(1)}$.'
+  - 'Shape trick: transpose and multiply until the shapes match.'
+- after: Training Neural Networks
+  notes:
+  - 'Forward and backward depend on each other: backward reuses the values stored by forward, and forward uses the parameters updated after backward.'
+  - 'Storing activations is why training needs **much more memory** than prediction, and it grows with depth and batch size.'

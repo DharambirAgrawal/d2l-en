@@ -31,7 +31,7 @@ linear-regression-scratch
 linear-regression-concise
 generalization
 weight-decay
-project-tempo
+project-pace
 capstone-quill-2
 ```
 

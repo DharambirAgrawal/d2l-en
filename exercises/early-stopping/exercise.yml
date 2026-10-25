@@ -1,0 +1,23 @@
+title: Early Stopping with Patience
+difficulty: easy
+timeout: 10
+description: |
+  Validation loss is noisy, so trainers stop only after it has failed to
+  improve for `patience` epochs in a row. Write
+  `early_stop(val_losses, patience, min_delta=0.0)`. It reads the losses
+  epoch by epoch (epoch 0, 1, ...) and returns `(best_epoch, stop_epoch)`:
+
+  - An epoch **improves** if its loss is below the best so far by more
+    than `min_delta`. Epoch 0 always improves.
+  - Training stops at the first epoch that makes it `patience` epochs
+    since the last improvement. If that never happens, `stop_epoch` is the
+    last epoch.
+  - `best_epoch` is the last improving epoch up to `stop_epoch`: the
+    checkpoint you'd keep.
+explanation: |
+  Patience guards against stopping on a random bump; `min_delta` ignores
+  tiny improvements that are just noise. Keeping the best checkpoint (not
+  the last weights) means that the `patience` extra epochs cost compute
+  but not accuracy. Picking the epoch with the validation set makes the
+  validation number slightly optimistic, like any other choice made with
+  it (Section 4.6).

@@ -1,5 +1,5 @@
 """Chapter 3: training loops in the browser, playgrounds, notes, answers,
-exercises, Tempo and Quill pages."""
+exercises, Pace and Quill pages."""
 import os
 import time
 import urllib.request
@@ -126,21 +126,21 @@ with sync_playwright() as p:
           'All tests passed' in ex.locator('.d2l-ex-status').inner_text(), ex.locator('.d2l-ex-status').inner_text())
 
     # ------------- project pages
-    page.goto(BASE + 'project-tempo.html')
-    check('Tempo page renders with its name', page.title().startswith('3.8. Project: Tempo'), page.title())
-    href = page.locator('a', has_text='deliveries.csv').first.get_attribute('href')
+    page.goto(BASE + 'project-pace.html')
+    check('Pace page renders with its name', page.title().startswith('3.8. Project: Pace'), page.title())
+    href = page.locator('a', has_text='llm_requests.csv').first.get_attribute('href')
     data = urllib.request.urlopen(BASE + href).read().decode()
-    check('deliveries.csv downloads', data.startswith('order_day,weekday') and data.count('\n') == 4001)
+    check('llm_requests.csv downloads', data.startswith('request_id,day,hour,client') and data.count('\n') == 7523)
     page.goto(BASE + 'capstone-quill-2.html')
     check('Quill Part 2 page renders', 'Quill, Part 2' in page.title(), page.title())
     progress = page.locator('section', has_text='How Far Quill Has Come').last.inner_text()
     check('Quill Part 2 shows progress (perplexity per version + samples)',
           '11.4' in progress and 'Part 1' in progress, progress[:300])
-    page.goto(BASE + 'project-tempo.html')
-    for name in ('Scout', 'Drift', 'Watt'):
-        check(f'Tempo lists optional side project {name}', page.locator('h3', has_text=name).count() == 1)
-    page.goto(ROOT + 'chapter_preliminaries/project-alert-triage.html')
-    check('2.8 renamed to Hush', 'Project: Hush' in page.title(), page.title())
+    page.goto(BASE + 'project-pace.html')
+    for name in ('Scale', 'Scout', 'Drift'):
+        check(f'Pace lists optional side project {name}', page.locator('h3', has_text=name).count() == 1)
+    page.goto(ROOT + 'chapter_preliminaries/project-podium.html')
+    check('2.8 is Podium', 'Project: Podium' in page.title(), page.title())
     page.goto(ROOT + 'chapter_preliminaries/capstone-minigpt-1.html')
     check('2.9 renamed to Quill', 'Quill, Part 1' in page.title() and 'MiniGPT' not in page.content(), page.title())
 

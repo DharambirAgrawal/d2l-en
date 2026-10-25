@@ -1,0 +1,8 @@
+# Quick recall for chapter_multilayer-perceptrons/backprop.md: retrieval practice on earlier material,
+# shown at the top of the section with hidden answers.
+- q: '*(5.2)* How many parameters does the MLP with 784 inputs, 256 hidden units, and 10 outputs have?'
+  a: '$784 \cdot 256 + 256 + 256 \cdot 10 + 10 = 203{,}530$.'
+- q: '*(2.5)* What does `backward()` do, and where do the results go?'
+  a: 'It runs reverse-mode automatic differentiation from a scalar through the recorded graph and stores each gradient in the `.grad` of every tensor with `requires_grad=True` (accumulating, so zero them between steps).'
+- q: '*(3.7)* What does adding $\frac{\lambda}{2}\|\mathbf{w}\|^2$ to the loss add to the gradient?'
+  a: '$\lambda\mathbf{w}$: each step also shrinks the weights toward zero ("weight decay").'

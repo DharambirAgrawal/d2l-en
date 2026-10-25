@@ -1,0 +1,48 @@
+# Answers for chapter_multilayer-perceptrons/numerical-stability-and-init.md "Exercises", in order.
+- answer: |
+    Yes, several:
+    - **Sign symmetry:** with odd activations like tanh, flipping the signs
+      of a unit's incoming and outgoing weights gives the same function.
+    - **Scaling symmetry:** with ReLU, multiplying a unit's incoming weights
+      by $c > 0$ and its outgoing weights by $1/c$ changes nothing.
+    - **Identical channels or heads:** convolution channels or attention
+      heads initialized identically stay identical.
+    - **Mirror-image weights** in an encoder and decoder, or any parameters
+      tied to receive equal gradients.
+
+    Random initialization breaks the first-kind (permutation)
+    symmetries. Scaling symmetries make the loss flat along certain
+    directions, which matters for optimization and is one reason
+    normalization layers are used.
+- answer: |
+    Yes. There are no hidden units to make identical: every weight already
+    sees a different input feature (and in softmax regression each output
+    has its own label signal), so the gradients differ and the weights
+    separate after one step. Initializing everything to **zero** is
+    standard for these convex models. The symmetry problem only exists
+    when several units are interchangeable, as in hidden layers.
+- answer: |
+    For matrices $\mathbf{A}, \mathbf{B}$, the largest singular value
+    satisfies $\sigma_{\max}(\mathbf{A}\mathbf{B}) \leq
+    \sigma_{\max}(\mathbf{A})\,\sigma_{\max}(\mathbf{B})$ and
+    $\sigma_{\min}(\mathbf{A}\mathbf{B}) \geq
+    \sigma_{\min}(\mathbf{A})\,\sigma_{\min}(\mathbf{B})$ for square
+    matrices. (Eigenvalues of non-symmetric products have no such simple
+    bounds, so singular values are the right tool.) Over $L$ layers the
+    gradient's scale can therefore grow like $\prod \sigma_{\max}$ or
+    shrink like $\prod \sigma_{\min}$, exponentially in depth. To keep
+    gradients well conditioned, keep each layer's Jacobian close to
+    norm-preserving (singular values near 1). That is the idea behind
+    Xavier/He scaling, orthogonal initialization, and residual
+    connections.
+  exercise: xavier-init
+- answer: |
+    Partly. **Gradient clipping** rescales a gradient whose norm exceeds a
+    threshold, which stops single exploding steps (standard for RNNs and
+    large language models). **LARS** (layer-wise adaptive rate scaling)
+    gives each layer a learning rate proportional to
+    $\|\mathbf{w}\| / \|\nabla\mathbf{w}\|$, so no layer's update is too
+    large or too small relative to its weights. This allowed training with
+    huge batch sizes. Adaptive optimizers (Adam) and normalization layers
+    also rescale things after the fact. These fixes treat symptoms; good
+    initialization and architecture prevent the problem.

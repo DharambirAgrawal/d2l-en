@@ -1,0 +1,99 @@
+# Podium: the Chapter 2 project, built step by step inside the chapter.
+# Each step appears at the end of its section (before the Exercises) and on
+# the project page. "revisit" deliberately brings back earlier topics.
+# Data: static/projects/battles.csv, made by projects/generators/make_battles.py.
+project: Podium
+subtitle: Rank AI models from head-to-head votes
+page: chapter_preliminaries/project-podium
+steps:
+  - page: chapter_preliminaries/ndarray
+    title: Simulate a tiny arena with broadcasting
+    build: |
+      Create your repository `podium`. Give four imaginary models the
+      ratings `r = torch.tensor([1.0, 0.5, 0.0, -1.0])`. With
+      **broadcasting** (no loops), build the 4 × 4 matrix of win
+      probabilities $P_{ij} = 1 / (1 + e^{-(r_i - r_j)})$ from
+      `r[:, None] - r[None, :]`. Check that $P_{ij} + P_{ji} = 1$ and that
+      the diagonal is 0.5. Then simulate 1,000 games for every pair at once:
+      `wins = (torch.rand(1000, 4, 4) < P).sum(0)`. Turn the result into a
+      win-rate matrix and compare it with $P$.
+    revisit: |
+      *Chapter 1:* why rank models with votes at all, instead of a test with
+      fixed answers? Write two sentences in your README.
+  - page: chapter_preliminaries/pandas
+    title: Load and clean the real votes
+    build: |
+      Download `battles.csv` (see the Podium page) and load it with pandas.
+      Report the fraction of missing values per column. Then clean it:
+      strip and lower-case model names, drop duplicate rows (66), and drop
+      votes with no winner (150). Count the votes per model: which model has
+      the fewest, and why (look at the dates)? Compute every model's **raw
+      win rate**, counting a tie or `both_bad` as half a win.
+    revisit: |
+      *2.1:* turn the cleaned table into a 12 × 12 tensor `wins[i, j]` (how
+      often model $i$ beat model $j$) and recompute the raw win rates from
+      the tensor with one reduction. Do they match pandas?
+  - page: chapter_preliminaries/linear-algebra
+    title: The vote matrix
+    build: |
+      Keep only decisive votes (`model_a` or `model_b` won). Build the
+      **design matrix** $\mathbf{X}$ with one row per vote and one column per
+      model: $+1$ for `model_a`, $-1$ for `model_b`, 0 elsewhere. Then:
+      (1) for ratings $\mathbf{r}$, $\mathbf{X}\mathbf{r}$ is the vector of
+      rating differences, one per vote. (2) Show that
+      $\mathbf{X}\mathbf{1} = \mathbf{0}$: adding the same number to every
+      rating changes nothing, so fix the mean rating at 0. (3) Compute
+      $\mathbf{X}^\top\mathbf{X}$: its diagonal counts each model's games and
+      its off-diagonal entries count head-to-head matchups. How often did
+      `atlas-4` meet `kite-7b`, and how often `nova-2`?
+    revisit: |
+      *2.2:* `quartz-xl` has the 4th-best raw win rate. Using the matchup
+      matrix, compute the average raw win rate of each model's opponents.
+      What do you notice about `quartz-xl`'s schedule?
+  - page: chapter_preliminaries/calculus
+    title: One pair by hand
+    build: |
+      Take one pair, `atlas-4` vs. `orbit-pro`. Atlas won $w = 235$ of
+      their decisive games and lost $l = 199$. With $d = r_{\textrm{atlas}} -
+      r_{\textrm{orbit}}$, the log-likelihood is
+      $\ell(d) = w \log \sigma(d) + l \log \sigma(-d)$. Use
+      $\sigma'(d) = \sigma(d)(1 - \sigma(d))$ to differentiate it, set the
+      derivative to 0, and show that the best $d$ is $\log(w/l) \approx
+      0.17$. Plot $\ell(d)$ and mark the maximum.
+    revisit: |
+      *2.3:* write the log-likelihood of **all** votes as one expression in
+      $\mathbf{X}\mathbf{r}$, and show that its gradient is
+      $\mathbf{X}^\top(\mathbf{y} - \sigma(\mathbf{X}\mathbf{r}))$. Check
+      one entry with a central difference.
+  - page: chapter_preliminaries/autograd
+    title: Fit the leaderboard with autograd
+    build: |
+      Make $\mathbf{r}$ a tensor with `requires_grad=True` and add one more
+      parameter $c$ for the **position bias**: $P(A \textrm{ wins}) =
+      \sigma(r_A - r_B + c)$. Minimize the average negative log-likelihood
+      by gradient descent with autograd, re-centering $\mathbf{r}$ to mean 0
+      after every step. Report $c$ (about +0.14) and the ratings on an
+      Elo-like scale, $1000 + \frac{400}{\ln 10} r_i$. Compare the order
+      with the raw win rates.
+    revisit: |
+      *2.4:* check autograd's gradient against your formula from Step 4.
+      *2.3:* the pair `atlas-4` vs. `orbit-pro` now has a rating difference
+      of about 0.22, not 0.17. Why does fitting all votes together change
+      it?
+  - page: chapter_preliminaries/probability
+    title: Error bars, and Podium's final report
+    build: |
+      Put an error bar on every rating with the **bootstrap**: resample the
+      votes with replacement 100 times, refit, and take the 2.5% and 97.5%
+      quantiles. Estimate $P(\textrm{nova-2} > \textrm{atlas-4})$ as the
+      fraction of resamples in which nova-2 is ahead (about 0.6). Then check
+      the model's probabilities: group votes by predicted $P(A \textrm{
+      wins})$ (0--0.2, ..., 0.8--1) and compare with how often A actually
+      won.
+    revisit: |
+      **Everything comes back:** cleaning (2.2), the simulator (2.1), the
+      vote matrix (2.3), the gradient (2.4), and the autograd fit (2.5).
+      Use your Step 1 simulator idea to make fake votes from your fitted
+      ratings and refit them: do you recover the ratings? Finish the README
+      with the leaderboard plot (ratings with error bars) and one sentence
+      per section on how Podium used it.

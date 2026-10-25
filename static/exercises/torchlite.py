@@ -14,6 +14,7 @@ Loaded as the module `torch` only for the runnable book cells
 (see static/exercises/notebook.py). Keep it compatible with Python 3.10.
 """
 import builtins
+import collections
 import math
 import os
 import sys
@@ -640,6 +641,64 @@ def relu(x):
     return _unary(x, lambda a: np.maximum(a, 0), lambda a, out: (a > 0).astype(a.dtype))
 
 
+def maximum(a, b):
+    """Elementwise maximum; the gradient goes to the larger input (ties: the first)."""
+    return _as_tensor(a)._binary(b, np.maximum, lambda g, x, y: (g * (x >= y), g * (x < y)))
+
+
+def minimum(a, b):
+    return _as_tensor(a)._binary(b, np.minimum, lambda g, x, y: (g * (x <= y), g * (x > y)))
+
+
+_MaxMin = collections.namedtuple('torch_return_types', ['values', 'indices'])
+
+
+def max(input, other=None, dim=None, keepdim=False):
+    """torch.max(x), torch.max(x, dim) -> (values, indices), torch.max(x, y)."""
+    input = _as_tensor(input)
+    if isinstance(other, Tensor):
+        return maximum(input, other)
+    if other is not None:
+        dim = other
+    if dim is None:
+        return input.max()
+    idx = np.argmax(input._data, axis=dim)
+    vals = np.take_along_axis(input._data, np.expand_dims(idx, dim), dim)
+    if not keepdim:
+        vals = vals.squeeze(dim)
+    else:
+        idx = np.expand_dims(idx, dim)
+    return _MaxMin(Tensor._wrap(vals), Tensor._wrap(idx.astype(np.int64)))
+
+
+def min(input, other=None, dim=None, keepdim=False):
+    input = _as_tensor(input)
+    if isinstance(other, Tensor):
+        return minimum(input, other)
+    if other is not None:
+        dim = other
+    if dim is None:
+        return input.min()
+    idx = np.argmin(input._data, axis=dim)
+    vals = np.take_along_axis(input._data, np.expand_dims(idx, dim), dim)
+    if not keepdim:
+        vals = vals.squeeze(dim)
+    else:
+        idx = np.expand_dims(idx, dim)
+    return _MaxMin(Tensor._wrap(vals), Tensor._wrap(idx.astype(np.int64)))
+
+
+def dropout(input, p=0.5, training=True):
+    """Zero each element with probability p and scale the rest by 1/(1-p)."""
+    input = _as_tensor(input)
+    if not training or p == 0:
+        return input
+    if p == 1:
+        return input * 0.0
+    mask = (_rng.random(input._data.shape) > p).astype(input._data.dtype) / (1 - p)
+    return input * Tensor._wrap(mask.astype(input._data.dtype))
+
+
 def log_softmax(x, dim=-1):
     """Stable log-softmax: x - max - log(sum(exp(x - max)))."""
     x = _as_tensor(x)
@@ -1162,6 +1221,28 @@ class Softmax(Module):
         return softmax(X, self.dim)
 
 
+class Sigmoid(Module):
+    def forward(self, X):
+        return sigmoid(X)
+
+
+class Tanh(Module):
+    def forward(self, X):
+        return tanh(X)
+
+
+class Dropout(Module):
+    def __init__(self, p=0.5, inplace=False):
+        super().__init__()
+        self.p = p
+
+    def forward(self, X):
+        return dropout(X, self.p, self.training)
+
+    def extra_repr(self):
+        return f'p={self.p}, inplace=False'
+
+
 class Sequential(Module):
     def __init__(self, *layers):
         super().__init__()
@@ -1207,6 +1288,25 @@ class _Init(types.ModuleType):
         return t
 
     @staticmethod
+    def xavier_normal_(t, gain=1.0):
+        fan_out, fan_in = t.shape[0], t.shape[1]
+        t.data.normal_(0.0, gain * math.sqrt(2 / (fan_in + fan_out)))
+        return t
+
+    @staticmethod
+    def kaiming_normal_(t, a=0, mode='fan_in', nonlinearity='relu'):
+        fan = t.shape[1] if mode == 'fan_in' else t.shape[0]
+        t.data.normal_(0.0, math.sqrt(2 / fan))
+        return t
+
+    @staticmethod
+    def kaiming_uniform_(t, a=0, mode='fan_in', nonlinearity='relu'):
+        fan = t.shape[1] if mode == 'fan_in' else t.shape[0]
+        bound = math.sqrt(6 / fan)
+        t.data.uniform_(-bound, bound)
+        return t
+
+    @staticmethod
     def xavier_uniform_(t, gain=1.0):
         fan_out, fan_in = t.shape[0], t.shape[1]
         a = gain * math.sqrt(6 / (fan_in + fan_out))
@@ -1235,10 +1335,16 @@ nn.Sequential = Sequential
 nn.CrossEntropyLoss = CrossEntropyLoss
 nn.Flatten = Flatten
 nn.ReLU = ReLU
+nn.Sigmoid = Sigmoid
+nn.Tanh = Tanh
+nn.Dropout = Dropout
 nn.Softmax = Softmax
 nn.init = _Init('torch.nn.init')
 nn.functional = types.ModuleType('torch.nn.functional')
 nn.functional.relu = relu
+nn.functional.sigmoid = sigmoid
+nn.functional.tanh = tanh
+nn.functional.dropout = dropout
 nn.functional.softmax = softmax
 nn.functional.log_softmax = log_softmax
 nn.functional.cross_entropy = cross_entropy
@@ -1412,6 +1518,13 @@ class Normalize(_Transform):
         return (a - self.mean) / self.std
 
 
+# Bigger networks train too slowly on all 60,000 images in the browser
+# (WebAssembly NumPy multiplies matrices at about 1 GFLOP/s). notebook.py sets
+# this for pages from Chapter 5 on.
+FASHION_MNIST_TRAIN_LIMIT = None
+_train_limit_noted = False
+
+
 class FashionMNIST:
     """torchvision.datasets.FashionMNIST: the full dataset (60,000 training
     and 10,000 test images), stored as uint8 and transformed per minibatch."""
@@ -1419,10 +1532,19 @@ class FashionMNIST:
                'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle boot']
 
     def __init__(self, root=None, train=True, transform=None, target_transform=None, download=False):
+        global _train_limit_noted
         d = _load_dataset('fashion-mnist')
         self.train, self.transform = train, transform
         self._x = d['train_x' if train else 'test_x']
         self._y = d['train_y' if train else 'test_y'].astype(np.int64)
+        limit = FASHION_MNIST_TRAIN_LIMIT
+        if train and limit and limit < len(self._y):
+            self._x, self._y = self._x[:limit], self._y[:limit]
+            if not _train_limit_noted:
+                _train_limit_noted = True
+                print(f'(Browser note: training on the first {limit:,} of the 60,000 training images so this '
+                      'finishes in about a minute, so expect roughly 72-78% validation accuracy here. Real PyTorch '
+                      'uses all of them and reaches about 85%.)')
 
     @property
     def data(self):

@@ -1,0 +1,62 @@
+# Answers for chapter_multilayer-perceptrons/backprop.md "Exercises", in order.
+- answer: |
+    Also $n \times m$. The gradient of a scalar with respect to a matrix
+    has one entry per input entry: $(\nabla_\mathbf{X} f)_{ij} =
+    \partial f / \partial x_{ij}$. That is why each gradient in
+    backpropagation has the same shape as its variable.
+- answer: |
+    1. Graph: $\mathbf{x}$ and $\mathbf{W}^{(1)}$ go into a product node; add
+       $\mathbf{b}^{(1)}$ to get $\mathbf{z}$; apply $\phi$ to get
+       $\mathbf{h}$; multiply by $\mathbf{W}^{(2)}$ to get $\mathbf{o}$;
+       $\mathbf{o}$ and $y$ go into the loss $L$. Separately,
+       $\mathbf{W}^{(1)}, \mathbf{W}^{(2)}$ go into the regularizer $s$; then
+       $J = L + s$.
+    2. Forward: $\mathbf{z} = \mathbf{W}^{(1)}\mathbf{x} + \mathbf{b}^{(1)}$,
+       $\mathbf{h} = \phi(\mathbf{z})$, $\mathbf{o} = \mathbf{W}^{(2)}\mathbf{h}$,
+       $J = l(\mathbf{o}, y) + \frac{\lambda}{2}(\|\mathbf{W}^{(1)}\|_F^2 +
+       \|\mathbf{W}^{(2)}\|_F^2)$. Backward: the same as in the section, plus
+       $\partial J/\partial\mathbf{b}^{(1)} = \partial J/\partial\mathbf{z}$
+       (the bias's gradient is the gradient of what it is added to; over a
+       minibatch, sum over examples). The other equations are unchanged,
+       since the bias doesn't appear in the regularizer. With an output
+       bias $\mathbf{b}^{(2)}$ as well, $\partial J/\partial\mathbf{b}^{(2)} =
+       \partial J/\partial\mathbf{o}$.
+  exercise: mlp-backprop
+- answer: |
+    With $d$ inputs, $h$ hidden units, $q$ outputs, and a minibatch of $n$:
+
+    - **Parameters:** $dh + hq$ numbers (plus biases).
+    - **Training:** also gradients for all parameters (another $dh + hq$),
+      often optimizer state (momentum: one more copy; Adam: two). It also
+      keeps the stored activations for backprop: $\mathbf{z}$ and
+      $\mathbf{h}$ ($2nh$) and $\mathbf{o}$ ($nq$) per minibatch.
+    - **Prediction:** just the parameters and the activations of the layer
+      currently being computed, which can be discarded once the next layer
+      is done.
+
+    For $d = 784$, $h = 256$, $q = 10$, $n = 256$ in float32: parameters
+    are about 0.8 MB; training adds 0.8 MB of gradients and about 0.5 MB of
+    activations. For large networks, stored activations usually dominate,
+    and they grow with batch size and depth.
+- answer: |
+    The backward pass itself becomes part of the graph: to differentiate a
+    gradient you must record the operations that computed it (in PyTorch,
+    `create_graph=True`). The graph roughly doubles in size and more
+    intermediate values must be kept. A Hessian--vector product costs
+    about as much as a few gradient evaluations (2--4×). The full Hessian
+    of $p$ parameters needs $p$ such products and $p^2$ memory, which is
+    impossible for large models. That's why second-order methods use
+    approximations.
+- answer: |
+    1. Yes. **Model (pipeline) parallelism** puts different layers on
+       different GPUs and passes activations between them in the forward
+       pass and gradients in the backward pass. **Tensor parallelism**
+       splits single large matrix multiplications across GPUs (Chapter 13).
+    2. Smaller minibatches are simpler (one GPU, no communication) but
+       give noisier gradients, use the hardware less efficiently, and
+       don't help if the *model itself* doesn't fit. Splitting the graph
+       keeps large batches and allows larger models, but adds communication
+       cost and complexity. In pipeline parallelism GPUs also wait for each
+       other ("bubbles"). Other tools are gradient checkpointing (recompute
+       activations instead of storing them) and gradient accumulation
+       (several small batches per update).

@@ -1,0 +1,12 @@
+title: Early Stopping and Noisy Labels
+description: |
+  An MLP is trained on 80 points from the "moons" data, and a fraction of
+  their labels has been flipped. Validation uses 400 points with **clean**
+  labels. With clean training labels, training longer does no harm. With
+  noisy labels, the network first learns the real pattern (validation
+  error drops), then starts memorizing the wrong labels (training error
+  keeps falling while validation error rises). The green line marks the
+  step early stopping would keep.
+params:
+  - {name: noise, label: "fraction of training labels flipped", min: 0, max: 0.4, step: 0.01, value: 0.2}
+  - {name: hidden, label: "hidden units", min: 4, max: 64, step: 1, value: 32}

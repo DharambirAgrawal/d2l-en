@@ -1,0 +1,17 @@
+# Notes for chapter_multilayer-perceptrons/generalization-deep.md: each entry is shown at the end of the
+# section whose heading matches "after".
+- after: Revisiting Overfitting and Regularization
+  notes:
+  - 'Deep networks can fit **random labels** perfectly (Zhang et al., 2017), yet generalize well on real labels. Classical "complexity" measures (number of parameters, VC dimension) can''t explain this.'
+  - 'Making the network bigger often **reduces** test error ("double descent"). Generalization in deep learning is still an open research question.'
+- after: Inspiration from Nonparametrics
+  notes:
+  - 'Deep nets behave a bit like **nonparametric** models (e.g., $k$-nearest neighbors): they can memorize training data and still generalize. Very wide networks behave like kernel methods (the *neural tangent kernel*).'
+- after: Early Stopping
+  notes:
+  - 'Networks fit clean labels **before** they memorize noisy ones. So stop when validation error stops improving (with *patience*: wait a few epochs) and keep the best checkpoint.'
+  - 'Helps most when labels are **noisy**; with clean, separable data it changes little. Bonus: it saves compute.'
+- after: Classical Regularization Methods for Deep Networks
+  notes:
+  - 'Weight decay is still common, but its strength is rarely enough to restrict the model class: it seems to help through **inductive bias** rather than by limiting capacity.'
+  - 'Dropout (next section) is another classic regularizer.'

@@ -1,0 +1,21 @@
+title: K-Fold Splits and the Log RMSE
+difficulty: easy
+timeout: 10
+description: |
+  1. Write `kfold_indices(n, k)`. It returns a list of `k` pairs
+     `(train_idx, val_idx)` of NumPy integer arrays. The validation folds
+     are consecutive blocks that together cover **all** of `0 .. n-1`
+     exactly once, with sizes differing by at most 1. The first `n % k`
+     folds get one extra example. Unlike the book's version, no example is
+     ever left out. `train_idx` is everything not in that fold, in
+     increasing order.
+  2. Write `log_rmse(preds, labels)`, the competition's error:
+     $\sqrt{\frac{1}{n}\sum_i (\log \hat{y}_i - \log y_i)^2}$. Clip
+     predictions below 1 to 1 first, so that a bad model can't take the log
+     of a negative price.
+explanation: |
+  The section's `k_fold_data` uses `n // k` examples per fold, so up to
+  $k - 1$ examples are never used for validation. Spreading the remainder
+  over the first folds fixes that (this is what scikit-learn's `KFold`
+  does). Because the log RMSE compares logs, being off by 10% costs the
+  same for a \$100,000 house and a \$1,000,000 house.

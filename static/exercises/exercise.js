@@ -755,7 +755,8 @@
    * (or before its first subsection). From _static/notes/<page>.json,
    * generated from notes/<chapter>/<section>.yml. */
   function normHeading(text) {
-    return text.replace(/^[\d.]+\s*/, '').replace(/[¶`]/g, '').replace(/---/g, '—')
+    // Markdown headings may carry d2lbook's slide marks: [**...**] or (**...**).
+    return text.replace(/\(\*\*|\*\*\)|\[\*\*|\*\*\]/g, '').replace(/^[\d.]+\s*/, '').replace(/[¶`]/g, '').replace(/---/g, '—')
       .replace(/--/g, '–').replace(/\s+/g, ' ').trim();
   }
 

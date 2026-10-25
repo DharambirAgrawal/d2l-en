@@ -78,12 +78,41 @@ class _Tab:
         pass
 
 
+# Chapters whose training cells are light enough to use all of Fashion-MNIST
+# in the browser; later chapters train on a subset (see torchlite).
+_FULL_DATA_CHAPTERS = ('chapter_preliminaries', 'chapter_linear-regression', 'chapter_linear-classification')
+
+
+def _set_train_limit(session_id):
+    import torchlite
+    limit = os.environ.get('D2L_TRAIN_LIMIT')
+    if limit is None and sys.platform == 'emscripten' and 'chapter_' in session_id \
+            and not any(c in session_id for c in _FULL_DATA_CHAPTERS):
+        limit = 10000
+    torchlite.FASHION_MNIST_TRAIN_LIMIT = int(limit) if limit else None
+
+
+def _pandas_compat():
+    """The browser's pandas (3.x) stores text as a new "str" dtype; the book
+    (pandas 2) expects "object", e.g. `dtypes[dtypes != 'object']` to pick the
+    numeric columns. Keep the old behavior."""
+    pd = sys.modules.get('pandas')
+    if pd is None:
+        return
+    try:
+        pd.set_option('future.infer_string', False)
+    except Exception:
+        pass
+
+
 def run_cell(session_id, code, params=None):
     """Run a cell in a session. Returns a result dict."""
     ns = SESSIONS.setdefault(session_id, {'__name__': '__main__', 'tab': _Tab()})
     if params:
         ns.update(params)
     clean = _MAGIC.sub('', code)
+    _set_train_limit(session_id)
+    _pandas_compat()
     grader._register_source(CELL_FILE, clean)
     needs_plotting = bool(re.search(r'\bd2l\b|matplotlib|plt\.', clean))
     value = None

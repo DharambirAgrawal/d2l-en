@@ -39,7 +39,8 @@ SITE="$WORK/src/_build/html"
 echo "== Running book code cells through the browser runtime"
 PAGES=$(cd "$REPO" && ls chapter_preliminaries/{ndarray,pandas,linear-algebra,calculus,autograd,probability}.md \
   chapter_linear-regression/{linear-regression,oo-design,synthetic-regression-data,linear-regression-scratch,linear-regression-concise,generalization,weight-decay}.md \
-  chapter_linear-classification/{image-classification-dataset,classification,softmax-regression-scratch,softmax-regression-concise}.md)
+  chapter_linear-classification/{image-classification-dataset,classification,softmax-regression-scratch,softmax-regression-concise}.md \
+  chapter_multilayer-perceptrons/{mlp,mlp-implementation,numerical-stability-and-init,dropout,kaggle-house-price}.md)
 FAILED=0
 (cd "$REPO" && D2L_DATASETS="$SITE/_static/datasets" "$WORK/env/bin/python" tools/site_tests/run_book_cells.py "$SITE/_static/exercises" $PAGES) \
   > "$WORK/cells.log" 2>&1 || FAILED=1
@@ -53,7 +54,7 @@ SERVER=$!
 trap 'kill $SERVER 2>/dev/null' EXIT
 sleep 1
 
-for t in test_exercises test_features test_chapter3 test_chapter4 test_steps_recall test_sync_notes; do
+for t in test_exercises test_features test_chapter3 test_chapter4 test_chapter5 test_steps_recall test_sync_notes; do
   echo "-- $t"
   "$WORK/pw/bin/python" "$REPO/tools/site_tests/$t.py" > "$WORK/$t.log" 2>&1 || FAILED=1
   grep -E "^FAIL|checks passed|Error" "$WORK/$t.log" || true

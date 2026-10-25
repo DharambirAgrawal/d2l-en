@@ -1,0 +1,118 @@
+# Taste: the Chapter 5 project, built step by step inside the chapter.
+# Each step appears at the end of its section (before the Exercises) and on
+# the project page. "revisit" deliberately brings back earlier topics.
+# Data: static/projects/preferences.csv, made by projects/generators/make_preferences.py.
+project: Taste
+subtitle: A reward model that learns what people prefer
+page: chapter_multilayer-perceptrons/project-taste
+steps:
+  - page: chapter_multilayer-perceptrons/mlp
+    title: A linear reward, and where it fails
+    build: |
+      Create your repository `taste` and download `preferences.csv` (see
+      the Taste page). Split by week (train 1--8, validation 9--10, test
+      11--12). Describe each answer by its 8 attributes, using
+      $\log(\textrm{words})$, and standardize with training statistics.
+      Fit a **linear reward** $r(\mathbf{x}) = \mathbf{w}^\top\mathbf{x}$
+      with the loss $-\log\sigma(r(A) - r(B))$ for "A preferred". This is
+      logistic regression on $\mathbf{x}_A - \mathbf{x}_B$. Expect about 68%
+      validation accuracy (the rule "longer wins" gets about 63%). Then
+      make a table of how often the refusing answer wins, split by
+      category. Explain why no linear reward can match it, and why
+      adding a one-hot `category` doesn't help.
+    revisit: |
+      *Podium (2.8):* this is the Bradley--Terry model again, with a
+      rating *computed from attributes* instead of one free rating per
+      model. *4.1:* why is this a two-class softmax regression in disguise?
+  - page: chapter_multilayer-perceptrons/mlp-implementation
+    title: The reward MLP
+    build: |
+      Build the reward model as an MLP that maps one answer's attributes
+      **plus the one-hot category** to a single score: 14 inputs, 64 ReLU
+      hidden units, 1 output. Apply the **same** network to A and B and
+      train on $-\log\sigma(r(A) - r(B))$. Do it from scratch first
+      (your own parameters and ReLU), then with `nn.Sequential`. With SGD
+      (learning rate 0.1, batch 64, 40 epochs), expect about **74--75%**
+      validation accuracy. Try 16, 64, and 256 hidden units.
+    revisit: |
+      *Step 1:* print the learned reward for "refuses" in an unsafe
+      prompt and in a coding prompt (other attributes at typical values).
+      Did the MLP learn the interaction? *4.3:* use your `Classifier`'s
+      accuracy logic on the sign of $r(A) - r(B)$.
+  - page: chapter_multilayer-perceptrons/backprop
+    title: Gradients through shared weights
+    build: |
+      For one pair and a one-hidden-layer reward MLP, derive the
+      gradient of $-\log\sigma(r(A) - r(B))$ with respect to $\mathbf{W}_1$
+      by hand. The same weights are used twice, so the gradient is the
+      **sum** of two backward passes: one from A with factor
+      $-(1 - \sigma(d))$ and one from B with factor $+(1 - \sigma(d))$,
+      where $d = r(A) - r(B)$. Implement it in NumPy and check it against
+      autograd on a minibatch.
+    revisit: |
+      *2.5:* this is why autograd *accumulates* into `.grad`: a parameter
+      used twice receives both contributions. *Podium Step 4:* compare with
+      the gradient of the Bradley--Terry likelihood you derived there.
+  - page: chapter_multilayer-perceptrons/numerical-stability-and-init
+    title: Going deeper without breaking it
+    build: |
+      Make the reward model 6 hidden layers deep (64 units each). First
+      use sigmoid activations with weights from $\mathcal{N}(0, 0.01^2)$
+      and train for 10 epochs: accuracy stays at about **50%**. Print the
+      gradient norm of each layer to see why. Then switch to ReLU with He
+      initialization ($\mathcal{N}(0, 2/n_\textrm{in})$): about **73%**.
+      Finally train one model on *unstandardized* attributes (raw word
+      counts): what happens?
+    revisit: |
+      *Step 2:* is the deep model better than one hidden layer? (Not here:
+      the data is simple, so depth isn't free.) *3.4 / Pace Step 4:* relate
+      the unstandardized run to the divergence you saw with raw prompt
+      lengths.
+  - page: chapter_multilayer-perceptrons/generalization-deep
+    title: How good can it get? Noise, ceilings, early stopping
+    build: |
+      Use the 424 pairs labeled twice: two annotators agree only about
+      **66%** of the time. Suppose each annotator agrees with the "true"
+      preference with probability $p$. Then two annotators agree with
+      probability $p^2 + (1-p)^2$. Solve for $p$ (about 0.78): that's
+      roughly the best accuracy any model can reach on these labels.
+      Explain why your 74% can beat the 66% agreement. Then train a big MLP
+      (two layers of 256) on only the **first 500 pairs** for 200 epochs.
+      Plot training and validation accuracy per epoch, and record where
+      early stopping would stop.
+    revisit: |
+      *4.6:* with about 1,150 validation pairs, how large is the error bar
+      on 74%? Is 74.4% vs. 74.1% a real difference? *3.6:* compare the
+      learning curve with Pace's.
+  - page: chapter_multilayer-perceptrons/dropout
+    title: Regularize the small-data model
+    build: |
+      On the same 500 pairs, add dropout (0.5 after each hidden layer) and
+      compare with weight decay ($10^{-3}$) and with both. Report final and
+      best validation accuracy for each. Expect no regularization to fall to
+      about 66% at the end (after peaking near 72%), and dropout to hold
+      about 70%. Weight decay this small barely matters. Which choice would
+      you ship, and would you still use early stopping?
+    revisit: |
+      *3.7:* why might weight decay need to be much larger here to have an
+      effect? *Step 5:* is the remaining gap to the ceiling about
+      variance (data) or bias (model)?
+  - page: chapter_multilayer-perceptrons/kaggle-house-price
+    title: Choose the final model, then audit it
+    build: |
+      Pick hidden units, dropout, and epochs with **5-fold
+      cross-validation** on weeks 1--10, then train on all of them and
+      report test accuracy (about 74%) once. Then **audit**:
+      (1) agreement with the 441 expert labels (about 77%; the linear
+      model gets about 70%); (2) how often your model picks the *longer*
+      answer on those pairs, compared with experts (about 66% vs. 58%);
+      (3) plot the reward against word count for a typical chitchat answer.
+      Yours will likely peak near 80 words; the simulation's true best is
+      40. Your reward model has learned the annotators' taste for length.
+    revisit: |
+      **Everything comes back:** linear vs. MLP (5.1), implementation
+      (5.2), shared-weight gradients (5.3), initialization (5.4), noise
+      and early stopping (5.5), dropout (5.6), plus Podium's Bradley--Terry
+      loss and Chapter 4's error bars. Write the README with the results
+      table and a short "what would happen if we tuned a chatbot against
+      this reward" paragraph.

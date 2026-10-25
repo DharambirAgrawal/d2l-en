@@ -1,0 +1,8 @@
+# Quick recall for chapter_multilayer-perceptrons/mlp-implementation.md: retrieval practice on earlier material,
+# shown at the top of the section with hidden answers.
+- q: '*(5.1)* Why does an MLP need a nonlinear activation between its layers?'
+  a: 'Without one, the composition of affine layers is itself affine, so the deep network is no more expressive than a single linear layer.'
+- q: '*(5.1)* What are ReLU and its derivative?'
+  a: '$\max(x, 0)$; derivative 0 for $x < 0$ and 1 for $x > 0$.'
+- q: '*(4.5)* Why compute the loss with `F.cross_entropy` on logits instead of softmax then log?'
+  a: 'It combines them stably (log-sum-exp with the max subtracted), avoiding overflow and $\log 0$.'

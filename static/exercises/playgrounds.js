@@ -708,5 +708,196 @@
     },
   };
 
+  // ---------------------------------------------------- Chapter 5: MLPs
+
+  const ACTS = [
+    {name: 'ReLU', f: (z) => (z > 0 ? z : 0), d: (z, a) => (z > 0 ? 1 : 0)},
+    {name: 'tanh', f: Math.tanh, d: (z, a) => 1 - a * a},
+    {name: 'sigmoid', f: (z) => 1 / (1 + Math.exp(-z)), d: (z, a) => a * (1 - a)},
+  ];
+
+  // Two-class 2-D datasets: 0 = XOR, 1 = circles, 2 = moons.
+  function twoClass(kind, n, seed, noise = 0.15) {
+    const rand = rng(seed);
+    const X = [], y = [];
+    for (let i = 0; i < n; i++) {
+      let x0, x1, c;
+      if (kind === 0) {
+        x0 = 2 * rand() - 1; x1 = 2 * rand() - 1;
+        c = x0 * x1 > 0 ? 1 : 0;
+        x0 *= 1.6; x1 *= 1.6;
+      } else if (kind === 1) {
+        c = i % 2;
+        const r = c ? 0.6 + 0.25 * rand() : 1.25 + 0.3 * rand(), t = 2 * Math.PI * rand();
+        x0 = r * Math.cos(t); x1 = r * Math.sin(t);
+      } else {
+        c = i % 2;
+        const t = Math.PI * rand();
+        x0 = c ? 1 - Math.cos(t) - 0.5 : Math.cos(t) - 0.5;
+        x1 = c ? 0.5 - Math.sin(t) : Math.sin(t) - 0.25;
+        x0 *= 1.3; x1 *= 1.3;
+      }
+      X.push([x0 + noise * gaussian(rand), x1 + noise * gaussian(rand)]);
+      y.push(c);
+    }
+    return {X, y};
+  }
+
+  /* One-hidden-layer MLP (h = 0: logistic regression) for two classes,
+   * trained full batch with Adam on the logistic loss. */
+  function trainMLP(X, y, h, act, steps, {lr = 0.05, seed = 1, record = 0, Xval = null, yval = null} = {}) {
+    const A = ACTS[act], rand = rng(seed), n = X.length;
+    const s1 = Math.sqrt(2 / (2 + Math.max(h, 1)));
+    const W1 = Array.from({length: h}, () => [s1 * gaussian(rand), s1 * gaussian(rand)]);
+    const b1 = new Array(h).fill(0);
+    const w2 = Array.from({length: h || 2}, () => (h ? Math.sqrt(1 / h) * gaussian(rand) : 0));
+    let b2 = 0;
+    const params = [W1.flat(), b1, w2, [b2]];
+    const sizes = params.map((p) => p.length);
+    const m = sizes.map((k) => new Float64Array(k)), v = sizes.map((k) => new Float64Array(k));
+    function forward(x) {
+      if (!h) return {o: w2[0] * x[0] + w2[1] * x[1] + b2};
+      const z = new Array(h), a = new Array(h);
+      let o = b2;
+      for (let j = 0; j < h; j++) {
+        z[j] = W1[j][0] * x[0] + W1[j][1] * x[1] + b1[j];
+        a[j] = A.f(z[j]);
+        o += w2[j] * a[j];
+      }
+      return {z, a, o};
+    }
+    const errRate = (XX, yy) => XX.reduce((e, x, i) => e + ((forward(x).o > 0 ? 1 : 0) !== yy[i] ? 1 : 0), 0) / XX.length;
+    const curve = [];
+    for (let t = 1; t <= steps; t++) {
+      const gW1 = W1.map(() => [0, 0]), gb1 = new Array(h).fill(0), gw2 = new Array(w2.length).fill(0);
+      let gb2 = 0;
+      for (let i = 0; i < n; i++) {
+        const x = X[i], f = forward(x);
+        const g = (1 / (1 + Math.exp(-f.o)) - y[i]) / n;
+        gb2 += g;
+        if (!h) { gw2[0] += g * x[0]; gw2[1] += g * x[1]; continue; }
+        for (let j = 0; j < h; j++) {
+          gw2[j] += g * f.a[j];
+          const gz = g * w2[j] * A.d(f.z[j], f.a[j]);
+          gW1[j][0] += gz * x[0]; gW1[j][1] += gz * x[1]; gb1[j] += gz;
+        }
+      }
+      const grads = [gW1.flat(), gb1, gw2, [gb2]];
+      const flatW1 = W1.flat();
+      const cur = [flatW1, b1, w2, [b2]];
+      cur.forEach((p, k) => {
+        for (let q = 0; q < p.length; q++) {
+          m[k][q] = 0.9 * m[k][q] + 0.1 * grads[k][q];
+          v[k][q] = 0.999 * v[k][q] + 0.001 * grads[k][q] ** 2;
+          p[q] -= lr * (m[k][q] / (1 - 0.9 ** t)) / (Math.sqrt(v[k][q] / (1 - 0.999 ** t)) + 1e-8);
+        }
+      });
+      for (let j = 0; j < h; j++) { W1[j][0] = flatW1[2 * j]; W1[j][1] = flatW1[2 * j + 1]; }
+      b2 = cur[3][0];
+      if (record && (t % record === 0 || t === 1)) curve.push([t, errRate(X, y), Xval ? errRate(Xval, yval) : 0]);
+    }
+    let loss = 0;
+    X.forEach((x, i) => { const o = forward(x).o; loss += Math.log(1 + Math.exp(-(2 * y[i] - 1) * o)); });
+    return {score: (x) => forward(x).o, loss: loss / n, err: errRate(X, y), curve, errRate};
+  }
+
+  function drawRegions(P, score) {
+    const [x0, x1] = P.xlim, [y0, y1] = P.ylim;
+    const nx = 60, ny = Math.round(nx * (y1 - y0) / (x1 - x0));
+    const dx = (x1 - x0) / nx, dy = (y1 - y0) / ny;
+    for (let i = 0; i < nx; i++) {
+      for (let j = 0; j < ny; j++) {
+        const p = 1 / (1 + Math.exp(-score([x0 + (i + 0.5) * dx, y0 + (j + 0.5) * dy])));
+        P.rect(x0 + i * dx, y0 + j * dy, x0 + (i + 1) * dx, y0 + (j + 1) * dy,
+          {color: p > 0.5 ? COLORS.orange : COLORS.blue, alpha: 0.06 + 0.4 * Math.abs(p - 0.5)});
+      }
+    }
+  }
+
+  registry['mlp-regions'] = {
+    aspect: 0.62,
+    draw(canvas, {data, hidden, act, steps}) {
+      const kind = Math.round(data), h = Math.round(hidden), a = Math.round(act);
+      const {X, y} = twoClass(kind, 160, 4);
+      const m = trainMLP(X, y, h, a, Math.round(steps));
+      const P = new Plot(canvas, {xlim: [-2.6, 2.6], ylim: [-2.1, 2.1], equal: true});
+      drawRegions(P, m.score);
+      X.forEach((x, i) => P.point(x[0], x[1], {color: y[i] ? COLORS.orange : COLORS.blue, r: 3}));
+      P.legend();
+      const what = h ? `MLP with ${h} hidden ${ACTS[a].name} units (${4 * h + 1} parameters)`
+        : 'no hidden layer: logistic regression, a straight boundary';
+      return `${['XOR', 'circles', 'moons'][kind]}   ·   ${what}   ·   ` +
+        `training error ${(100 * m.err).toFixed(1)}%   ·   loss ${m.loss.toFixed(3)}`;
+    },
+  };
+
+  /* Push a batch through a deep MLP of width 64 and backpropagate a random
+   * output gradient; return per-layer activation and gradient sizes. */
+  registry['deep-signal'] = {
+    aspect: 0.6,
+    draw(canvas, {depth, log_scale, act}) {
+      const L = Math.round(depth), A = ACTS[Math.round(act)], n = 64, batch = 32;
+      const scale = Math.pow(10, log_scale);   // weights ~ N(0, scale^2 / n)
+      const rand = rng(9);
+      const Ws = Array.from({length: L}, () => Array.from({length: n}, () =>
+        Array.from({length: n}, () => scale * gaussian(rand) / Math.sqrt(n))));
+      let H = Array.from({length: batch}, () => Array.from({length: n}, () => gaussian(rand)));
+      const Zs = [], Hs = [H];
+      const rms = (M) => Math.sqrt(M.reduce((s, r) => s + r.reduce((t, v) => t + v * v, 0), 0) / (M.length * M[0].length));
+      for (const W of Ws) {
+        const Z = H.map((h) => W.map((w) => w.reduce((s, wij, j) => s + wij * h[j], 0)));
+        H = Z.map((z) => z.map(A.f));
+        Zs.push(Z); Hs.push(H);
+      }
+      let G = H.map((r) => r.map(() => gaussian(rand)));
+      const grads = new Array(L);
+      for (let l = L - 1; l >= 0; l--) {
+        const Gz = G.map((g, b) => g.map((v, i) => v * A.d(Zs[l][b][i], Hs[l + 1][b][i])));
+        grads[l] = rms(Gz);
+        G = Gz.map((gz) => Array.from({length: n}, (_, j) => Ws[l].reduce((s, w, i) => s + w[j] * gz[i], 0)));
+      }
+      const acts = Hs.slice(1).map(rms);
+      const layers = Array.from({length: L}, (_, i) => i + 1);
+      const clip = (v) => Math.min(Math.max(v, 1e-12), 1e12);
+      const P = new Plot(canvas, {xlim: [1, Math.max(L, 2)], ylim: [1e-12, 1e12], ylog: true,
+        xlabel: 'layer', legend: 'lower left'});
+      P.line(layers, acts.map(clip), {color: COLORS.blue, label: 'activation size (forward)'});
+      P.line(layers, grads.map(clip), {color: COLORS.red, label: 'gradient size (backward)'});
+      P.line([1, Math.max(L, 2)], [1, 1], {color: COLORS.gray, dash: [4, 4], width: 1});
+      P.legend();
+      const ratio = grads[0] / grads[L - 1];
+      const verdict = !isFinite(ratio) || ratio > 1e3 ? 'gradients EXPLODE toward the first layers'
+        : ratio < 1e-3 ? 'gradients VANISH toward the first layers' : 'gradients stay in a healthy range';
+      return `${L} layers of ${A.name}, weights ~ N(0, (${scale.toPrecision(2)}²)/n)   ·   ` +
+        `first-layer gradient is ${ratio.toExponential(1)} × the last-layer one: ${verdict}`;
+    },
+  };
+
+  registry['early-stopping'] = {
+    aspect: 0.58,
+    draw(canvas, {noise, hidden}) {
+      const h = Math.round(hidden);
+      const {X, y} = twoClass(2, 80, 21, 0.12);
+      const val = twoClass(2, 400, 22, 0.12);
+      const rand = rng(23);
+      const yn = y.map((c) => (rand() < noise ? 1 - c : c));
+      const steps = 3000;
+      const m = trainMLP(X, yn, h, 0, steps, {lr: 0.05, record: 60, Xval: val.X, yval: val.y});
+      const ts = m.curve.map((c) => c[0]);
+      const P = new Plot(canvas, {xlim: [1, steps], ylim: [0, 0.5], xlabel: 'training steps', legend: 'upper right'});
+      P.line(ts, m.curve.map((c) => c[1]), {color: COLORS.blue, label: 'training error (noisy labels)'});
+      P.line(ts, m.curve.map((c) => c[2]), {color: COLORS.orange, label: 'validation error (clean labels)'});
+      let best = 0;
+      m.curve.forEach((c, i) => { if (c[2] < m.curve[best][2]) best = i; });
+      const [tb, , vb] = m.curve[best];
+      P.line([tb, tb], [0, 0.5], {color: COLORS.green, dash: [6, 4], label: 'best step (early stopping)'});
+      P.legend();
+      const last = m.curve[m.curve.length - 1];
+      return `${(100 * noise).toFixed(0)}% of training labels flipped   ·   best validation error ` +
+        `${(100 * vb).toFixed(1)}% at step ${tb}   ·   after ${steps} steps: training ${(100 * last[1]).toFixed(1)}%, ` +
+        `validation ${(100 * last[2]).toFixed(1)}%`;
+    },
+  };
+
   window.D2LPlaygrounds = registry;
 })();

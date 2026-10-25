@@ -1,0 +1,19 @@
+title: An MLP of Any Depth
+difficulty: easy
+timeout: 10
+description: |
+  Write `mlp_forward(X, params)` for an MLP with any number of hidden
+  layers. `params` is a list of `(W, b)` pairs, one per layer, with `W` of
+  shape (inputs, outputs). Apply ReLU after every layer **except the
+  last**, which returns the raw logits. `X` has shape (batch, inputs).
+
+  Also write `count_params(sizes)`, which returns the number of
+  parameters (weights and biases) of an MLP with layer sizes `sizes`. For
+  example, `[784, 256, 10]` has $784 \cdot 256 + 256 + 256 \cdot 10 + 10$
+  parameters.
+explanation: |
+  Each layer is $\mathbf{H} \leftarrow \mathrm{ReLU}(\mathbf{H}\mathbf{W} + \mathbf{b})$;
+  the output layer skips the ReLU because logits must be able to be
+  negative, and the softmax in the loss handles them. A layer from $a$ to
+  $b$ units has $ab + b$ parameters, so adding a 256-unit hidden layer to
+  the Fashion-MNIST MLP adds $256 \cdot 256 + 256 = 65{,}792$ parameters.

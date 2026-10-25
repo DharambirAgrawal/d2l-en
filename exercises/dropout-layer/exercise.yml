@@ -1,0 +1,16 @@
+title: Inverted Dropout
+difficulty: easy
+timeout: 10
+description: |
+  Write `dropout(X, p, training, rng)`. When `training` is true, zero each
+  entry independently with probability `p` and divide the survivors by
+  $1 - p$ (use `rng.random(X.shape)` to draw the mask). Handle `p = 1`
+  (everything is dropped, return zeros) without dividing by zero. When
+  `training` is false, return `X` unchanged.
+explanation: |
+  Dividing by $1 - p$ keeps each activation's expected value equal to
+  the original: $E[h'] = (1 - p)\cdot\frac{h}{1 - p} + p \cdot 0 = h$.
+  That is why nothing needs to change at test time: the network sees the
+  same average signal it was trained with. (The original 2014 paper
+  instead scaled the weights by $1-p$ at test time; "inverted" dropout
+  moves that work into training.)

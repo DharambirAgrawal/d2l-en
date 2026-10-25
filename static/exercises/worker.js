@@ -18,23 +18,26 @@
 let pyodideReady = null;
 let datasetsBase = '';
 
-// Datasets the book's code can load (torchlite's torchvision shim reads them
-// from /d2l/datasets). Downloaded the first time a cell mentions them.
+// Datasets the book's code can load (torchlite's torchvision shim and
+// d2l.download read them from /d2l/datasets). Downloaded the first time a
+// cell mentions them.
 const DATASETS = [
-  {name: 'fashion-mnist', pattern: /FashionMNIST/, label: 'Fashion-MNIST (31 MB, only once)'},
+  {file: 'fashion-mnist.npz', pattern: /FashionMNIST/, label: 'Fashion-MNIST (31 MB, only once)'},
+  {file: 'kaggle_house_pred_train.csv', pattern: /KaggleHouse|kaggle_house/, label: 'house prices (0.5 MB)'},
+  {file: 'kaggle_house_pred_test.csv', pattern: /KaggleHouse|kaggle_house/, label: 'house prices (0.5 MB)'},
 ];
 
 async function ensureDatasets(pyodide, code, post) {
   for (const d of DATASETS) {
-    const path = `/d2l/datasets/${d.name}.npz`;
+    const path = `/d2l/datasets/${d.file}`;
     if (!d.pattern.test(code) || pyodide.FS.analyzePath(path).exists) continue;
     post({type: 'status', text: `Downloading ${d.label}…`});
     try {
-      const r = await fetch(`${datasetsBase}${d.name}.npz`);
+      const r = await fetch(`${datasetsBase}${d.file}`);
       if (!r.ok) throw new Error(String(r.status));
       pyodide.FS.writeFile(path, new Uint8Array(await r.arrayBuffer()));
     } catch (e) {
-      // torchlite raises a clear error when the file is missing.
+      // The Python side raises a clear error when the file is missing.
     }
   }
 }

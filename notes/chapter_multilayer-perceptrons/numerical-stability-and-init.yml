@@ -1,0 +1,26 @@
+# Notes for chapter_multilayer-perceptrons/numerical-stability-and-init.md: each entry is shown at the end of the
+# section whose heading matches "after".
+- after: Vanishing and Exploding Gradients
+  notes:
+  - 'The gradient of a deep network is a **product** of many matrices (one per layer). Products of many numbers either shrink to 0 or blow up unless each factor is near 1.'
+- after: (**Vanishing Gradients**)
+  notes:
+  - 'Sigmoid''s derivative is at most 0.25 and almost 0 when inputs are large in size: multiply many such factors and the gradient **vanishes**, so the early layers stop learning.'
+  - 'This is why ReLU (derivative 1 for positive inputs) became the default.'
+- after: '[**Exploding Gradients**]'
+  notes:
+  - 'Multiply 100 random $4 \times 4$ Gaussian matrices and the entries become astronomically large (often beyond $10^{20}$): gradients **explode** and training diverges.'
+- after: Breaking the Symmetry
+  notes:
+  - 'Hidden units in a layer are interchangeable (**permutation symmetry**). If all weights start equal, every unit computes the same thing and gets the same gradient, forever. Plain minibatch SGD never breaks this; random initialization does. (Dropout would.)'
+- after: Default Initialization
+  notes:
+  - 'Frameworks use sensible random defaults (PyTorch''s `nn.Linear`: uniform in $\pm 1/\sqrt{n_\textrm{in}}$). Fine for moderate problems.'
+- after: Xavier Initialization
+  notes:
+  - 'For $o_i = \sum_j w_{ij}x_j$ with $n_\textrm{in}$ inputs: $\textrm{Var}[o_i] = n_\textrm{in}\sigma^2\gamma^2$. Keep it equal to the input variance: $n_\textrm{in}\sigma^2 = 1$; backward pass wants $n_\textrm{out}\sigma^2 = 1$.'
+  - '**Xavier**: compromise $\sigma^2 = 2/(n_\textrm{in} + n_\textrm{out})$; Gaussian $\mathcal{N}(0, \sigma^2)$ or uniform $U(-\sqrt{6/(n_\textrm{in} + n_\textrm{out})}, \sqrt{6/(n_\textrm{in} + n_\textrm{out})})$.'
+  - 'For ReLU, half the outputs are 0, so use twice the variance: $2/n_\textrm{in}$ (**He/Kaiming** initialization).'
+- after: Beyond
+  notes:
+  - 'Initialization is an active research area: special schemes let networks with 10,000 layers train without extra tricks.'

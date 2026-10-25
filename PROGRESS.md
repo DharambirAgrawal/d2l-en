@@ -82,6 +82,10 @@ site should respect them.
     practice testing and distributed practice (Dunlosky et al., 2013;
     Donoghue & Hattie, 2021). I forget fast and want to truly learn the
     whole book.
+20. **Projects must feel current (2026).** Chapter projects should be the
+    kind of problem AI companies work on now (LLM evaluation, serving,
+    safety, RLHF), while still using only the chapter's concepts. Generic
+    textbook scenarios felt dull (2026-10-24).
 
 ---
 
@@ -322,6 +326,73 @@ file for its features.
   better, motivating the MLP); *The War of the Worlds* shift test (9.2).
   Roadmap renumbered: Part 4 = MLP (Ch 5), 5 = RNN, 6 = Transformer.
 
+### 2026-10-24: 2026-style projects + Chapter 5 (Multilayer Perceptrons)
+
+The user found the first projects dull, so all three chapter projects were
+replaced with ones about building and running AI systems in 2026. Same
+step-by-step structure, new data (generators in `projects/generators/`,
+so the data can be rebuilt exactly):
+
+- **2.8 Podium** (`battles.csv`, 6,831 chatbot-arena votes): rank 12 AI
+  models with Bradley--Terry (the RLHF reward-model loss), fix a 52/48
+  position bias, bootstrap error bars; the new model's "#1" is a
+  statistical tie (P = 0.61). Side projects: *Lens* (vector search over
+  this book, the retrieval half of RAG), *Ripple*, *Spark*.
+- **3.8 Pace** (`llm_requests.csv`, 7,522 requests): predict an LLM's time
+  to first token from prompt length, prefix-cache hits, queue depth, model
+  and GPU. Test MAE 514 → 472 → 311 → 196 → 172 (Huber) → 155 ms (+client);
+  a P90 promise of 1.19× the prediction. Side projects: *Scale*
+  (scaling-law extrapolation), *Scout*, *Drift*.
+- **4.8 Shield** (`agent_inbox.csv`, 8,000 messages): a prompt-injection /
+  exfiltration / jailbreak / phishing filter for an AI agent. May 97.8%;
+  a June injection style drops attacks caught from 97% to 81%; cost-aware
+  `decide` gets back to 89%; 50 June labels → 93%. Side projects:
+  *Router* (model routing), *Gauge*, *Sentinel*.
+- Removed: Hush, Tempo, Relay (and metrics/deliveries/tickets CSVs).
+
+Chapter 5, same treatment as Chapters 3--4:
+
+- **Runs in the browser:** all 36 PyTorch cells. torchlite gained
+  `torch.max/min` (elementwise and by dim), `maximum/minimum`,
+  `nn.Dropout` / `F.dropout` (respects `train()`/`eval()`), `nn.Sigmoid`,
+  `nn.Tanh`, `nn.init.xavier_normal_/kaiming_*`. The house-price CSVs ship in
+  `static/datasets/` and `d2l.download` returns the local copy (browser
+  stand-in in `tools/build_d2l_book.py`); the worker fetches them when a
+  cell mentions `KaggleHouse`. Results match the book (MLP about 85%,
+  k-fold log MSE about 0.17).
+- **Answers** for all 42 exercises, with numbers measured in real PyTorch
+  (hidden units, learning rates, activations, init, dropout vs. weight
+  decay, house-price tuning).
+- **Notes** (28 sections) and **recall** for all 7 sections. Notes can now
+  sit under headings with d2lbook slide marks (`[**Training**]`).
+- **7 coding exercises:** `activation-derivatives`, `mlp-forward`,
+  `mlp-backprop`, `xavier-init`, `early-stopping`, `dropout-layer`,
+  `kfold-split`.
+- **3 playgrounds:** `mlp-regions` (hidden units bend the boundary),
+  `deep-signal` (vanishing/exploding gradients vs. weight scale and
+  activation), `early-stopping` (noisy labels get memorized late).
+- **5.8 Project: Taste** (`preferences.csv`, 6,770 labels): an RLHF reward
+  model. Linear 68% → MLP 74%; annotator agreement 66% (ceiling about 78%);
+  deep sigmoid with tiny init stays at 50%, ReLU + He 73%; audit vs. 441
+  expert labels finds a learned length bias. Side projects: *Grok*
+  (grokking), *Reel* (feed ranking), *Probe* (probing GPT-2).
+- **5.9 Quill Part 4:** character MLP with embeddings (Bengio 2003).
+  Measured: k=8, 256 units 5.6; 512 + dropout 5.1; two layers of 512 +
+  dropout 0.3 **4.5** (beats the 4-gram's 5.8); next-char accuracy 56%.
+- Tests: `tools/site_tests/test_chapter5.py`; run_all.sh runs Chapter 5
+  cells too.
+- **Browser speed:** an MLP batch takes about 0.1 s in WebAssembly NumPy, so
+  from Chapter 5 on the browser trains on the first 10,000 Fashion-MNIST
+  images (a printed note says so; about 72--78% instead of 85%). Set in
+  `notebook.py` (`_set_train_limit`; `D2L_TRAIN_LIMIT` overrides).
+- **pandas 3 in the browser** stores text as a "str" dtype, which broke the
+  house-price preprocessing; `notebook.py` sets `future.infer_string=False`.
+- `.gitignore` now keeps `static/datasets/*.csv` (the house-price files
+  would otherwise never reach Render).
+- Full run 2026-10-24: build OK, 206/206 book cells, 192/192 browser
+  checks (two flaky checks fixed: float rounding in row sums and in the
+  autograd control-flow example).
+
 ---
 
 ## Still on the site (possible next cleanups)
@@ -422,7 +493,7 @@ Pyodide 314+ must be loaded as a module worker (`import()`).
 3. Check: `python tools/build_exercises.py` (needs `numpy`, `pandas`,
    `matplotlib`, `pyyaml`, `mistune`).
 
-### Exercises so far (27)
+### Exercises so far (34)
 
 | Section | Exercises |
 |---|---|
@@ -434,6 +505,7 @@ Pyodide 314+ must be loaded as a module worker (`import()`).
 | 2.6 Probability and Statistics | `coin-estimator-variance`, `coupled-tests-bayes`, `portfolio-stats` |
 | Chapter 3 | `mean-vs-median`, `poisson-loss`, `reproducible-batches`, `linreg-sgd-numpy`, `huber-loss`, `weight-decay-updates` |
 | Chapter 4 | `stable-softmax`, `soft-cross-entropy`, `exact-validation-loss`, `bayes-decision`, `exp-safe-range`, `hoeffding-samples`, `shift-detector` |
+| Chapter 5 | `activation-derivatives`, `mlp-forward`, `mlp-backprop`, `xavier-init`, `early-stopping`, `dropout-layer`, `kfold-split` |
 
 ### Testing record
 - 2026-10-18 Phase 1: clean full build + 27/27 browser checks (exercises).
@@ -466,9 +538,10 @@ Pyodide 314+ must be loaded as a module worker (`import()`).
 
 - [ ] Deploy the study-course update and try it on the live site.
 - [x] Chapter 3: answers, notes, exercises, playgrounds, runnable training
-      loops, Tempo project, Quill Part 2.
-- [x] Chapter 4 (classification): same treatment, Relay, Quill Part 3,
+      loops, Tempo project (now Pace), Quill Part 2.
+- [x] Chapter 4 (classification): same treatment, Relay (now Shield), Quill Part 3,
       Fashion-MNIST in the browser.
-- [ ] Chapter 5 (MLPs): same treatment, Quill Part 4 (MLP; goal: beat the
-      count 4-gram's 5.8); torchlite needs activations (`ReLU` exists),
-      dropout, and `nn.init` extras.
+- [x] Replace the chapter projects with 2026-style ones (Podium, Pace,
+      Shield).
+- [x] Chapter 5 (MLPs): same treatment, Taste, Quill Part 4 (4.5).
+- [ ] Chapter 6 (Builders' Guide): same treatment, Quill Part 5 prep.

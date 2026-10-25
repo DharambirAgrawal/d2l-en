@@ -1,0 +1,34 @@
+# Notes for chapter_multilayer-perceptrons/mlp.md: each entry is shown at the end of the
+# section whose heading matches "after".
+- after: Limitations of Linear Models
+  notes:
+  - 'Linear models assume **monotonicity**: raising a feature always pushes the output the same way. Many problems break this (body temperature vs. health risk: too low *and* too high are bad).'
+  - 'Hand-made features (e.g., distance from 37°C) can fix one case, but for images no simple feature of single pixels works: what matters is pixels **in context**.'
+- after: Incorporating Hidden Layers
+  notes:
+  - 'Stack fully connected layers: input → **hidden layer** → output. Each layer feeds the next. This is a **multilayer perceptron (MLP)**.'
+  - 'The figure''s MLP has 4 inputs, 5 hidden units, 3 outputs: two layers of weights (counting only layers with parameters).'
+- after: From Linear to Nonlinear
+  notes:
+  - 'Without a nonlinearity, two layers collapse into one: $(\mathbf{X}\mathbf{W}^{(1)} + \mathbf{b}^{(1)})\mathbf{W}^{(2)} + \mathbf{b}^{(2)} = \mathbf{X}\mathbf{W} + \mathbf{b}$. Nothing gained.'
+  - 'Apply an **activation function** $\sigma$ elementwise after the hidden layer: $\mathbf{H} = \sigma(\mathbf{X}\mathbf{W}^{(1)} + \mathbf{b}^{(1)})$, $\mathbf{O} = \mathbf{H}\mathbf{W}^{(2)} + \mathbf{b}^{(2)}$. Now the model can no longer be rewritten as linear.'
+  - 'Rows are examples (minibatch), so $\mathbf{H}$ has shape (batch, hidden units).'
+- after: Universal Approximators
+  notes:
+  - 'One hidden layer with enough units can approximate any continuous function (**universal approximation**). But "can represent" ≠ "easy to learn", and the number of units needed can be huge.'
+  - 'In practice **deeper** (more layers) networks represent many functions far more compactly than wide shallow ones.'
+- after: ReLU Function
+  notes:
+  - '$\mathrm{ReLU}(x) = \max(x, 0)$. Derivative: 0 for $x < 0$, 1 for $x > 0$ (at 0 use 0 by convention).'
+  - 'Its gradient either passes through unchanged or is zero: this helps against **vanishing gradients**. The default choice today. Variant: pReLU $\max(0, x) + \alpha\min(0, x)$.'
+- after: Sigmoid Function
+  notes:
+  - '$\sigma(x) = 1/(1 + e^{-x})$ squashes to $(0, 1)$. Derivative $\sigma(x)(1 - \sigma(x))$, at most **0.25** (at $x = 0$).'
+  - 'For large $|x|$ the derivative is almost 0: gradients vanish. Today used mostly for outputs that are probabilities and for gates (LSTMs, Chapter 10).'
+- after: Tanh Function
+  notes:
+  - '$\tanh(x) = (1 - e^{-2x})/(1 + e^{-2x})$, range $(-1, 1)$, symmetric around 0. Derivative $1 - \tanh^2(x)$, at most **1**.'
+  - '$\tanh(x) = 2\sigma(2x) - 1$: a rescaled sigmoid.'
+- after: Summary and Discussion
+  notes:
+  - 'Modern activations: ReLU, GELU $x\Phi(x)$, Swish $x\,\sigma(\beta x)$. Transformers mostly use GELU or variants.'

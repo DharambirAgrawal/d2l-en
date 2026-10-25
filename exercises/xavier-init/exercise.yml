@@ -1,0 +1,26 @@
+title: Keep the Signal Alive with Xavier Initialization
+difficulty: medium
+timeout: 20
+description: |
+  1. Write `xavier_normal(n_in, n_out, rng)`, which returns an
+     `(n_in, n_out)` weight matrix with entries drawn from
+     $\mathcal{N}(0, \sigma^2)$, where $\sigma^2 = 2/(n_\textrm{in} + n_\textrm{out})$.
+     Use `rng.normal`.
+  2. Write `layer_stds(X, weights, act)`. It passes `X` through the
+     layers $\mathbf{H} \leftarrow \mathrm{act}(\mathbf{H}\mathbf{W})$ (no
+     biases) and returns a list with the standard deviation of
+     $\mathbf{H}$ after every layer.
+
+  The starter compares 30 tanh layers of width 256 initialized with
+  $\sigma = 0.01$, $\sigma = 1$, and Xavier. With $\sigma = 0.01$ the
+  signal vanishes; with $\sigma = 1$ tanh saturates at $\pm 1$; Xavier
+  keeps it in a healthy range.
+explanation: |
+  Each output sums $n_\textrm{in}$ terms, so its variance is
+  $n_\textrm{in}\sigma^2$ times the input variance. With $\sigma = 0.01$
+  and width 256 that factor is 0.0256, so after a few layers nothing is
+  left. With $\sigma = 1$ it is 256, so tanh is pushed to $\pm 1$, where
+  its gradient is 0. Xavier makes the factor about 1 (here
+  $n_\textrm{in} = n_\textrm{out}$). Backward gradients face the same
+  products, which is why initialization decides whether deep networks
+  train at all.

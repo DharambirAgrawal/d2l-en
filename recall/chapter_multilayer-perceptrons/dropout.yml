@@ -1,0 +1,8 @@
+# Quick recall for chapter_multilayer-perceptrons/dropout.md: retrieval practice on earlier material,
+# shown at the top of the section with hidden answers.
+- q: '*(5.5)* What is early stopping, and when does it help most?'
+  a: 'Stop training when validation error stops improving (keep the best checkpoint). It helps most with noisy labels, which networks memorize late in training.'
+- q: '*(5.4)* Why can''t all weights start at the same value?'
+  a: 'Then all hidden units compute the same function and receive the same gradient, so they stay identical (permutation symmetry is never broken).'
+- q: '*(3.7)* How is weight decay passed to a PyTorch optimizer?'
+  a: 'With the `weight_decay` argument, e.g., `torch.optim.SGD(params, lr=0.1, weight_decay=1e-3)`.'

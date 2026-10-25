@@ -1,0 +1,71 @@
+# Answers for chapter_multilayer-perceptrons/mlp.md "Exercises", in order.
+- answer: |
+    A linear layer is $\mathbf{x} \mapsto \mathbf{W}\mathbf{x} + \mathbf{b}$.
+    Composing two gives $\mathbf{W}_2(\mathbf{W}_1\mathbf{x} + \mathbf{b}_1) +
+    \mathbf{b}_2 = (\mathbf{W}_2\mathbf{W}_1)\mathbf{x} + (\mathbf{W}_2\mathbf{b}_1 +
+    \mathbf{b}_2)$, which is again one linear layer. By induction, any depth
+    collapses to a single layer, so depth adds no expressive power.
+
+    It can **reduce** it: a narrow hidden layer is a bottleneck. With 784
+    inputs, a hidden layer of 1 unit, and 10 outputs, the product
+    $\mathbf{W}_2\mathbf{W}_1$ has rank at most 1, so all 10 logits move
+    along one direction. A single 784 → 10 layer can have rank 10. (In the
+    experiments for Section 5.2, Exercise 3, a 1-unit bottleneck even
+    *with* ReLU drops Fashion-MNIST test accuracy to about 42%.)
+- answer: |
+    $\mathrm{pReLU}(x) = \max(0, x) + \alpha\min(0, x)$, so the derivative
+    is $1$ for $x > 0$ and $\alpha$ for $x < 0$. At $x = 0$ it is not
+    differentiable (unless $\alpha = 1$); by convention, use either value.
+    With respect to the learned parameter: $\partial/\partial\alpha =
+    \min(0, x)$.
+  exercise: activation-derivatives
+- answer: |
+    Product rule with $\sigma'(z) = \sigma(z)(1 - \sigma(z))$:
+    $$\frac{d}{dx}\, x\,\sigma(\beta x) = \sigma(\beta x) + \beta x\,
+    \sigma(\beta x)\big(1 - \sigma(\beta x)\big).$$
+    At $x = 0$ it equals $1/2$; it tends to 1 as $x \to \infty$ and to 0 as
+    $x \to -\infty$. It dips slightly below 0 for moderate negative $x$,
+    and as $\beta \to \infty$ Swish approaches ReLU.
+- answer: |
+    Each ReLU unit computes $\max(0, \mathbf{w}^\top\mathbf{x} + b)$, which is
+    continuous and piecewise linear (two linear pieces split by a
+    hyperplane). Continuous piecewise linear functions are closed under the
+    operations an MLP uses: sums and scalings (the next affine layer),
+    composition with affine maps, and taking $\max(0, \cdot)$. Each
+    operation keeps continuity and only adds more boundaries between
+    pieces. By induction over layers, the whole network is continuous and
+    piecewise linear, with finitely many linear regions. The same argument
+    works for pReLU: $\max(0, z) + \alpha\min(0, z)$ is continuous and
+    piecewise linear too.
+- answer: |
+    1. $2\sigma(2x) = \frac{2}{1 + e^{-2x}}$, and $\tanh(x) + 1 =
+       \frac{1 - e^{-2x}}{1 + e^{-2x}} + \frac{1 + e^{-2x}}{1 + e^{-2x}} =
+       \frac{2}{1 + e^{-2x}}$. They are equal.
+    2. So $\tanh(z) = 2\sigma(2z) - 1$. Take a tanh network with a hidden
+       layer $\tanh(\mathbf{W}\mathbf{x} + \mathbf{b})$ followed by affine
+       $\mathbf{V}\mathbf{h} + \mathbf{c}$. Rewrite it as
+       $2\mathbf{V}\sigma(2\mathbf{W}\mathbf{x} + 2\mathbf{b}) + (\mathbf{c} -
+       \mathbf{V}\mathbf{1})$: a sigmoid network with weights $2\mathbf{W}$,
+       bias $2\mathbf{b}$, and the factor and shift absorbed into the next
+       layer's weights and bias. The reverse works with $\sigma(z) =
+       (\tanh(z/2) + 1)/2$. Every function one class can represent, the
+       other can too. (Training behavior still differs: tanh is centered at
+       0, which often helps optimization.)
+- answer: |
+    Then an example's output depends on the **other examples in its
+    minibatch**:
+    - Predictions change with the batch size and batch composition. A
+      single example at test time has no "batch statistics", so training
+      and test behavior differ (batch normalization fixes this with running
+      averages at test time; Section 8.5).
+    - Very small batches give noisy statistics.
+    - Examples are no longer independent, which complicates gradients and
+      makes results depend on how data is shuffled and split across
+      devices.
+- answer: |
+    Sigmoid saturates. If a pre-activation is large, say $z = 10$, then
+    $\sigma'(10) = \sigma(10)(1 - \sigma(10)) \approx 4.5 \times 10^{-5}$.
+    Even at best, $\sigma'(0) = 0.25$, so a chain of 10 sigmoid layers
+    multiplies the gradient by at most $0.25^{10} \approx 10^{-6}$. Large
+    initial weights (or unscaled inputs like raw pixel values 0--255) put
+    units into saturation, and the early layers receive almost no gradient.

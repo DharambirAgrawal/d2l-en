@@ -1,0 +1,20 @@
+title: Derivatives of Modern Activations
+difficulty: easy
+timeout: 10
+description: |
+  Write the derivatives of two activation functions, elementwise on NumPy
+  arrays:
+
+  - `prelu_grad(x, alpha)`: the derivative of
+    $\mathrm{pReLU}(x) = \max(0, x) + \alpha \min(0, x)$. Use 1 for
+    $x > 0$ and $\alpha$ for $x \leq 0$.
+  - `swish_grad(x, beta)`: the derivative of
+    $\mathrm{swish}(x) = x\,\sigma(\beta x)$, where
+    $\sigma(z) = 1/(1 + e^{-z})$.
+explanation: |
+  pReLU is linear on each side of 0, so its derivative is 1 on the right
+  and $\alpha$ on the left. For Swish, the product rule and
+  $\sigma'(z) = \sigma(z)(1 - \sigma(z))$ give
+  $\sigma(\beta x) + \beta x\,\sigma(\beta x)(1 - \sigma(\beta x))$.
+  For large positive $x$ it tends to 1, like ReLU. Unlike ReLU, it is
+  smooth and slightly negative for some $x < 0$.

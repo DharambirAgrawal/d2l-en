@@ -34,5 +34,7 @@ numerical-stability-and-init
 generalization-deep
 dropout
 kaggle-house-price
+project-taste
+capstone-quill-4
 ```
 

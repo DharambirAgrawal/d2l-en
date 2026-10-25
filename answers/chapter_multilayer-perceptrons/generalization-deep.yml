@@ -1,0 +1,35 @@
+# Answers for chapter_multilayer-perceptrons/generalization-deep.md "Exercises", in order.
+- answer: |
+    Complexity measures such as parameter count or VC dimension bound the
+    gap between training and test error by the capacity of the *model
+    class*. Deep networks have enough capacity to fit even **random
+    labels** perfectly, so these bounds are vacuous (larger than 100%
+    error). Yet the same networks generalize well on real labels. And
+    making networks bigger often *reduces* test error (double descent),
+    the opposite of what capacity-based bounds predict. What matters seems
+    to be the interaction between the data, the architecture, and the
+    optimizer (which solutions SGD finds), not the size of the class.
+- answer: |
+    It limits how far training can move the parameters from their small
+    initialization, which effectively restricts the set of functions the
+    model can reach, like a constraint on the weights. For linear models
+    trained by gradient descent, stopping early is closely related to $\ell_2$
+    regularization. Empirically, it stops the network before it memorizes
+    noisy labels, which is what a regularizer is for.
+- answer: |
+    They monitor **validation** error after each epoch (or every few
+    steps). They stop when it hasn't improved by more than a small
+    threshold (`min_delta`) for a number of evaluations (the
+    **patience**), and keep the checkpoint with the best validation score.
+  exercise: early-stopping
+- answer: |
+    **Label noise.** With clean, separable data the network can't
+    "overfit" in the harmful sense, and training to convergence is fine.
+    With noisy labels, networks first fit the clean patterns and only later
+    memorize the wrong labels. Stopping between those phases gives big
+    gains.
+- answer: |
+    It saves **compute** and time (often a lot, when the model would
+    otherwise train for many more epochs), and with it energy and cost. It
+    also provides a natural, cheap way to choose the number of epochs, one
+    fewer hyperparameter to tune.

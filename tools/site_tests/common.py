@@ -47,6 +47,7 @@ def cell_index(page, needle):
 def wait_cell_done(page, i, timeout=180000):
     page.wait_for_function(
         '(i) => { const b = document.querySelectorAll(".d2l-cell-bar")[i]; const o = b.nextElementSibling;'
+        ' if (/Stopped:/.test(b.querySelector(".d2l-cell-status").textContent)) return true;'
         ' return !o.hidden && o.childElementCount > 0 &&'
         ' !/Running|Loading/.test(b.querySelector(".d2l-cell-status").textContent); }',
         arg=i, timeout=timeout)

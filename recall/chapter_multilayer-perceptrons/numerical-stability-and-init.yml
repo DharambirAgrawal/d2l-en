@@ -1,0 +1,8 @@
+# Quick recall for chapter_multilayer-perceptrons/numerical-stability-and-init.md: retrieval practice on earlier material,
+# shown at the top of the section with hidden answers.
+- q: '*(5.3)* In backpropagation, how do you get $\partial J/\partial\mathbf{z}$ from $\partial J/\partial\mathbf{h}$ when $\mathbf{h} = \phi(\mathbf{z})$?'
+  a: 'Multiply elementwise by the activation''s derivative: $\partial J/\partial\mathbf{z} = \partial J/\partial\mathbf{h} \odot \phi''(\mathbf{z})$.'
+- q: '*(5.1)* What is the largest value of the sigmoid''s derivative?'
+  a: '0.25, at $x = 0$; it is nearly 0 for large $|x|$.'
+- q: '*(5.3)* Why does training need more memory than prediction?'
+  a: 'Backpropagation reuses the intermediate values from the forward pass, so they must be kept until the backward pass is done.'

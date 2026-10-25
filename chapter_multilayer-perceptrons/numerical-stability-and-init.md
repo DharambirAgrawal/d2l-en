@@ -370,6 +370,12 @@ the Xavier initialization method
 turns out to work well in practice.
 
 
+See how the weight scale and the activation decide whether a deep network's gradients survive:
+
+```{=html}
+<div class="d2l-playground" data-playground="deep-signal"></div>
+```
+
 ### Beyond
 
 The reasoning above barely scratches the surface

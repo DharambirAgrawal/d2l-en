@@ -1,0 +1,8 @@
+# Quick recall for chapter_multilayer-perceptrons/kaggle-house-price.md: retrieval practice on earlier material,
+# shown at the top of the section with hidden answers.
+- q: '*(5.6)* In dropout, why are the surviving activations divided by $1 - p$?'
+  a: 'So that each activation''s expected value stays the same as without dropout; then no change is needed at test time.'
+- q: '*(2.2)* How does pandas turn a categorical column into numbers?'
+  a: '`pd.get_dummies` one-hot encodes it; `dummy_na=True` adds a column for missing values.'
+- q: '*(Chapter 3 project)* Why standardize features before gradient descent?'
+  a: 'Features on very different scales make the loss surface badly conditioned: a learning rate that works for one direction diverges or crawls in another.'

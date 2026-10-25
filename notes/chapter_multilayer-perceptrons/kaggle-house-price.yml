@@ -1,0 +1,20 @@
+# Notes for chapter_multilayer-perceptrons/kaggle-house-price.md: each entry is shown at the end of the
+# section whose heading matches "after".
+- after: Accessing and Reading the Dataset
+  notes:
+  - '1,460 training houses, 1,459 test houses, 79 features (numbers and categories) plus `Id` and the label `SalePrice`.'
+- after: Data Preprocessing
+  notes:
+  - 'Drop `Id`. Standardize numeric columns to mean 0, variance 1, then fill missing values with **0** (= the mean).'
+  - 'One-hot encode categories with `pd.get_dummies(dummy_na=True)`: "missing" becomes its own category. 79 features become **330**.'
+  - 'Compute the statistics on train and test together here (allowed in this competition setup, where test features are known); in production, use training statistics only.'
+- after: Error Measure
+  notes:
+  - 'Prices span orders of magnitude, so care about **relative** error: train and evaluate on $\log(\textrm{price})$. RMSE of logs ≈ typical relative error ($0.1$ ≈ 10%).'
+- after: '[**Model Selection**]'
+  notes:
+  - '**$K$-fold cross-validation:** split training data into $K$ folds; train $K$ times, each time validating on a different fold; average the validation errors. Uses all data for both training and validation.'
+  - 'Linear regression on the 330 features gives an average validation log-MSE of about **0.17** with 5 folds. Watch for training error far below validation error: that is overfitting.'
+- after: '[**Submitting Predictions on Kaggle**]'
+  notes:
+  - 'Average the $K$ models'' predictions (an **ensemble**), exponentiate back to prices, and write `submission.csv`.'

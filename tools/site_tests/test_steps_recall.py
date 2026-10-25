@@ -13,24 +13,25 @@ with sync_playwright() as p:
     page.wait_for_selector('.d2l-step', timeout=30000)
     step = page.locator('.d2l-step')
     kicker = step.locator('.d2l-card-kicker').text_content()
-    check('section page shows its Tempo step', step.count() == 1 and kicker.startswith('Tempo · Step')
+    check('section page shows its Pace step', step.count() == 1 and kicker.startswith('Pace · Step')
           and 'of 7' in kicker, kicker)
     check('step box sits right before the Exercises', page.evaluate(
         '() => document.querySelector(".d2l-step").nextElementSibling.id === "exercises"'))
     labels = step.locator('.d2l-step-label').all_text_contents()
     check('step has Build and Revisit parts', labels == ['Build', 'Revisit'], labels)
     href = step.locator('.d2l-step-foot a').get_attribute('href')
-    check('step links to the project page', href.endswith('chapter_linear-regression/project-tempo.html'), href)
+    check('step links to the project page', href.endswith('chapter_linear-regression/project-pace.html'), href)
     shot(step, 'step.png')
 
     page.goto(BASE + 'chapter_preliminaries/ndarray.html')
     page.wait_for_selector('.d2l-step', timeout=30000)
     kicker = page.locator('.d2l-step .d2l-card-kicker').text_content()
-    check('Chapter 2 section shows Hush step 1', kicker.startswith('Hush · Step 1 of 6'), kicker)
+    check('Chapter 2 section shows Podium step 1', kicker.startswith('Podium · Step 1 of 6'), kicker)
 
     # ---------------- project page lists every step, in order
-    for name, path, total in (('Tempo', 'chapter_linear-regression/project-tempo.html', 7),
-                              ('Hush', 'chapter_preliminaries/project-alert-triage.html', 6)):
+    for name, path, total in (('Pace', 'chapter_linear-regression/project-pace.html', 7),
+                              ('Podium', 'chapter_preliminaries/project-podium.html', 6),
+                              ('Shield', 'chapter_linear-classification/project-shield.html', 7)):
         page.goto(BASE + path)
         page.wait_for_selector('.d2l-project-steps .d2l-step', timeout=30000)
         kickers = page.locator('.d2l-project-steps .d2l-card-kicker').all_text_contents()
@@ -64,7 +65,7 @@ with sync_playwright() as p:
     page.wait_for_selector('.d2l-recall', timeout=30000)
     check('first Chapter 2 section recalls the Introduction',
           '1. Introduction' in page.locator('.d2l-recall').inner_text())
-    page.goto(BASE + 'chapter_linear-regression/project-tempo.html')
+    page.goto(BASE + 'chapter_linear-regression/project-pace.html')
     page.wait_for_selector('.d2l-project-steps .d2l-step', timeout=30000)
     check('project pages have no recall box', page.locator('.d2l-recall').count() == 0)
 

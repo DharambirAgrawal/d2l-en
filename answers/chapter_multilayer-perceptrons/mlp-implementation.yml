@@ -1,0 +1,102 @@
+# Answers for chapter_multilayer-perceptrons/mlp-implementation.md "Exercises", in order.
+- answer: |
+    Measured with PyTorch (10 epochs, SGD, learning rate 0.1, batch 256;
+    Fashion-MNIST test accuracy). Softmax regression with no hidden layer
+    gets 82.3%:
+
+    | Hidden units | 8 | 32 | 128 | 256 | 1024 |
+    |:--|--:|--:|--:|--:|--:|
+    | Test accuracy | 80.5% | 83.0% | 83.4% | 83.7% | 84.3% |
+
+    Accuracy improves quickly and then flattens. Very few units are a
+    bottleneck; beyond a few hundred, gains are small for 10 epochs while
+    compute grows linearly. 256 is a sensible choice. "Best" depends on
+    the training budget, and should be chosen on validation data.
+- answer: |
+    Two hidden layers of 256 (same settings) reach about 83.9% test
+    accuracy, essentially the same as one layer at 10 epochs. The extra
+    layer adds 65,792 parameters and makes optimization a little slower to
+    start. Depth pays off more with longer training and harder data
+    (images with spatial structure, where CNNs will shine).
+  exercise: mlp-forward
+- answer: |
+    A one-unit hidden layer squeezes all information about the image into
+    **one number**, and with ReLU, everything negative becomes 0. Ten
+    classes must then be separated along a single line, which is
+    impossible to do well. Measured: about **42%** test accuracy, versus
+    84% with 256 units. Worse, if the unit's pre-activation is negative for
+    most inputs, ReLU outputs 0 and passes no gradient: a "dead" unit can
+    stop learning entirely.
+- answer: |
+    Measured with 10 epochs and 256 hidden units:
+
+    | Learning rate | 0.01 | 0.1 | 0.3 | 1.0 | 3.0 |
+    |:--|--:|--:|--:|--:|--:|
+    | Test accuracy | 80.0% | 83.7% | 85.0% | 10.4% (diverged) | 10.0% (diverged) |
+
+    0.3 is best here; 1.0 already diverges. Learning rate and epochs
+    interact: a small rate needs more epochs to reach the same point, and a
+    larger rate reaches a good region faster but risks divergence. Fix the
+    budget (epochs) first, then tune the rate for that budget.
+- answer: |
+    1. Combining what worked above (one or two layers of 256--1024 units,
+       learning rate around 0.3, more epochs, plus dropout from Section 5.6)
+       reaches about 88% test accuracy for an MLP (40 epochs without
+       dropout already gives 87.9%). Beyond that you
+       need a different architecture (CNNs reach 91--93%).
+    2. The search space grows **exponentially**: 5 values for each of 4
+       hyperparameters is 625 runs. Hyperparameters also interact (the best
+       learning rate depends on depth and epochs), so you can't tune them
+       one at a time, and every evaluation is a full training run.
+    3. Use **random search** over log-scaled ranges rather than a grid: it
+       tries more distinct values of the hyperparameters that matter. Then
+       narrow the ranges around the best runs, stop bad runs early
+       (successive halving, Hyperband), or use Bayesian optimization
+       (Chapter 19). Tune on small budgets first and confirm the winners
+       with full training.
+- answer: |
+    The concise version is usually somewhat faster. Its layers call
+    optimized kernels, and the framework fuses operations. The
+    from-scratch version builds the same operations from Python-level
+    calls. The difference grows with more layers (more Python overhead per
+    step) but shrinks when each step is dominated by large matrix
+    multiplications, which both versions hand to the same BLAS/GPU
+    kernels. Measure with `time.time()` around `trainer.fit` for networks
+    of increasing width and depth.
+- answer: |
+    Time `A @ B` for $n \times n$ matrices with $n$ = 1024, 1025, 1026,
+    1028, 1032 (repeat many times and take the median). On CPUs and
+    especially GPUs, sizes that are multiples of 8, 16, 32, or 64 are often
+    noticeably faster per FLOP. Memory is loaded in aligned blocks
+    (cache lines, memory transactions of 32/64/128 bytes), and matrix
+    kernels and tensor cores work on fixed tile sizes. Odd sizes need
+    padding or slower edge-handling code.
+    1. On GPUs the effect is larger, because tensor cores need dimensions
+       that are multiples of 8 (FP16) or 16. On CPUs it shows up through
+       SIMD width and cache behavior.
+    2. Look up your hardware: CPUs typically have a 64-bit memory channel
+       (two or more channels); GPUs have 128- to 384-bit (GDDR) or
+       4096-bit-plus (HBM) memory buses. `nvidia-smi -q` and the vendor's
+       spec sheet list it.
+- answer: |
+    Measured (10 epochs, learning rate 0.1, 256 units):
+
+    | Activation | ReLU | GELU | Tanh | Sigmoid |
+    |:--|--:|--:|--:|--:|
+    | Test accuracy | 83.7% | 83.5% | 82.2% | 81.4% |
+
+    ReLU (and GELU) work best and train fastest. Sigmoid is slowest to
+    learn because its derivative is at most 0.25 and it isn't centered
+    at 0.
+- answer: |
+    Yes, it matters a lot. Measured (same setup):
+
+    | Initialization | All zeros | $\mathcal{N}(0, 0.01^2)$ | $\mathcal{N}(0, 1)$ | Xavier |
+    |:--|--:|--:|--:|--:|
+    | Test accuracy | 10.0% | 83.2% | 76.6% | 84.3% |
+
+    All zeros never breaks symmetry: every hidden unit stays identical and
+    the ReLU units output 0, so the network learns nothing (chance level).
+    Standard deviation 1 is far too large for 784 inputs: activations and
+    gradients blow up, and training is unstable. Small random weights work,
+    and **Xavier** (Section 5.4), which scales by layer size, is best.

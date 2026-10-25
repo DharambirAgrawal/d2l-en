@@ -1,0 +1,78 @@
+# Answers for chapter_multilayer-perceptrons/dropout.md "Exercises", in order.
+- answer: |
+    Measured with PyTorch (two hidden layers of 256, 10 epochs, learning
+    rate 0.1; Fashion-MNIST test accuracy):
+
+    | Dropout (layer 1, layer 2) | (0, 0) | (0.2, 0.5) | (0.5, 0.5) | (0.5, 0.2) |
+    |:--|--:|--:|--:|--:|
+    | Test accuracy | 83.9% | 85.0% | 85.3% | 85.6% |
+
+    Every setting with dropout beats none by 1--2 points. The differences
+    between the orderings are within about half a point, which is close to
+    run-to-run noise for a single seed. To answer properly, repeat each
+    setting with several seeds and report the mean and spread. The takeaway
+    is that dropout helps, and the network isn't very sensitive to the
+    exact rates in this range.
+- answer: |
+    At 40 epochs (same network): without dropout, training accuracy is
+    91.8% and test accuracy 87.9%. With dropout (0.5, 0.5), training
+    accuracy is 87.3% and test accuracy 85.2%. Dropout keeps the
+    train--test gap much smaller (2 vs. 4 points), but it also slows
+    learning. At this budget the network without dropout is still ahead
+    on test accuracy. Dropout pays off more with longer training, wider
+    networks, or less data, where overfitting dominates.
+- answer: |
+    For a unit with value $h$, dropout gives $h/(1-p)$ with probability
+    $1-p$, else 0. The mean stays $h$, but
+    $E[h'^2] = h^2/(1-p)$, so the variance it adds is $h^2\,p/(1-p)$: with
+    $p = 0.5$ that equals $h^2$. So in training mode, the variance of each
+    hidden layer's activations should be clearly higher with dropout,
+    most of all in the layer with the higher rate. To see how it evolves,
+    record `H.var()` on a fixed batch after every epoch for both models
+    (in training mode) and plot the curves. Also compare the variance in
+    evaluation mode, where dropout is off.
+- answer: |
+    Dropout is a training-time regularizer: random noise makes predictions
+    random, and at test time we want the best **deterministic**
+    prediction. Thanks to the $1/(1-p)$ scaling, the full network's
+    activations already equal the expected activations, so it is a cheap
+    approximation to averaging over all thinned networks. (Exception:
+    *Monte Carlo dropout* keeps dropout on at test time on purpose and
+    averages several passes, to estimate uncertainty.)
+  exercise: dropout-layer
+- answer: |
+    Measured (same two-layer network, 10 epochs):
+
+    | Regularization | none | weight decay $10^{-3}$ | dropout (0.5, 0.5) | both |
+    |:--|--:|--:|--:|--:|
+    | Test accuracy | 83.9% | 83.2% | 85.3% | 84.8% |
+
+    At this short budget weight decay slightly hurts (the model isn't
+    overfitting yet, so shrinking weights only slows learning), and
+    dropout helps. The effects are **not additive**: combining them is
+    worse than dropout alone, because both reduce the effective capacity
+    and together they over-regularize. In general, expect diminishing
+    returns when stacking regularizers. Tune their strengths together,
+    not separately.
+- answer: |
+    That is **DropConnect**: each weight $w_{ij}$ is dropped independently,
+    so each input to a unit is dropped separately per output unit. It
+    injects noise more finely, and it is more expensive, because the mask
+    has the size of the weight matrix (per example, if done exactly). Its
+    regularization effect is similar to dropout's and it can be slightly
+    better on some tasks, but dropout on activations is far more common
+    because it is cheaper and simpler.
+- answer: |
+    Options to try (same architecture, compare test accuracy with several
+    seeds):
+    - **Gaussian dropout:** multiply activations by $1 + \epsilon$ with
+      $\epsilon \sim \mathcal{N}(0, p/(1-p))$. It has the same mean and
+      variance as dropout, and often similar results.
+    - **Additive Gaussian noise** on inputs or activations, scaled to each
+      layer's standard deviation.
+    - **Input dropout** or random erasing of image patches.
+    - **Mixup:** train on mixtures of pairs of images and their labels.
+
+    Beating tuned dropout on Fashion-MNIST with an MLP is hard. Report
+    results averaged over seeds, since differences of a few tenths of a
+    percent are within noise.

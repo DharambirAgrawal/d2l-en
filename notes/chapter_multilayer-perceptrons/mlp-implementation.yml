@@ -1,0 +1,14 @@
+# Notes for chapter_multilayer-perceptrons/mlp-implementation.md: each entry is shown at the end of the
+# section whose heading matches "after".
+- after: Initializing Model Parameters
+  notes:
+  - 'Fashion-MNIST: 784 inputs, 10 outputs, **256 hidden units** (a power of 2 fits hardware memory well).'
+  - 'Parameters: $\mathbf{W}_1$ (784 × 256), $\mathbf{b}_1$ (256), $\mathbf{W}_2$ (256 × 10), $\mathbf{b}_2$ (10). Weights start small and random (`torch.randn(...) * sigma` with $\sigma = 0.01$), biases at 0.'
+- after: Implementation from Scratch
+  notes:
+  - 'Model: reshape images to (batch, 784), then `relu(X @ W1 + b1) @ W2 + b2`. ReLU from scratch = `torch.max(X, zeros_like(X))`.'
+  - 'Same `Trainer` and cross-entropy loss as softmax regression; only the model changed. Validation accuracy goes from about 83% (softmax regression) to about **85%**.'
+- after: Concise Implementation
+  notes:
+  - '`nn.Sequential(nn.Flatten(), nn.LazyLinear(256), nn.ReLU(), nn.LazyLinear(10))`: the framework creates and initializes the weights.'
+  - 'Same results, less code: from here on we use the concise version.'

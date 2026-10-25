@@ -37,3 +37,4 @@ static/latex_style/*
 # Data files the site needs (the *.csv rule above would drop them)
 !exercises/*/files/*.csv
 !static/projects/*.csv
+!static/datasets/*.csv

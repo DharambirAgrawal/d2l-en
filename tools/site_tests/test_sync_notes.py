@@ -78,7 +78,7 @@ with sync_playwright() as p:
     href = page.locator('.d2l-review-page h3 a').nth(8).get_attribute('href')
     check('My Notes: section links point at the right anchor', href.endswith('linear-algebra.html#matrixvector-products'), href)
     page.locator('#d2l-review-all').check()
-    check('My Notes: "Show all" shows every section with notes', page.locator('.d2l-review-page').count() == 21,
+    check('My Notes: "Show all" shows every section with notes', page.locator('.d2l-review-page').count() == 28,
           page.locator('.d2l-review-page').count())
     page.locator('#d2l-review-all').uncheck()
     page.locator('.d2l-btn', has_text='Copy as text').click()

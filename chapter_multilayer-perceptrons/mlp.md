@@ -263,6 +263,12 @@ e.g., $\mathbf{H}^{(1)} = \sigma_1(\mathbf{X} \mathbf{W}^{(1)} + \mathbf{b}^{(1)
 and $\mathbf{H}^{(2)} = \sigma_2(\mathbf{H}^{(1)} \mathbf{W}^{(2)} + \mathbf{b}^{(2)})$,
 one atop another, yielding ever more expressive models.
 
+Watch a hidden layer bend the decision boundary:
+
+```{=html}
+<div class="d2l-playground" data-playground="mlp-regions"></div>
+```
+
 ### Universal Approximators
 
 We know that the brain is capable of very sophisticated statistical analysis. As such,

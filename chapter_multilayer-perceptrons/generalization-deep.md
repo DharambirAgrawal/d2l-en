@@ -282,6 +282,12 @@ early stopping is crucial.
 Training models until they interpolate noisy data is typically a bad idea.
 
 
+See early stopping at work when some labels are wrong:
+
+```{=html}
+<div class="d2l-playground" data-playground="early-stopping"></div>
+```
+
 ## Classical Regularization Methods for Deep Networks
 
 In :numref:`chap_regression`, we described

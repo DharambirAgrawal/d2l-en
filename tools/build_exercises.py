@@ -399,9 +399,9 @@ def load_notes():
 def load_project_steps():
     """projects/<name>.yml: a chapter project built step by step.
 
-        project: Tempo
-        subtitle: Honest delivery-time estimates
-        page: chapter_linear-regression/project-tempo   # full spec page
+        project: Pace
+        subtitle: Predict how fast an LLM starts answering
+        page: chapter_linear-regression/project-pace   # full spec page
         steps:
           - page: chapter_linear-regression/linear-regression  # shown there
             title: ...

@@ -1,0 +1,13 @@
+title: What a Hidden Layer Buys You
+description: |
+  A network with two inputs is trained to separate orange points from
+  blue ones (full-batch training with the logistic loss). With **0
+  hidden units** it is logistic regression, and its boundary is a straight
+  line, so it fails on XOR and circles. Add a few hidden units and the
+  boundary bends. With ReLU it is made of straight pieces (Exercise 4).
+  Try 2 units on circles: too few to wrap around the center.
+params:
+  - {name: data, label: "data: 0 = XOR, 1 = circles, 2 = moons", min: 0, max: 2, step: 1, value: 0}
+  - {name: hidden, label: "hidden units (0 = no hidden layer)", min: 0, max: 32, step: 1, value: 8}
+  - {name: act, label: "activation: 0 = ReLU, 1 = tanh, 2 = sigmoid", min: 0, max: 2, step: 1, value: 0}
+  - {name: steps, label: "training steps", min: 0, max: 1500, step: 10, value: 400}

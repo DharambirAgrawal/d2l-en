@@ -1,0 +1,111 @@
+# Pace: the Chapter 3 project, built step by step inside the chapter.
+# Each step appears at the end of its section (before the Exercises) and on
+# the project page. "revisit" deliberately brings back earlier topics.
+# Data: static/projects/llm_requests.csv, made by projects/generators/make_requests.py.
+project: Pace
+subtitle: Predict how fast an LLM starts answering
+page: chapter_linear-regression/project-pace
+steps:
+  - page: chapter_linear-regression/linear-regression
+    title: First look, baseline, and the exact answer
+    build: |
+      Download `llm_requests.csv` (see the Pace page). **Split by time**:
+      train on days 0--23, test on days 24--29. Compute the **baseline**:
+      predict the training average for every request and report the test
+      MAE in milliseconds (about 514). Then fit linear regression on the
+      numeric columns (`prompt_tokens`, `cached_tokens`, `queue_depth`) with
+      the **analytic solution**
+      $\mathbf{w}^* = (\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{y}$
+      (append a column of ones for the bias). Test MAE drops only a little,
+      to about 472. Keep that in mind for Step 5.
+    revisit: |
+      *Chapter 2:* fill missing `queue_depth` with the **training** mean
+      only (2.2) and standardize the features with broadcasting (2.1,
+      2.3). Why must the test data use the training mean and standard
+      deviation?
+  - page: chapter_linear-regression/oo-design
+    title: Give Pace a proper structure
+    build: |
+      Create your repository `pace` with three classes following this
+      section's design: `PaceData` (a `DataModule` that loads the CSV,
+      imputes, standardizes, makes the time split, and yields minibatches),
+      `LinearTTFT` (a `Module` with `forward` and `loss`), and a `Trainer`
+      with `fit`. Use `save_hyperparameters` (or your own version of it).
+    revisit: |
+      *3.1:* plot a histogram of your Step 1 model's residuals on the
+      training set. Do they look Gaussian, the assumption behind squared
+      loss? Look at the right tail: those are cold starts. Keep the plot
+      for Step 5.
+  - page: chapter_linear-regression/synthetic-regression-data
+    title: Test the pipeline on data you control
+    build: |
+      Add a `SyntheticPace` data module that generates fake requests with
+      **known** costs: 40 ms of overhead, 50 ms per 1,000 new tokens
+      (prompt minus cached), and 30 ms per waiting request, plus Gaussian
+      noise. Your pipeline must recover these numbers. This is how real
+      teams catch bugs before they trust a model on real data.
+    revisit: |
+      *3.2:* your synthetic module should reuse `PaceData`'s minibatching
+      (inheritance or `add_to_class`). *3.1:* check the recovered
+      coefficients against the analytic solution on the same synthetic
+      data.
+  - page: chapter_linear-regression/linear-regression-scratch
+    title: Train Pace from scratch with SGD
+    build: |
+      Train `LinearTTFT` with your own minibatch SGD on the real data. First
+      try it **without** standardizing: with `prompt_tokens` in the
+      thousands, even a learning rate of $10^{-6}$ makes the loss `nan`.
+      Explain why using the gradient formula. Then standardize, sweep
+      the learning rate (0.001, 0.01, 0.1, 1), and plot training and
+      validation loss per epoch.
+    revisit: |
+      *3.1:* compare your SGD weights with the Step 1 analytic weights. How
+      close are they, and why might they differ a little? *Chapter 2
+      (2.4):* gradient-check one SGD step numerically.
+  - page: chapter_linear-regression/linear-regression-concise
+    title: Features that match the physics, and a robust loss
+    build: |
+      Re-implement the model with `nn.LazyLinear`, `nn.MSELoss`, and
+      `optim.SGD`, and confirm it matches Step 4. Then **engineer
+      features**. First one-hot `model` and `gpu` (MAE about 311). Then
+      the key idea: compute **new tokens** = prompt − cached, and give each
+      model-and-GPU pair its *own* slope for new tokens and for queue depth.
+      For example, use the column `new_tokens * (model == "lumen-70b") *
+      (gpu == "H100")`. MAE should drop to about 196. Swap squared loss for
+      **Huber** loss (about 172), then add one-hot `client` (about 155).
+    revisit: |
+      *Step 2's histogram:* which requests does Huber loss stop
+      overweighting? *Chapter 2 (2.2):* one-hot encoding with
+      `get_dummies`. With squared loss, adding `client` makes the MAE
+      *worse*. Explain why.
+  - page: chapter_linear-regression/generalization
+    title: Validate like a professional
+    build: |
+      Hold out days 20--23 as a **validation** set and pick your learning
+      rate and feature set with it, never with the test set. Draw a
+      **learning curve**: validation MAE when training on 1, 2, 4, 8, 16
+      days, with and without the `client` features. Which feature set wins
+      with little data, and which wins with a lot? Why?
+    revisit: |
+      *3.3/3.4:* only the training loader shuffles. Explain why shuffling
+      *across* the time split would leak the future. *Step 1:* why was a
+      time-based split the right call?
+  - page: chapter_linear-regression/weight-decay
+    title: Scarce data, regularization, and an honest promise
+    build: |
+      Retrain on only the **first two days** with all features, including
+      150 client columns for about 400 requests. Show the train/test gap,
+      then sweep weight decay $\lambda$ (log scale) using a validation split
+      from those days. How much of the gap does it close, compared with
+      simply dropping the client features? Then train Pace's final model
+      on all training days with your best settings and make a
+      **promise**: find the factor $k$ such that $\textrm{TTFT} \leq k
+      \times \textrm{prediction}$ for 90% of *training* requests (about
+      1.19), and check it on the test days.
+    revisit: |
+      **Everything comes back:** analytic vs. SGD (3.1, 3.4), your
+      Module/Trainer (3.2), synthetic tests (3.3), features and Huber
+      (3.5), validation (3.6), plus Chapter 2's quantiles for the promise.
+      Write the README results table and the prefill-cost table (ms per
+      1,000 new tokens per model and GPU), with one sentence per section on
+      how Pace used it.

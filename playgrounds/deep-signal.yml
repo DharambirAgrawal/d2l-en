@@ -1,0 +1,14 @@
+title: Vanishing and Exploding Gradients
+description: |
+  A batch goes forward through a deep network (64 units per layer, no
+  biases), and a random gradient comes back from the top. The plot shows
+  the typical size of the activations (blue) and of the gradient reaching
+  each layer (red) on a log scale. The weights are drawn from
+  $\mathcal{N}(0, s^2/n)$. Xavier corresponds to $s = 1$ here (since
+  $n_\textrm{in} = n_\textrm{out}$), and He/Kaiming for ReLU to
+  $s = \sqrt{2} \approx 1.41$ ($\log_{10} s \approx 0.15$). Find the
+  healthy scale for ReLU and for tanh, then try sigmoid: no scale saves it.
+params:
+  - {name: depth, label: "number of layers", min: 2, max: 50, step: 1, value: 30}
+  - {name: log_scale, label: "$\\log_{10} s$ (weight scale)", min: -1, max: 1, step: 0.01, value: 0}
+  - {name: act, label: "activation: 0 = ReLU, 1 = tanh, 2 = sigmoid", min: 0, max: 2, step: 1, value: 0}

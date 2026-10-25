@@ -1,0 +1,16 @@
+# Notes for chapter_multilayer-perceptrons/dropout.md: each entry is shown at the end of the
+# section whose heading matches "after".
+- after: Dropout in Practice
+  notes:
+  - 'During **training**, zero each hidden activation with probability $p$ and divide the survivors by $1 - p$: $h'' = 0$ w.p. $p$, else $h/(1-p)$. Then $E[h''] = h$ (unbiased).'
+  - 'Idea: noise forces the network not to rely on any single unit (no "co-adaptation"); like training many thinned networks at once.'
+  - 'At **test time**, no dropout: use the full network (the $1/(1-p)$ scaling already matched the expectations).'
+- after: Implementation from Scratch
+  notes:
+  - '`mask = (torch.rand(X.shape) > p).float()`, return `mask * X / (1.0 - p)`. Handle $p = 1$ (all zeros) and $p = 0$ (unchanged).'
+- after: Defining the Model
+  notes:
+  - 'Apply dropout after each hidden layer''s activation, only when `self.training` is true. Common pattern: **lower** dropout near the input (0.2), higher later (0.5).'
+- after: '[**Concise Implementation**]'
+  notes:
+  - '`nn.Dropout(p)` after each `nn.ReLU()`. `model.train()` turns it on, `model.eval()` turns it off; the `Trainer` switches modes for you.'
